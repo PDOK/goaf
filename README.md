@@ -12,25 +12,4 @@ The specification is a preliminary one, with `go generate` the routing based on 
 * FeatureCollectionGeoJSON is overridden in provider gpkg to use the github.com/go-spatial/geom/encoding/geojso equivalent for decoding blobs
 * https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/openapi.yaml
 
-**DOCKER**  
-
-` docker build -t wfs . && docker run -p 8080:8080 wfs`
-
-**example geopackage detail log**
-
-2019/01/24 13:35:45 | GEOPACKAGE DETAILS 
-2019/01/24 13:35:45 |
-2019/01/24 13:35:45 |   FILE: /2019_gemeentegrenzen_kustlijn.gpkg, APPLICATION: GP10, VERSION: 0
-2019/01/24 13:35:45 |
-2019/01/24 13:35:45 |   NUMBER OF LAYERS: 1
-2019/01/24 13:35:45 |
-2019/01/24 13:35:45 |   LAYER: 1. ID: 2019_gemeentegrenzen_kustlijn, SRS_ID: 28992, TABLE: 2019_gemeentegrenzen_kustlijn PK: fid, FEATURES : [geom id gid code gemeentenaam]
-2019/01/24 13:35:45 | 
-2019/01/24 13:35:45 |   BBOX: [13565.400000,306846.000000,278026.000000,619233.000000], SRS_ID:28992
-2019/01/24 13:35:45 |
-2019/01/24 13:35:45 | SERVING ON: http://localhost:8080
-
-
-
-
-
+example wfs-3.0 geopackage example: https://github.com/PDOK/wfs-3.0-gpkg
