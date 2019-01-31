@@ -27,5 +27,3 @@ ENV PATH=/
 COPY --from=build-env  /wfs-server /
 COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build-env /go/src/server/spec /spec
-
-CMD ["/wfs-server","-s","0.0.0.0","-p","8080", "-gpkg","/srv/data/data.gpkg","-endpoint","http://localhost:8080"]
