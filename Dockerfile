@@ -17,7 +17,7 @@ ENV CGO_ENABLED=1
 ENV GOOS=linux
 
 #build the binary with debug information removed
-RUN go build -ldflags '-w -s -linkmode external -extldflags -static' -a -installsuffix cgo -o /wfs-server main.go
+RUN go build -ldflags '-w -s -linkmode external -extldflags -static' -a -installsuffix cgo -o /wfs-server start.go
 
 FROM scratch as service
 EXPOSE 8080

@@ -16,7 +16,7 @@ func main() {
 	bindPort := flag.Int("p", 8080, "server internal bind address, default; 8080")
 	serverEndpoint := flag.String("endpoint", "http://localhost:8080", "server endpoint for proxy reasons, default; http://localhost:8080")
 
-	serviceSpecPath := flag.String("spec", "/spec/wfs3.0.yml", "swagger openapi spec")
+	serviceSpecPath := flag.String("spec", "spec/wfs3.0.yml", "swagger openapi spec")
 	filePath := flag.String("gpkg", "/2019_gemeentegrenzen_kustlijn.gpkg", "geopackage path")
 	defaultLimit := flag.Int("limit", 20, "limit, default: 20")
 	maxLimit := flag.Int("limitmax", 100, "max limit, default: 100")

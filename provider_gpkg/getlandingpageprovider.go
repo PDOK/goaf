@@ -8,7 +8,7 @@ import (
 )
 
 type GetLandingPageProvider struct {
-	links []Link
+	Links []Link `json:"links"`
 }
 
 func (provider *GeoPackageProvider) NewGetLandingPageProvider(r *http.Request) (Provider, error) {
@@ -26,10 +26,10 @@ func (provider *GeoPackageProvider) NewGetLandingPageProvider(r *http.Request) (
 	conformanceLink, _ := provider.createLinks(fmt.Sprintf("%s/conformance", provider.ServerEndpoint), "conformance", ct) // /conformance, "conformance", ct)
 	dataLink, _ := provider.createLinks(fmt.Sprintf("%s/collections", provider.ServerEndpoint), "data", ct)               // /collections, "collections", ct)
 
-	p.links = append(p.links, links...)
-	p.links = append(p.links, apiLink...)
-	p.links = append(p.links, conformanceLink...)
-	p.links = append(p.links, dataLink...)
+	p.Links = append(p.Links, links...)
+	p.Links = append(p.Links, apiLink...)
+	p.Links = append(p.Links, conformanceLink...)
+	p.Links = append(p.Links, dataLink...)
 
 	return p, nil
 }

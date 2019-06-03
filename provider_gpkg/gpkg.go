@@ -78,6 +78,8 @@ func NewGeoPackage(filepath string) (GeoPackage, error) {
 	log.Printf("|\n")
 	// determine query bbox
 	for i, layer := range layers {
+		log.Printf("| 	LAYER: %d. ID: %s, SRS_ID: %d, TABLE: %s PK: %s, FEATURES : %v\n", i+1, layer.Identifier, layer.SrsId, layer.Features[0], layer.Features[1], layer.Features[2:])
+
 		if i == 0 {
 			gpkg.DefaultBBox = []float64{layer.MinX, layer.MinY, layer.MaxX, layer.MaxY}
 			gpkg.SrsId = layer.SrsId
@@ -94,7 +96,6 @@ func NewGeoPackage(filepath string) (GeoPackage, error) {
 		if layer.MaxY > gpkg.DefaultBBox[3] {
 			gpkg.DefaultBBox[3] = layer.MaxY
 		}
-		log.Printf("| 	LAYER: %d. ID: %s, SRS_ID: %d, TABLE: %s PK: %s, FEATURES : %v\n", i+1, layer.Identifier, layer.SrsId, layer.Features[0], layer.Features[1], layer.Features[2:])
 	}
 	log.Printf("| \n")
 	log.Printf("| 	BBOX: [%f,%f,%f,%f], SRS_ID:%d", gpkg.DefaultBBox[0], gpkg.DefaultBBox[1], gpkg.DefaultBBox[2], gpkg.DefaultBBox[3], gpkg.SrsId)
@@ -121,7 +122,7 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 			  FROM
 			  gpkg_contents c JOIN gpkg_geometry_columns gc ON c.table_name == gc.table_name JOIN sqlite_master sm ON c.table_name = sm.tbl_name
 		      WHERE
-			  c.data_type = 'features' AND sm.type = 'table'`
+			  c.data_type = 'features' AND sm.type = 'table' AND c.min_x IS NOT NULL`
 
 	rows, err := db.Queryx(query)
 	defer rows.Close()
