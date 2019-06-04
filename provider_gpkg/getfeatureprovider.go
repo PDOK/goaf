@@ -2,20 +2,19 @@ package provider_gpkg
 
 import (
 	"encoding/json"
-	"github.com/go-spatial/geom/encoding/geojson"
 	"net/http"
 	cg "wfs3_server/codegen"
 )
 
 type GetFeatureProvider struct {
-	data geojson.Feature
+	data Feature
 }
 
 func (provider *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (cg.Provider, error) {
 
 	collectionId, featureId := cg.ParametersForGetFeature(r)
 
-	featureIdParam := provider.parseUint(featureId, 0)
+	featureIdParam := featureId
 	bboxParam := provider.GeoPackage.DefaultBBox
 
 	ct := r.Header.Get("Content-Type")

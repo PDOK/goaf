@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"wfs3_server/codegen"
 	gpkg "wfs3_server/provider_gpkg"
+	postgis "wfs3_server/provider_postgis"
 	"wfs3_server/spec"
 )
 
@@ -17,6 +18,24 @@ type Server struct {
 }
 
 func NewServerWithGeopackageProvider(providers *gpkg.GeoPackageProvider) (*Server, error) {
+	swagger, err := spec.GetSwagger(providers.ServiceSpecPath)
+
+	if err != nil {
+		log.Fatal("Specification initialisation error:", err)
+		return nil, err
+	}
+
+	err = providers.Init()
+
+	if err != nil {
+		log.Fatal("Provider initialisation error:", err)
+		return nil, err
+	}
+
+	return &Server{Providers: providers, swagger: swagger}, nil
+}
+
+func NewServerWithPostgisProvider(providers *postgis.PostgisProvider) (*Server, error) {
 	swagger, err := spec.GetSwagger(providers.ServiceSpecPath)
 
 	if err != nil {

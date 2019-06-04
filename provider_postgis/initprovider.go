@@ -1,4 +1,4 @@
-package provider_gpkg
+package provider_postgis
 
 import (
 	_ "github.com/mattn/go-sqlite3"
@@ -9,22 +9,22 @@ import (
 	cg "wfs3_server/codegen"
 )
 
-type GeoPackageProvider struct {
+type PostgisProvider struct {
 	ServerEndpoint  string
 	ServiceSpecPath string
-	FilePath        string
-	GeoPackage      GeoPackage
-	FeatureIdKey    string
+	ConnectionStr   string
+	FeatureTables   []string
+	PostGis         Postgis
 	MaxLimit        uint64
 	DefaultLimit    uint64
 }
 
-func (provider *GeoPackageProvider) Init() (err error) {
-	provider.GeoPackage, err = NewGeoPackage(provider.FilePath, provider.FeatureIdKey)
+func (provider *PostgisProvider) Init() (err error) {
+	provider.PostGis, err = NewPostgis(provider.ConnectionStr, provider.FeatureTables)
 	return
 }
 
-func (provider *GeoPackageProvider) procesLinksForParams(links []cg.Link, queryParams url.Values) error {
+func (provider *PostgisProvider) procesLinksForParams(links []cg.Link, queryParams url.Values) error {
 	for l := range links {
 		spath, err := url.Parse(links[l].Href)
 		if err != nil {
@@ -46,7 +46,7 @@ func (provider *GeoPackageProvider) procesLinksForParams(links []cg.Link, queryP
 
 }
 
-func (provider *GeoPackageProvider) parseLimit(limit string) uint64 {
+func (provider *PostgisProvider) parseLimit(limit string) uint64 {
 	limitParam := provider.DefaultLimit
 	if limit != "" {
 		newValue, err := strconv.ParseInt(limit, 10, 64)
@@ -59,7 +59,7 @@ func (provider *GeoPackageProvider) parseLimit(limit string) uint64 {
 	return limitParam
 }
 
-func (provider *GeoPackageProvider) parseUint(stringValue string, defaultValue uint64) uint64 {
+func (provider *PostgisProvider) parseUint(stringValue string, defaultValue uint64) uint64 {
 	if stringValue == "" {
 		return defaultValue
 	}
@@ -70,7 +70,7 @@ func (provider *GeoPackageProvider) parseUint(stringValue string, defaultValue u
 	return value
 }
 
-func (provider *GeoPackageProvider) parseFloat64(stringValue string, defaultValue float64) float64 {
+func (provider *PostgisProvider) parseFloat64(stringValue string, defaultValue float64) float64 {
 	if stringValue == "" {
 		return defaultValue
 	}
@@ -81,13 +81,13 @@ func (provider *GeoPackageProvider) parseFloat64(stringValue string, defaultValu
 	return value
 }
 
-func (provider *GeoPackageProvider) parseBBox(stringValue string, defaultValue []float64) []float64 {
+func (provider *PostgisProvider) parseBBox(stringValue string, defaultValue []float64) []float64 {
 	if stringValue == "" {
-		return provider.GeoPackage.DefaultBBox
+		return provider.PostGis.DefaultBBox
 	}
 	bboxValues := strings.Split(stringValue, ",")
 	if len(bboxValues) != 4 {
-		return provider.GeoPackage.DefaultBBox
+		return provider.PostGis.DefaultBBox
 	}
 
 	value := make([]float64, len(bboxValues))
@@ -98,7 +98,7 @@ func (provider *GeoPackageProvider) parseBBox(stringValue string, defaultValue [
 	return value
 }
 
-func (provider *GeoPackageProvider) createLinks(path, rel, ct string) ([]cg.Link, error) {
+func (provider *PostgisProvider) createLinks(path, rel, ct string) ([]cg.Link, error) {
 
 	links := make([]cg.Link, 0)
 
@@ -127,7 +127,7 @@ func (provider *GeoPackageProvider) createLinks(path, rel, ct string) ([]cg.Link
 	return links, nil
 }
 
-func (provider *GeoPackageProvider) ctLink(baselink, contentType string) (string, error) {
+func (provider *PostgisProvider) ctLink(baselink, contentType string) (string, error) {
 
 	u, err := url.Parse(baselink)
 	if err != nil {
@@ -148,7 +148,7 @@ func (provider *GeoPackageProvider) ctLink(baselink, contentType string) (string
 	return l, nil
 }
 
-func (provider *GeoPackageProvider) contains(a []string, x string) bool {
+func (provider *PostgisProvider) contains(a []string, x string) bool {
 	for _, n := range a {
 		if x == n {
 			return true
