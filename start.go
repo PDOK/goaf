@@ -45,7 +45,7 @@ func main() {
 
 	flag.Parse()
 
-	crsMap := map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"}
+	crsMap := make(map[string]string)
 	if *crsMapFilePath != "" {
 		csrMapFile, err := ioutil.ReadFile(*crsMapFilePath)
 		if err != nil {
@@ -57,6 +57,8 @@ func main() {
 				log.Println("Could not unmarshal crsmap file: %s, using default CRS Map", *crsMapFilePath)
 			}
 		}
+	} else {
+		crsMap = map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"}
 	}
 
 	var apiServer *server.Server
