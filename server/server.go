@@ -3,13 +3,14 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3"
 	"log"
 	"net/http"
 	"wfs3_server/codegen"
 	gpkg "wfs3_server/provider_gpkg"
 	postgis "wfs3_server/provider_postgis"
 	"wfs3_server/spec"
+
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 type Server struct {
@@ -59,7 +60,7 @@ func (server *Server) HandleForProvider(providerFunc func(r *http.Request) (code
 
 		format, ok := r.URL.Query()["f"]
 		if ok && len(format) > 0 {
-			r.Header.Add("Layers-Type", format[0])
+			r.Header.Add("Content-Type", format[0])
 		}
 
 		provider, err := providerFunc(r)
@@ -74,7 +75,7 @@ func (server *Server) HandleForProvider(providerFunc func(r *http.Request) (code
 			return
 		}
 
-		ct := r.Header.Get("Layers-Type")
+		ct := r.Header.Get("Content-Type")
 
 		if ct == "" {
 			ct = codegen.JSONContentType
@@ -103,11 +104,11 @@ func (server *Server) HandleForProvider(providerFunc func(r *http.Request) (code
 				return
 			}
 		} else {
-			jsonError(w, "Invalid Layers Type", "Layers-Type: ''"+ct+"'' not supported.", http.StatusInternalServerError)
+			jsonError(w, "Invalid Content Type", "Content-Type: ''"+ct+"'' not supported.", http.StatusInternalServerError)
 			return
 		}
 
-		w.Header().Set("Layers-Type", ct)
+		w.Header().Set("Content-Type", ct)
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(encodedContent)
 	}

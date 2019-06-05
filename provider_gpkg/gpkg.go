@@ -5,12 +5,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/go-spatial/geom/encoding/geojson"
-	"github.com/jmoiron/sqlx"
 	"log"
 	"os"
 	"regexp"
 	"time"
+
+	"github.com/go-spatial/geom/encoding/geojson"
+	"github.com/jmoiron/sqlx"
 )
 
 // mandatory according to geopackage specification
@@ -190,9 +191,9 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	if featureId != nil {
 		switch identifier := featureId.(type) {
 		case uint64:
-			additionalWhere = fmt.Sprintf(" `%s`=%d AND ", gpkg.FeatureIdKey, identifier)
+			additionalWhere = fmt.Sprintf(" l.`%s`=%d AND ", gpkg.FeatureIdKey, identifier)
 		case string:
-			additionalWhere = fmt.Sprintf(" `%s`='%s' AND ", gpkg.FeatureIdKey, identifier)
+			additionalWhere = fmt.Sprintf(" l.`%s`='%s' AND ", gpkg.FeatureIdKey, identifier)
 		}
 	} else {
 
@@ -221,7 +222,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	*/
 
 	// query information with selection
-	query := fmt.Sprintf("SELECT %s FROM `%s` l INNER JOIN `%s` g ON g.`id` = l.`fid` WHERE %s minx <= %v AND maxx >= %v AND miny <= %v AND maxy >= %v ORDER BY %s LIMIT %d OFFSET %d;",
+	query := fmt.Sprintf("SELECT %s FROM `%s` l INNER JOIN `%s` g ON g.`id` = l.`fid` WHERE %s minx <= %v AND maxx >= %v AND miny <= %v AND maxy >= %v ORDER BY l.`%s` LIMIT %d OFFSET %d;",
 		selectClause, layer.TableName, rtreeTablenName, additionalWhere, bbox[2], bbox[0], bbox[3], bbox[1], featureIdKey, limit, offset)
 
 	rows, err := db.Queryx(query)
