@@ -87,6 +87,13 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 
 		fcGeoJSON.Links = links
 
+		crsUri, ok := provider.CrsMap[fmt.Sprintf("%d", cn.SrsId)]
+		if !ok {
+			log.Printf("SRS ID: %s, not found", fmt.Sprintf("%d", cn.SrsId))
+			crsUri = ""
+		}
+		fcGeoJSON.Crs = crsUri
+
 		p.data = fcGeoJSON
 		break
 	}

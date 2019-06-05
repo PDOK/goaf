@@ -1,18 +1,20 @@
 package provider_gpkg
 
 import (
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/url"
 	"strconv"
 	"strings"
 	cg "wfs3_server/codegen"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type GeoPackageProvider struct {
 	ServerEndpoint  string
 	ServiceSpecPath string
 	FilePath        string
+	CrsMap          map[string]string
 	GeoPackage      GeoPackage
 	FeatureIdKey    string
 	MaxLimit        uint64

@@ -28,10 +28,16 @@ func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Reques
 			continue
 		}
 
+		crss := make([]string, 0)
+		for _, v := range provider.CrsMap {
+			crss = append(crss, v)
+		}
+
 		cInfo := CollectionInfo{
 			Name:        cn.Identifier,
 			Title:       cn.Identifier,
 			Description: cn.Description,
+			Crs:         crss,
 			Links:       []Link{},
 		}
 
