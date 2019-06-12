@@ -20,8 +20,8 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 		FilePath:        "../2019_gemeentegrenzen_kustlijn.gpkg",
 		//FilePath:        "/media/sf_development-virtual/brtachtergrondkaart.gpkg",l
 		//FilePath:     "/media/sf_development-virtual/natura2000.gpkg",
-		DefaultLimit: 20,
-		MaxLimit:     100,
+		DefaultLimit: 100,
+		MaxLimit:     1000,
 	}
 
 	server, _ := NewServerWithGeopackageProvider(gpkgp)

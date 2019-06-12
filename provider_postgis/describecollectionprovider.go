@@ -1,4 +1,4 @@
-package provider_gpkg
+package provider_postgis
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ type DescribeCollectionProvider struct {
 	data CollectionInfo
 }
 
-func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Request) (Provider, error) {
+func (provider *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (Provider, error) {
 	path := r.URL.Path // collections/{{collectionId}}
 	ct := r.Header.Get("Content-Type")
 
@@ -22,7 +22,7 @@ func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Reques
 	if ct == "" {
 		ct = JSONContentType
 	}
-	for _, cn := range provider.GeoPackage.Layers {
+	for _, cn := range provider.PostGis.Layers {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
 			continue

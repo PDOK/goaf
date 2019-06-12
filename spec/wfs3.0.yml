@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: A sample API conforming to the OGC Web Feature Service standard
-  version: 0.0.1
+  version: M1
   description: >-
     This is a sample OpenAPI definition that conforms to the OGC Web Feature
     Service specification (conformance classes: "Core", "GeoJSON", "HTML" and
@@ -55,7 +55,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/req-classes'
         default:
-          description: An error occurred.
+          description: An error occured.
           content:
             application/json:
               schema:
@@ -77,7 +77,7 @@ paths:
               schema:
                 type: string
         default:
-          description: An error occurred.
+          description: An error occured.
           content:
             application/json:
               schema:
@@ -104,7 +104,7 @@ paths:
               schema:
                 type: string
         default:
-          description: An error occurred.
+          description: An error occured.
           content:
             application/json:
               schema:
@@ -142,7 +142,7 @@ paths:
               schema:
                 type: string
         default:
-          description: An error occurred.
+          description: An error occured.
           content:
             application/json:
               schema:
@@ -170,7 +170,7 @@ paths:
               schema:
                 type: string
         default:
-          description: An error occurred.
+          description: An error occured.
           content:
             application/json:
               schema:

@@ -36,8 +36,8 @@ func main() {
 
 	flag.Var(&featureTables, "collection", "postgis feature table, can be repeated multiple times.")
 	featureIdKey := flag.String("featureId", "", "Default feature identification or else first column definition (fid)")
-	defaultLimit := flag.Int("limit", 20, "limit, default: 20")
-	maxLimit := flag.Int("limitmax", 100, "max limit, default: 100")
+	defaultLimit := flag.Int("limit", 100, "limit, default: 100")
+	maxLimit := flag.Int("limitmax", 1000, "max limit, default: 1000")
 
 	flag.Parse()
 

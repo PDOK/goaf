@@ -1,4 +1,4 @@
-package provider_gpkg
+package provider_postgis
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ type DescribeCollectionsProvider struct {
 	data Content
 }
 
-func (provider *GeoPackageProvider) NewDescribeCollectionsProvider(r *http.Request) (Provider, error) {
+func (provider *PostgisProvider) NewDescribeCollectionsProvider(r *http.Request) (Provider, error) {
 
 	path := r.URL.Path // collections
 	ct := r.Header.Get("Content-Type")
@@ -27,12 +27,12 @@ func (provider *GeoPackageProvider) NewDescribeCollectionsProvider(r *http.Reque
 	hrefBase := fmt.Sprintf("%s%s", provider.ServerEndpoint, path) // /collections
 	links, _ := provider.createLinks(hrefBase, "self", ct)
 	csInfo.Links = append(csInfo.Links, links...)
-	for _, cn := range provider.GeoPackage.Layers {
+	for _, cn := range provider.PostGis.Layers {
 		clinks, _ := provider.createLinks(fmt.Sprintf("%s/%s", hrefBase, cn.Identifier), "item", ct)
 		csInfo.Links = append(csInfo.Links, clinks...)
 	}
 
-	for _, cn := range provider.GeoPackage.Layers {
+	for _, cn := range provider.PostGis.Layers {
 
 		cInfo := CollectionInfo{
 			Name:        cn.Identifier,

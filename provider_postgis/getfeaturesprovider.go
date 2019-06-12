@@ -1,4 +1,4 @@
-package provider_gpkg
+package provider_postgis
 
 import (
 	"encoding/json"
@@ -12,12 +12,12 @@ type GetFeaturesProvider struct {
 	data FeatureCollectionGeoJSON
 }
 
-func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
+func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
 	collectionId, limit, bbox, time, offset := cg.ParametersForGetFeatures(r)
 
 	limitParam := provider.parseLimit(limit)
 	offsetParam := provider.parseUint(offset, 0)
-	bboxParam := provider.parseBBox(bbox, provider.GeoPackage.DefaultBBox)
+	bboxParam := provider.parseBBox(bbox, provider.PostGis.DefaultBBox)
 
 	if time != "" {
 		log.Println("Time selection currently not implemented")
@@ -32,23 +32,19 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 		ct = cg.JSONContentType
 	}
 
-	for _, cn := range provider.GeoPackage.Layers {
+	for _, cn := range provider.PostGis.Layers {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
 			continue
 		}
 
-		fcGeoJSON, err := provider.GeoPackage.GetFeatures(r.Context(), provider.GeoPackage.DB, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
+		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.DB, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
 
 		if err != nil {
 			return nil, err
 		}
 
 		requestParams := r.URL.Query()
-
-		if int64(offsetParam) >= fcGeoJSON.NumberMatched && fcGeoJSON.NumberMatched > 0 {
-			offsetParam = uint64(fcGeoJSON.NumberMatched - 1)
-		}
 
 		if int64(offsetParam) < 0 {
 			offsetParam = 0
