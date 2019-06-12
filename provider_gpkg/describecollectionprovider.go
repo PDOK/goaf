@@ -39,9 +39,6 @@ func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Reques
 			Description: cn.Description,
 			Crs:         crss,
 			Links:       []Link{},
-			Crs:         []string{},
-
-			Links: []Link{},
 		}
 
 		// create links
