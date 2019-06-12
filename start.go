@@ -1,14 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/rs/cors"
+	"io/ioutil"
 	"log"
 	"net/http"
 	gpkg "wfs3_server/provider_gpkg"
 	postgis "wfs3_server/provider_postgis"
 	"wfs3_server/server"
+
+	"github.com/rs/cors"
 )
 
 type arrayFlags []string
@@ -32,6 +35,7 @@ func main() {
 
 	serviceSpecPath := flag.String("spec", "spec/wfs3.0.yml", "swagger openapi spec")
 	gpkgFilePath := flag.String("gpkg", "", "geopackage path")
+	crsMapFilePath := flag.String("crs", "", "crs file path")
 	connectionStr := flag.String("postgis", "", "postgis connection str")
 
 	flag.Var(&featureTables, "collection", "postgis feature table, can be repeated multiple times.")
@@ -41,6 +45,22 @@ func main() {
 
 	flag.Parse()
 
+	crsMap := make(map[string]string)
+	if *crsMapFilePath != "" {
+		csrMapFile, err := ioutil.ReadFile(*crsMapFilePath)
+		if err != nil {
+			log.Println("Could not read crsmap file: %s, using default CRS Map", *crsMapFilePath)
+		} else {
+			err := json.Unmarshal(csrMapFile, &crsMap)
+			log.Print(crsMap)
+			if err != nil {
+				log.Println("Could not unmarshal crsmap file: %s, using default CRS Map", *crsMapFilePath)
+			}
+		}
+	} else {
+		crsMap = map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"}
+	}
+
 	var apiServer *server.Server
 
 	if *gpkgFilePath != "" {
@@ -48,6 +68,7 @@ func main() {
 			ServerEndpoint:  *serverEndpoint,
 			ServiceSpecPath: *serviceSpecPath,
 			FilePath:        *gpkgFilePath,
+			CrsMap:          crsMap,
 			FeatureIdKey:    *featureIdKey,
 			DefaultLimit:    uint64(*defaultLimit),
 			MaxLimit:        uint64(*maxLimit),
