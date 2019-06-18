@@ -26,9 +26,9 @@ func (provider *PostgisProvider) NewGetApiProvider(r *http.Request) (Provider, e
 
 	var err error
 	if swagger == nil {
-		swagger, err = spec.GetSwagger(provider.ServiceSpecPath)
+		swagger, err = spec.GetSwagger(provider.serviceSpecPath)
 		if err != nil {
-			log.Fatalf("Error parsing swagger yaml file %s", provider.ServiceSpecPath)
+			log.Fatalf("Error parsing swagger yaml file %s", provider.serviceEndpoint)
 			return p, nil
 		}
 	}

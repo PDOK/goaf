@@ -24,6 +24,7 @@ type Provider interface {
 
 type Providers interface {
 	Init() error
+
 	NewGetApiProvider(r *http.Request) (Provider, error)
 
 	NewGetLandingPageProvider(r *http.Request) (Provider, error)

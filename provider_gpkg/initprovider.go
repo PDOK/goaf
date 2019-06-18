@@ -11,14 +11,26 @@ import (
 )
 
 type GeoPackageProvider struct {
-	ServerEndpoint  string
-	ServiceSpecPath string
-	FilePath        string
-	CrsMap          map[string]string
-	GeoPackage      GeoPackage
-	FeatureIdKey    string
-	MaxLimit        uint64
-	DefaultLimit    uint64
+	FilePath           string
+	GeoPackage         GeoPackage
+	FeatureIdKey       string
+	CrsMap             map[string]string
+	serviceEndpoint    string
+	serviceSpecPath    string
+	maxReturnLimit     uint64
+	defaultReturnLimit uint64
+}
+
+func NewGeopackageProvider(serviceEndpoint, serviceSpecPath, gpkgFilePath string, crsMap map[string]string, featureIdKey string, defaultReturnLimit uint64, maxReturnLimit uint64) *GeoPackageProvider {
+	return &GeoPackageProvider{
+		FilePath:           gpkgFilePath,
+		CrsMap:             crsMap,
+		FeatureIdKey:       featureIdKey,
+		serviceEndpoint:    serviceEndpoint,
+		serviceSpecPath:    serviceSpecPath,
+		defaultReturnLimit: defaultReturnLimit,
+		maxReturnLimit:     maxReturnLimit,
+	}
 }
 
 func (provider *GeoPackageProvider) Init() (err error) {
@@ -49,13 +61,13 @@ func (provider *GeoPackageProvider) procesLinksForParams(links []cg.Link, queryP
 }
 
 func (provider *GeoPackageProvider) parseLimit(limit string) uint64 {
-	limitParam := provider.DefaultLimit
+	limitParam := provider.defaultReturnLimit
 	if limit != "" {
 		newValue, err := strconv.ParseInt(limit, 10, 64)
-		if err == nil && uint64(newValue) < provider.MaxLimit {
+		if err == nil && uint64(newValue) < provider.maxReturnLimit {
 			limitParam = uint64(newValue)
 		} else {
-			limitParam = provider.MaxLimit
+			limitParam = provider.maxReturnLimit
 		}
 	}
 	return limitParam

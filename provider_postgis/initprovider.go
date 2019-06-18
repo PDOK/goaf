@@ -10,17 +10,28 @@ import (
 )
 
 type PostgisProvider struct {
-	ServerEndpoint  string
-	ServiceSpecPath string
-	ConnectionStr   string
-	FeatureTables   []string
-	PostGis         Postgis
-	MaxLimit        uint64
-	DefaultLimit    uint64
+	PostGis            Postgis
+	CrsMap             map[string]string
+	serviceSpecPath    string
+	configFilePath     string
+	serviceEndpoint    string
+	maxReturnLimit     uint64
+	defaultReturnLimit uint64
+}
+
+func NewPostgisProvider(serviceEndpoint, servicespecPath, configPath string, defaultReturnLimit uint64, maxReturnLimit uint64) *PostgisProvider {
+	return &PostgisProvider{
+		CrsMap:             map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"},
+		configFilePath:     configPath,
+		serviceEndpoint:    serviceEndpoint,
+		serviceSpecPath:    servicespecPath,
+		defaultReturnLimit: defaultReturnLimit,
+		maxReturnLimit:     maxReturnLimit,
+	}
 }
 
 func (provider *PostgisProvider) Init() (err error) {
-	provider.PostGis, err = NewPostgis(provider.ConnectionStr, provider.FeatureTables)
+	provider.PostGis, err = NewPostgis(provider.configFilePath)
 	return
 }
 
@@ -47,13 +58,13 @@ func (provider *PostgisProvider) procesLinksForParams(links []cg.Link, queryPara
 }
 
 func (provider *PostgisProvider) parseLimit(limit string) uint64 {
-	limitParam := provider.DefaultLimit
+	limitParam := provider.defaultReturnLimit
 	if limit != "" {
 		newValue, err := strconv.ParseInt(limit, 10, 64)
-		if err == nil && uint64(newValue) < provider.MaxLimit {
+		if err == nil && uint64(newValue) < provider.maxReturnLimit {
 			limitParam = uint64(newValue)
 		} else {
-			limitParam = provider.MaxLimit
+			limitParam = provider.maxReturnLimit
 		}
 	}
 	return limitParam
@@ -83,11 +94,11 @@ func (provider *PostgisProvider) parseFloat64(stringValue string, defaultValue f
 
 func (provider *PostgisProvider) parseBBox(stringValue string, defaultValue []float64) []float64 {
 	if stringValue == "" {
-		return provider.PostGis.DefaultBBox
+		return provider.PostGis.BBox
 	}
 	bboxValues := strings.Split(stringValue, ",")
 	if len(bboxValues) != 4 {
-		return provider.PostGis.DefaultBBox
+		return provider.PostGis.BBox
 	}
 
 	value := make([]float64, len(bboxValues))

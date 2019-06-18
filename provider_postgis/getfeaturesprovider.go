@@ -17,7 +17,7 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 
 	limitParam := provider.parseLimit(limit)
 	offsetParam := provider.parseUint(offset, 0)
-	bboxParam := provider.parseBBox(bbox, provider.PostGis.DefaultBBox)
+	bboxParam := provider.parseBBox(bbox, provider.PostGis.BBox)
 
 	if time != "" {
 		log.Println("Time selection currently not implemented")
@@ -38,7 +38,7 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 			continue
 		}
 
-		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.DB, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
+		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.db, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
 
 		if err != nil {
 			return nil, err
@@ -54,7 +54,7 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 		requestParams.Set("limit", fmt.Sprintf("%d", int64(limitParam)))
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", provider.ServerEndpoint, path) // /collections
+		hrefBase := fmt.Sprintf("%s%s", provider.serviceEndpoint, path) // /collections
 		links, _ := provider.createLinks(hrefBase, "self", ct)
 		_ = provider.procesLinksForParams(links, requestParams)
 
@@ -68,7 +68,8 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 		}
 
 		// prev => offsetParam + limitParam < numbersMatched
-		if int64(offsetParam) > 0 {
+		// disable prev for performance reasons
+		if false && int64(offsetParam) > 0 {
 			ilinks, _ := provider.createLinks(hrefBase, "prev", ct)
 			newOffset := int64(offsetParam) - int64(limitParam)
 			if newOffset < 0 {

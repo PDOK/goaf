@@ -21,10 +21,10 @@ func (provider *PostgisProvider) NewGetLandingPageProvider(r *http.Request) (Pro
 		ct = JSONContentType
 	}
 
-	links, _ := provider.createLinks(fmt.Sprintf("%s/", provider.ServerEndpoint), "self", ct)
-	apiLink, _ := provider.createLinks(fmt.Sprintf("%s/api", provider.ServerEndpoint), "service", ct)                     // /api, "service", ct)
-	conformanceLink, _ := provider.createLinks(fmt.Sprintf("%s/conformance", provider.ServerEndpoint), "conformance", ct) // /conformance, "conformance", ct)
-	dataLink, _ := provider.createLinks(fmt.Sprintf("%s/collections", provider.ServerEndpoint), "data", ct)               // /collections, "collections", ct)
+	links, _ := provider.createLinks(fmt.Sprintf("%s/", provider.serviceEndpoint), "self", ct)
+	apiLink, _ := provider.createLinks(fmt.Sprintf("%s/api", provider.serviceEndpoint), "service", ct)                     // /api, "service", ct)
+	conformanceLink, _ := provider.createLinks(fmt.Sprintf("%s/conformance", provider.serviceEndpoint), "conformance", ct) // /conformance, "conformance", ct)
+	dataLink, _ := provider.createLinks(fmt.Sprintf("%s/collections", provider.serviceEndpoint), "data", ct)               // /collections, "collections", ct)
 
 	p.Links = append(p.Links, links...)
 	p.Links = append(p.Links, apiLink...)

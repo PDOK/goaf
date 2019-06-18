@@ -1,0 +1,46 @@
+ApplicationId: POSTGIS
+ConnectionStr: 'host=127.0.0.1 port=5432 password=bgt dbname=bgt sslmode=disable'
+Layers:
+  - SchemaName: latest
+    TableName: pand
+    Identifier: pand_geometrie_vlak
+    Description: BGT
+    GeometryColumn: bbox
+    GeometryType: MULTIPOLYGON
+    FeatureIDColumn: ogc_fid
+    BBoxGeometryColumn: bbox
+    OffsetColumn: ogc_fid
+    BBox:
+      - 13603.33
+      - 306900.151
+      - 277924.306
+      - 617112.488
+    SrsId: 28992
+    Features:
+      - ogc_fid
+      - gml_id
+      - namespace
+      - lokaalid
+      - objectbegintijd
+      - objecteindtijd
+      - tijdstipregistratie
+      - eindregistratie
+      - lv_publicatiedatum
+      - bronhouder
+      - inonderzoek
+      - relatievehoogteligging
+      - bgt_status
+      - plus_status
+      - identificatiebagpnd
+      - nummeraanduidingtekst
+      - nummeraanduidinghoek
+      - identificatiebagvbolaagstehuisnummer
+      - identificatiebagvbohoogstehuisnummer
+BBox:
+  - 13603.33
+  - 306900.151
+  - 277924.306
+  - 617112.488
+SrsId: 28992
+
+
