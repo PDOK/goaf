@@ -1,5 +1,5 @@
 ApplicationId: POSTGIS
-ConnectionStr: 'host=127.0.0.1 port=5432 password=bgt dbname=bgt sslmode=disable'
+ConnectionStr: 'host=127.0.0.1 port=5432 dbname=bgt sslmode=disable'
 Layers:
   - SchemaName: latest
     TableName: pand
@@ -10,12 +10,9 @@ Layers:
     FeatureIDColumn: ogc_fid
     BBoxGeometryColumn: bbox
     OffsetColumn: ogc_fid
-    BBox:
-      - 13603.33
-      - 306900.151
-      - 277924.306
-      - 617112.488
+    BBox: [13603.33,306900.151,277924.306,617112.488]
     SrsId: 28992
+    # Features are colum names which should be exposed in properties par of the reponse
     Features:
       - ogc_fid
       - gml_id
@@ -36,11 +33,7 @@ Layers:
       - nummeraanduidinghoek
       - identificatiebagvbolaagstehuisnummer
       - identificatiebagvbohoogstehuisnummer
-BBox:
-  - 13603.33
-  - 306900.151
-  - 277924.306
-  - 617112.488
+BBox: [13603.33,306900.151,277924.306,617112.488]
 SrsId: 28992
 
 

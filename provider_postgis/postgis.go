@@ -117,19 +117,21 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 	additionalWhere := ""
 
 	if featureId != nil {
-		switch identifier := featureId.(type) {
-		case uint64:
-			additionalWhere = fmt.Sprintf(` l."%s"=%d AND `, FeatureIDColumn, identifier)
-		case string:
-			additionalWhere = fmt.Sprintf(` l."%s"='%s' AND `, FeatureIDColumn, identifier)
-		}
+		additionalWhere = fmt.Sprintf(` l."%s"=$8 AND `, FeatureIDColumn)
 	}
 
 	// query information with selection
-	query := fmt.Sprintf(`SELECT %s FROM %s l WHERE %s st_intersects(st_makeenvelope(%v,%v,%v,%v, %v), l."%s") AND l."%s" > %d ORDER BY l."%s" LIMIT %d;`,
-		selectClause, tablenName, additionalWhere, bbox[0], bbox[1], bbox[2], bbox[3], layer.SrsId, layer.GeometryColumn, layer.OffsetColumn, offset, layer.OffsetColumn, limit)
+	query := fmt.Sprintf(`SELECT %s FROM %s l WHERE %s st_intersects(st_makeenvelope($1,$2,$3,$4,$5), l."%s") AND l."%s" > $6 ORDER BY l."%s" LIMIT $7;`,
+		selectClause, tablenName, additionalWhere, layer.GeometryColumn, layer.OffsetColumn, layer.OffsetColumn)
 
-	rows, err := db.Queryx(query)
+	var rows *sqlx.Rows
+
+	// query params to prevent sql injection
+	if featureId != nil {
+		rows, err = db.Queryx(query, bbox[0], bbox[1], bbox[2], bbox[3], layer.SrsId, offset, limit, featureId)
+	} else {
+		rows, err = db.Queryx(query, bbox[0], bbox[1], bbox[2], bbox[3], layer.SrsId, offset, limit)
+	}
 
 	if err != nil {
 		log.Printf("err during query: %v - %v", query, err)
