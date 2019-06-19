@@ -4,12 +4,12 @@ package codegen
 // DO NOT EDIT BY HAND!
 
 type CollectionInfo struct {
-	Links       []Link   `json:"links"`
-	Name        string   `json:"name"`
-	Title       string   `json:"title,omitempty"`
 	Crs         []string `json:"crs,omitempty"`
 	Description string   `json:"description,omitempty"`
 	Extent      *Extent  `json:"extent,omitempty"`
+	Links       []Link   `json:"links"`
+	Name        string   `json:"name"`
+	Title       string   `json:"title,omitempty"`
 }
 
 type Content struct {

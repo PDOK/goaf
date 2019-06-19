@@ -38,7 +38,7 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 		{"root call", "", []codegen.Link{}, func(want []codegen.Link) error {
 
 			if len(want) != 4 {
-				return errors.New("Error invalid number of Links")
+				return errors.New("error invalid number of links")
 			}
 
 			rels := []string{"self", "service", "conformance", "data"}

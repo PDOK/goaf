@@ -15,12 +15,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// mandatory according to geopackage specification
-const (
-	metatable_gpkg_contents        = "gpkg_contents"
-	metatable_gpkg_spatial_ref_sys = " gpkg_spatial_ref_sys"
-)
-
 type GeoPackageLayer struct {
 	TableName    string    `db:"table_name"`
 	DataType     string    `db:"data_type"`
@@ -118,7 +112,7 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 		return
 	}
 
-	re := regexp.MustCompile(`\"(.*?)\"|'(.*?)'`)
+	re := regexp.MustCompile(`"(.*?)"|'(.*?)'`)
 
 	query := `SELECT
 			  c.table_name, c.data_type, c.identifier, c.description, c.last_change, c.min_x, c.min_y, c.max_x, c.max_y, c.srs_id, gc.column_name, gc.geometry_type_name, sm.sql
@@ -128,12 +122,11 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 			  c.data_type = 'features' AND sm.type = 'table' AND c.min_x IS NOT NULL`
 
 	rows, err := db.Queryx(query)
-	defer rows.Close()
-
 	if err != nil {
 		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
+	defer rowsClose(query, rows)
 
 	gpkg.Layers = make([]GeoPackageLayer, 0)
 
@@ -165,7 +158,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
 	result = FeatureCollectionGeoJSON{}
 	if len(bbox) > 4 {
-		err = errors.New("bbox with 6 elements not supported!")
+		err = errors.New("bbox with 6 elements not supported")
 		return
 	}
 
@@ -227,12 +220,11 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 		selectClause, layer.TableName, rtreeTablenName, additionalWhere, bbox[2], bbox[0], bbox[3], bbox[1], featureIdKey, limit, offset)
 
 	rows, err := db.Queryx(query)
-
 	if err != nil {
 		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
-	defer rows.Close()
+	defer rowsClose(query, rows)
 
 	cols, err := rows.Columns()
 	if err != nil {
@@ -246,6 +238,10 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
 			return
+		}
+
+		if featureId != nil {
+			additionalWhere = fmt.Sprintf(` l."%s"=$8 AND `, featureId)
 		}
 
 		if featureId != nil {
@@ -347,7 +343,7 @@ func (gpkg *GeoPackage) GetApplicationID(ctx context.Context, db *sqlx.DB) (stri
 		return gpkg.ApplicationId, nil
 	}
 
-	query := "PRAGMA application_id"
+	query := "PRAGMA applicationId"
 	// retrieve
 	_, rows, err := executeRaw(ctx, db, query)
 	if err != nil {
@@ -360,10 +356,10 @@ func (gpkg *GeoPackage) GetApplicationID(ctx context.Context, db *sqlx.DB) (stri
 	}
 
 	// check length rows/colums
-	application_id := rows[0][0].(int64)
+	applicationId := rows[0][0].(int64)
 
 	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(application_id))
+	binary.BigEndian.PutUint64(b, uint64(applicationId))
 
 	gpkg.ApplicationId = string(b[4:]) // should result in GPKG
 
@@ -460,4 +456,14 @@ func executeRaw(ctx context.Context, db *sqlx.DB, query string) (cols []string, 
 	}
 
 	return
+}
+
+func rowsClose(query string, rows *sqlx.Rows) {
+
+	err := rows.Close()
+
+	if err != nil {
+		log.Printf("err during closing rows: %v - %v", query, err)
+	}
+
 }

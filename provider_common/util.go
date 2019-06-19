@@ -82,16 +82,7 @@ func ctLink(baselink, contentType string) (string, error) {
 	return l, nil
 }
 
-func contains(a []string, x string) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
-}
-
-// copied from https://github.com/go-spatial/jivan
+// copied,tweaked from https://github.com/go-spatial/jivan
 func ConvertFeatureID(v interface{}) (interface{}, error) {
 	switch aval := v.(type) {
 	case float64:

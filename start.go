@@ -15,17 +15,6 @@ import (
 	"github.com/rs/cors"
 )
 
-type arrayFlags []string
-
-func (i *arrayFlags) String() string {
-	return "my string representation"
-}
-
-func (i *arrayFlags) Set(value string) error {
-	*i = append(*i, value)
-	return nil
-}
-
 func main() {
 
 	// TODO parse Flags into struct and separate into private method
@@ -101,12 +90,12 @@ func addGeopackageProviders(serviceEndpoint, serviceSpecPath, crsMapFilePath str
 	crsMap := make(map[string]string)
 	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
 	if err != nil {
-		log.Println("Could not read crsmap file: %s, using default CRS Map", crsMapFilePath)
+		log.Printf("Could not read crsmap file: %s, using default CRS Map", crsMapFilePath)
 	} else {
 		err := json.Unmarshal(csrMapFile, &crsMap)
 		log.Print(crsMap)
 		if err != nil {
-			log.Println("Could not unmarshal crsmap file: %s, using default CRS Map", crsMapFilePath)
+			log.Printf("Could not unmarshal crsmap file: %s, using default CRS Map", crsMapFilePath)
 		}
 
 	}

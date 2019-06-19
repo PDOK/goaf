@@ -14,7 +14,7 @@ const (
 )
 
 // These are the MIME types that the handlers support.
-var SupportedContentTypes []string = []string{JSONContentType}
+var SupportedContentTypes = []string{JSONContentType}
 
 type Provider interface {
 	Provide() (interface{}, error)

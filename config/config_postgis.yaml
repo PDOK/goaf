@@ -12,7 +12,7 @@ Layers:
     OffsetColumn: ogc_fid
     BBox: [13603.33,306900.151,277924.306,617112.488]
     SrsId: 28992
-    # Features are colum names which should be exposed in properties par of the reponse
+    # Features are column names which should be exposed in properties par of the reponse
     Features:
       - ogc_fid
       - gml_id

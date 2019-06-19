@@ -45,7 +45,7 @@ func (s *Server) AddProviders(providers codegen.Providers) (*Server, error) {
 	return s, nil
 }
 
-func (server *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 

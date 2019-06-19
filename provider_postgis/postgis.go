@@ -15,12 +15,6 @@ import (
 	pc "wfs3_server/provider_common"
 )
 
-// mandatory according to geopackage specification
-const (
-	metatable_gpkg_contents        = "gpkg_contents"
-	metatable_gpkg_spatial_ref_sys = " gpkg_spatial_ref_sys"
-)
-
 type IdNotFoundError struct {
 	err string
 }
@@ -59,13 +53,13 @@ func NewPostgis(configfilePath string) (Postgis, error) {
 	configFile, err := ioutil.ReadFile(configfilePath)
 
 	if err != nil {
-		log.Println("Could not find config file: %s", configfilePath)
+		log.Printf("Could not find config file: %s", configfilePath)
 		return postgis, err
 	} else {
 		err := yaml.Unmarshal(configFile, &postgis)
 
 		if err != nil {
-			log.Println("Could not unmarshal config file: %s", configfilePath)
+			log.Printf("Could not unmarshal config file: %s", configfilePath)
 			return postgis, err
 		}
 
@@ -85,14 +79,14 @@ func NewPostgis(configfilePath string) (Postgis, error) {
 	return postgis, nil
 }
 
-func (gpkg *Postgis) Close() error {
-	return gpkg.db.Close()
+func (postgis Postgis) Close() error {
+	return postgis.db.Close()
 }
 
 func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer PostgisLayer, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox []float64) (result FeatureCollectionGeoJSON, err error) {
 	result = FeatureCollectionGeoJSON{}
 	if len(bbox) > 4 {
-		err = errors.New("bbox with 6 elements not supported!")
+		err = errors.New("bbox with 6 elements not supported")
 		return
 	}
 
@@ -104,7 +98,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 		FeatureIDColumn = layer.FeatureIDColumn
 	}
 
-	tablenName := fmt.Sprintf(`%s.%s`, layer.SchemaName, layer.TableName)
+	tableName := fmt.Sprintf(`%s.%s`, layer.SchemaName, layer.TableName)
 	selectClause := fmt.Sprintf(`l."%s", st_asgeojson(l."%s") as %s`, FeatureIDColumn, layer.GeometryColumn, layer.GeometryColumn)
 
 	for _, tf := range layer.Features {
@@ -123,7 +117,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 
 	// query information with selection
 	query := fmt.Sprintf(`SELECT %s FROM %s l WHERE %s st_intersects(st_makeenvelope($1,$2,$3,$4,$5), l."%s") AND l."%s" > $6 ORDER BY l."%s" LIMIT $7;`,
-		selectClause, tablenName, additionalWhere, layer.GeometryColumn, layer.OffsetColumn, layer.OffsetColumn)
+		selectClause, tableName, additionalWhere, layer.GeometryColumn, layer.OffsetColumn, layer.OffsetColumn)
 
 	var rows *sqlx.Rows
 

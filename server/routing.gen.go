@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
-	"wfs3_server/provider_common"
+	pc "wfs3_server/provider_common"
 )
 
 type routes []*route
@@ -51,20 +51,20 @@ func (s routes) Less(i, j int) bool {
 	return len(s[i].pattern.String()) < len(s[j].pattern.String())
 }
 
-func (server *Server) Router() *RegexpHandler {
+func (s *Server) Router() *RegexpHandler {
 	router := &RegexpHandler{}
-	router.HandleFunc(regexp.MustCompile("/api"), server.HandleForProvider(provider_common.NewGetApiProvider(server.ServiceSpecPath)))
+	router.HandleFunc(regexp.MustCompile("/api"), s.HandleForProvider(pc.NewGetApiProvider(s.ServiceSpecPath)))
 	// path: /
-	router.HandleFunc(regexp.MustCompile("/"), server.HandleForProvider(server.Providers.NewGetLandingPageProvider))
+	router.HandleFunc(regexp.MustCompile("/"), s.HandleForProvider(s.Providers.NewGetLandingPageProvider))
 	// path: /collections
-	router.HandleFunc(regexp.MustCompile("/collections"), server.HandleForProvider(server.Providers.NewDescribeCollectionsProvider))
+	router.HandleFunc(regexp.MustCompile("/collections"), s.HandleForProvider(s.Providers.NewDescribeCollectionsProvider))
 	// path: /collections/{collectionId}
-	router.HandleFunc(regexp.MustCompile("/collections/.*"), server.HandleForProvider(server.Providers.NewDescribeCollectionProvider))
+	router.HandleFunc(regexp.MustCompile("/collections/.*"), s.HandleForProvider(s.Providers.NewDescribeCollectionProvider))
 	// path: /collections/{collectionId}/items
-	router.HandleFunc(regexp.MustCompile("/collections/.*/items"), server.HandleForProvider(server.Providers.NewGetFeaturesProvider))
+	router.HandleFunc(regexp.MustCompile("/collections/.*/items"), s.HandleForProvider(s.Providers.NewGetFeaturesProvider))
 	// path: /collections/{collectionId}/items/{featureId}
-	router.HandleFunc(regexp.MustCompile("/collections/.*/items/.*"), server.HandleForProvider(server.Providers.NewGetFeatureProvider))
+	router.HandleFunc(regexp.MustCompile("/collections/.*/items/.*"), s.HandleForProvider(s.Providers.NewGetFeatureProvider))
 	// path: /conformance
-	router.HandleFunc(regexp.MustCompile("/conformance"), server.HandleForProvider(server.Providers.NewGetRequirementsClassesProvider))
+	router.HandleFunc(regexp.MustCompile("/conformance"), s.HandleForProvider(s.Providers.NewGetRequirementsClassesProvider))
 	return router
 }
