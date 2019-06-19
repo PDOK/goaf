@@ -1,11 +1,11 @@
-package provider_postgis
+package provider_common
 
 import (
 	"encoding/json"
 	"github.com/getkin/kin-openapi/openapi3"
 	"log"
 	"net/http"
-	. "wfs3_server/codegen"
+	"wfs3_server/codegen"
 	"wfs3_server/spec"
 )
 
@@ -15,27 +15,30 @@ type GetApiProvider struct {
 
 var swagger *openapi3.Swagger
 
-func (provider *PostgisProvider) NewGetApiProvider(r *http.Request) (Provider, error) {
+func NewGetApiProvider(serviceSpecPath string) func(r *http.Request) (codegen.Provider, error) {
 
-	ct := r.Header.Get("Content-Type")
-	p := &GetApiProvider{}
+	return func(r *http.Request) (codegen.Provider, error) {
 
-	if ct == "" {
-		ct = JSONContentType
-	}
+		ct := r.Header.Get("Content-Type")
+		p := &GetApiProvider{}
 
-	var err error
-	if swagger == nil {
-		swagger, err = spec.GetSwagger(provider.serviceSpecPath)
-		if err != nil {
-			log.Fatalf("Error parsing swagger yaml file %s", provider.serviceEndpoint)
-			return p, nil
+		if ct == "" {
+			ct = codegen.JSONContentType
 		}
+
+		var err error
+		if swagger == nil {
+			swagger, err = spec.GetSwagger(serviceSpecPath)
+			if err != nil {
+				log.Fatalf("Error parsing swagger yaml file %s", serviceSpecPath)
+				return p, nil
+			}
+		}
+
+		p.data = swagger
+
+		return p, nil
 	}
-
-	p.data = swagger
-
-	return p, nil
 }
 
 func (provider *GetApiProvider) Provide() (interface{}, error) {

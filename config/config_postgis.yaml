@@ -3,7 +3,7 @@ ConnectionStr: 'host=127.0.0.1 port=5432 dbname=bgt sslmode=disable'
 Layers:
   - SchemaName: latest
     TableName: pand
-    Identifier: pand_geometrie_vlak
+    Identifier: pand
     Description: BGT
     GeometryColumn: bbox
     GeometryType: MULTIPOLYGON

@@ -9,6 +9,7 @@ import (
 	"os"
 	"regexp"
 	"time"
+	pc "wfs3_server/provider_common"
 
 	"github.com/go-spatial/geom/encoding/geojson"
 	"github.com/jmoiron/sqlx"
@@ -285,7 +286,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 
 			switch colName {
 			case featureIdKey:
-				ID, err := convertFeatureID(vals[i])
+				ID, err := pc.ConvertFeatureID(vals[i])
 				if err != nil {
 					return result, err
 				}
@@ -459,33 +460,4 @@ func executeRaw(ctx context.Context, db *sqlx.DB, query string) (cols []string, 
 	}
 
 	return
-}
-
-// convertFeatureID attempts to convert an interface value to an uint64
-// copied from https://github.com/go-spatial/jivan
-func convertFeatureID(v interface{}) (interface{}, error) {
-	switch aval := v.(type) {
-	case float64:
-		return uint64(aval), nil
-	case int64:
-		return uint64(aval), nil
-	case uint64:
-		return aval, nil
-	case uint:
-		return uint64(aval), nil
-	case int8:
-		return uint64(aval), nil
-	case uint8:
-		return uint64(aval), nil
-	case uint16:
-		return uint64(aval), nil
-	case int32:
-		return uint64(aval), nil
-	case uint32:
-		return uint64(aval), nil
-	case []byte:
-		return string(aval), nil
-	default:
-		return 0, errors.New(fmt.Sprintf("Cannot convert ID : %v", aval))
-	}
 }

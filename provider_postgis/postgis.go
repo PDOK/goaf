@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"log"
 	"time"
+	pc "wfs3_server/provider_common"
 )
 
 // mandatory according to geopackage specification
@@ -58,7 +59,7 @@ func NewPostgis(configfilePath string) (Postgis, error) {
 	configFile, err := ioutil.ReadFile(configfilePath)
 
 	if err != nil {
-		log.Println("Could not read config file: %s, using default CRS Map", configFile)
+		log.Println("Could not find config file: %s", configfilePath)
 		return postgis, err
 	} else {
 		err := yaml.Unmarshal(configFile, &postgis)
@@ -137,7 +138,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
-	defer rows.Close()
+	defer rowsClose(query, rows)
 
 	cols, err := rows.Columns()
 	if err != nil {
@@ -181,7 +182,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 
 			switch colName {
 			case FeatureIDColumn:
-				ID, err := convertFeatureID(vals[i])
+				ID, err := pc.ConvertFeatureID(vals[i])
 				if err != nil {
 					return result, err
 				}
@@ -256,7 +257,7 @@ func (postgis *Postgis) GetVersion(ctx context.Context, db *sqlx.DB) (string, er
 		log.Printf("err during query: %v - %v", query, err)
 		return "", err
 	}
-	defer rows.Close()
+	defer rowsClose(query, rows)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -278,34 +279,12 @@ func (postgis *Postgis) GetVersion(ctx context.Context, db *sqlx.DB) (string, er
 	return postgis.UserVersion, nil
 }
 
-// convertFeatureID attempts to convert an interface value to an uint64
-// copied from https://github.com/go-spatial/jivan
-func convertFeatureID(v interface{}) (interface{}, error) {
-	switch aval := v.(type) {
-	case float64:
-		return uint64(aval), nil
-	case int64:
-		return uint64(aval), nil
-	case uint64:
-		return aval, nil
-	case uint:
-		return uint64(aval), nil
-	case int8:
-		return uint64(aval), nil
-	case uint8:
-		return uint64(aval), nil
-	case uint16:
-		return uint64(aval), nil
-	case int32:
-		return uint64(aval), nil
-	case uint32:
-		return uint64(aval), nil
-	case []byte:
-		return string(aval), nil
-	case string:
-		return aval, nil
+func rowsClose(query string, rows *sqlx.Rows) {
 
-	default:
-		return 0, errors.New(fmt.Sprintf("Cannot convert ID : %v", aval))
+	err := rows.Close()
+
+	if err != nil {
+		log.Printf("err during closing rows: %v - %v", query, err)
 	}
+
 }

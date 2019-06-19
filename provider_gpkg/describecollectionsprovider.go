@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	. "wfs3_server/codegen"
+	pc "wfs3_server/provider_common"
 )
 
 type DescribeCollectionsProvider struct {
@@ -25,10 +26,10 @@ func (provider *GeoPackageProvider) NewDescribeCollectionsProvider(r *http.Reque
 	csInfo := Content{Links: []Link{}, Collections: []CollectionInfo{}}
 	// create Links
 	hrefBase := fmt.Sprintf("%s%s", provider.serviceEndpoint, path) // /collections
-	links, _ := provider.createLinks(hrefBase, "self", ct)
+	links, _ := pc.CreateLinks(hrefBase, "self", ct)
 	csInfo.Links = append(csInfo.Links, links...)
 	for _, cn := range provider.GeoPackage.Layers {
-		clinks, _ := provider.createLinks(fmt.Sprintf("%s/%s", hrefBase, cn.Identifier), "item", ct)
+		clinks, _ := pc.CreateLinks(fmt.Sprintf("%s/%s", hrefBase, cn.Identifier), "item", ct)
 		csInfo.Links = append(csInfo.Links, clinks...)
 	}
 
@@ -49,11 +50,11 @@ func (provider *GeoPackageProvider) NewDescribeCollectionsProvider(r *http.Reque
 
 		chrefBase := fmt.Sprintf("%s/%s", hrefBase, cn.Identifier)
 
-		clinks, _ := provider.createLinks(chrefBase, "self", ct)
+		clinks, _ := pc.CreateLinks(chrefBase, "self", ct)
 		cInfo.Links = append(cInfo.Links, clinks...)
 
 		cihrefBase := fmt.Sprintf("%s/items", chrefBase)
-		ilinks, _ := provider.createLinks(cihrefBase, "item", ct)
+		ilinks, _ := pc.CreateLinks(cihrefBase, "item", ct)
 		cInfo.Links = append(cInfo.Links, ilinks...)
 		csInfo.Collections = append(csInfo.Collections, cInfo)
 	}
