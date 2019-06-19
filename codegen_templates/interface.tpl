@@ -24,7 +24,6 @@ type Provider interface {
 
 type Providers interface {
     Init() error
-    NewGetApiProvider(r *http.Request) (Provider, error)
 {{range $key, $value := .Paths}}
     New{{upperFirst .Get.OperationID}}Provider(r *http.Request) (Provider, error)
 {{end -}}

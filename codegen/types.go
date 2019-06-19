@@ -23,17 +23,15 @@ type Exception struct {
 }
 
 type Extent struct {
-	Temporal []string  `json:"temporal,omitempty"`
-	Trs      string    `json:"trs,omitempty"`
-	Crs      string    `json:"crs,omitempty"`
-	Spatial  []float64 `json:"spatial,omitempty"`
+	Temporal interface{} `json:"temporal,omitempty"`
+	Spatial  interface{} `json:"spatial,omitempty"`
 }
 
 type FeatureGeoJSON struct {
+	Geometry   *GeometryGeoJSON `json:"geometry"`
 	Id         string           `json:"id,omitempty"`
 	Properties interface{}      `json:"properties"`
 	Type       string           `json:"type"`
-	Geometry   *GeometryGeoJSON `json:"geometry"`
 }
 
 type GeometryGeoJSON struct {
@@ -41,10 +39,11 @@ type GeometryGeoJSON struct {
 }
 
 type Link struct {
-	Type     string `json:"type,omitempty"`
 	Href     string `json:"href"`
 	Hreflang string `json:"hreflang,omitempty"`
 	Rel      string `json:"rel,omitempty"`
+	Title    string `json:"title,omitempty"`
+	Type     string `json:"type,omitempty"`
 }
 
 type ReqClasses struct {

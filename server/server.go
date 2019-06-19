@@ -6,55 +6,46 @@ import (
 	"log"
 	"net/http"
 	"wfs3_server/codegen"
-	gpkg "wfs3_server/provider_gpkg"
-	postgis "wfs3_server/provider_postgis"
 	"wfs3_server/spec"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
 type Server struct {
-	Providers codegen.Providers
-	swagger   *openapi3.Swagger
+	ServiceEndpoint    string
+	ServiceSpecPath    string
+	MaxReturnLimit     uint64
+	DefaultReturnLimit uint64
+	Providers          codegen.Providers
+	swagger            *openapi3.Swagger
 }
 
-func NewServerWithGeopackageProvider(providers *gpkg.GeoPackageProvider) (*Server, error) {
-	swagger, err := spec.GetSwagger(providers.ServiceSpecPath)
+func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnlimit, maxReturnLimit uint64) (*Server, error) {
+	swagger, err := spec.GetSwagger(serviceSpecPath)
 
 	if err != nil {
 		log.Fatal("Specification initialisation error:", err)
 		return nil, err
 	}
 
-	err = providers.Init()
+	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnlimit, swagger: swagger}
+	return server, nil
+}
+
+func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
+	err := providers.Init()
 
 	if err != nil {
 		log.Fatal("Provider initialisation error:", err)
 		return nil, err
 	}
 
-	return &Server{Providers: providers, swagger: swagger}, nil
+	s.Providers = providers
+
+	return s, nil
 }
 
-func NewServerWithPostgisProvider(providers *postgis.PostgisProvider) (*Server, error) {
-	swagger, err := spec.GetSwagger(providers.ServiceSpecPath)
-
-	if err != nil {
-		log.Fatal("Specification initialisation error:", err)
-		return nil, err
-	}
-
-	err = providers.Init()
-
-	if err != nil {
-		log.Fatal("Provider initialisation error:", err)
-		return nil, err
-	}
-
-	return &Server{Providers: providers, swagger: swagger}, nil
-}
-
-func (server *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -66,7 +57,7 @@ func (server *Server) HandleForProvider(providerFunc func(r *http.Request) (code
 		provider, err := providerFunc(r)
 
 		if err != nil {
-			jsonError(w, "PROVIDER CREATION", err.Error(), http.StatusInternalServerError)
+			jsonError(w, "PROVIDER CREATION", err.Error(), http.StatusNotFound)
 			return
 		}
 

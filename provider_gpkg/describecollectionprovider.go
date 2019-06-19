@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	. "wfs3_server/codegen"
+	pc "wfs3_server/provider_common"
 )
 
 type DescribeCollectionProvider struct {
@@ -42,11 +43,11 @@ func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Reques
 		}
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", provider.ServerEndpoint, path) // /collections
-		links, _ := provider.createLinks(hrefBase, "self", ct)
+		hrefBase := fmt.Sprintf("%s%s", provider.ServiceEndpoint, path) // /collections
+		links, _ := pc.CreateLinks(hrefBase, "self", ct)
 
 		cihrefBase := fmt.Sprintf("%s/items", hrefBase)
-		ilinks, _ := provider.createLinks(cihrefBase, "item", ct)
+		ilinks, _ := pc.CreateLinks(cihrefBase, "item", ct)
 		cInfo.Links = append(links, ilinks...)
 
 		p.data = cInfo

@@ -2,6 +2,8 @@ package provider_postgis
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	cg "wfs3_server/codegen"
 )
@@ -15,7 +17,7 @@ func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Prov
 	collectionId, featureId := cg.ParametersForGetFeature(r)
 
 	featureIdParam := featureId
-	bboxParam := provider.PostGis.DefaultBBox
+	bboxParam := provider.PostGis.BBox
 
 	ct := r.Header.Get("Content-Type")
 
@@ -31,7 +33,7 @@ func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Prov
 			continue
 		}
 
-		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.DB, cn, collectionId, 0, 1, featureIdParam, bboxParam)
+		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.db, cn, collectionId, 0, 1, featureIdParam, bboxParam)
 
 		if err != nil {
 			return nil, err
@@ -39,6 +41,8 @@ func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Prov
 
 		if len(fcGeoJSON.Features) == 1 {
 			p.data = fcGeoJSON.Features[0]
+		} else {
+			return p, errors.New(fmt.Sprintf("Feature with id: %s not found", string(featureId)))
 		}
 
 		break

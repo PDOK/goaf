@@ -9,15 +9,10 @@ import (
 	"os"
 	"regexp"
 	"time"
+	pc "wfs3_server/provider_common"
 
 	"github.com/go-spatial/geom/encoding/geojson"
 	"github.com/jmoiron/sqlx"
-)
-
-// mandatory according to geopackage specification
-const (
-	metatable_gpkg_contents        = "gpkg_contents"
-	metatable_gpkg_spatial_ref_sys = " gpkg_spatial_ref_sys"
 )
 
 type GeoPackageLayer struct {
@@ -117,7 +112,7 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 		return
 	}
 
-	re := regexp.MustCompile(`\"(.*?)\"|'(.*?)'`)
+	re := regexp.MustCompile(`"(.*?)"|'(.*?)'`)
 
 	query := `SELECT
 			  c.table_name, c.data_type, c.identifier, c.description, c.last_change, c.min_x, c.min_y, c.max_x, c.max_y, c.srs_id, gc.column_name, gc.geometry_type_name, sm.sql
@@ -127,12 +122,11 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 			  c.data_type = 'features' AND sm.type = 'table' AND c.min_x IS NOT NULL`
 
 	rows, err := db.Queryx(query)
-	defer rows.Close()
-
 	if err != nil {
 		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
+	defer rowsClose(query, rows)
 
 	gpkg.Layers = make([]GeoPackageLayer, 0)
 
@@ -164,7 +158,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
 	result = FeatureCollectionGeoJSON{}
 	if len(bbox) > 4 {
-		err = errors.New("bbox with 6 elements not supported!")
+		err = errors.New("bbox with 6 elements not supported")
 		return
 	}
 
@@ -189,52 +183,28 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	additionalWhere := ""
 
 	if featureId != nil {
-		switch identifier := featureId.(type) {
-		case uint64:
-			additionalWhere = fmt.Sprintf(" l.`%s`=%d AND ", gpkg.FeatureIdKey, identifier)
-		case string:
-			additionalWhere = fmt.Sprintf(" l.`%s`='%s' AND ", gpkg.FeatureIdKey, identifier)
-		}
-	} else {
-
-		// count total with selection
-		queryCount := fmt.Sprintf("SELECT count(*) AS `total` FROM `%s` WHERE minx <= %v AND maxx >= %v AND miny <= %v AND maxy >= %v;",
-			rtreeTablenName, bbox[2], bbox[0], bbox[3], bbox[1])
-		count, err := db.Query(queryCount)
-		if err != nil {
-			log.Printf("err during query: %v - %v", queryCount, err)
-			return result, err
-		}
-		defer count.Close()
-
-		if count.Next() {
-			err = count.Scan(&result.NumberMatched)
-			if err != nil {
-				log.Printf("err reading row values: %v", err)
-				return result, err
-			}
-		}
+		additionalWhere = fmt.Sprintf(` l."%s"=$1 AND `, featureIdKey)
 	}
 
-	/*
-		query := fmt.Sprintf("SELECT %s FROM `%s` l WHERE l.`%s` IN (SELECT id FROM %s WHERE %s minx <= %v AND maxx >= %v AND miny <= %v AND maxy >= %v ORDER BY ID LIMIT %d OFFSET %d);",
-			selectClause, layer.TableName, layer.Features[1], rtreeTablenName, additionalWhere, bbox[2], bbox[0], bbox[3], bbox[1], limit, offset)
-	*/
+	query := fmt.Sprintf("SELECT %s FROM `%s` l INNER JOIN `%s` g ON g.`id` = l.`fid` WHERE %s minx <= $2 AND maxx >= $3 AND miny <= $4 AND maxy >= $5 ORDER BY l.`%s` LIMIT $6 OFFSET $7;",
+		selectClause, layer.TableName, rtreeTablenName, additionalWhere, featureIdKey)
 
-	// query information with selection
-	query := fmt.Sprintf("SELECT %s FROM `%s` l INNER JOIN `%s` g ON g.`id` = l.`fid` WHERE %s minx <= %v AND maxx >= %v AND miny <= %v AND maxy >= %v ORDER BY l.`%s` LIMIT %d OFFSET %d;",
-		selectClause, layer.TableName, rtreeTablenName, additionalWhere, bbox[2], bbox[0], bbox[3], bbox[1], featureIdKey, limit, offset)
-
-	rows, err := db.Queryx(query)
+	var rows *sqlx.Rows
+	if featureId != nil {
+		rows, err = db.Queryx(query, featureId, bbox[2], bbox[0], bbox[3], bbox[1], limit, offset)
+	} else {
+		rows, err = db.Queryx(query, bbox[2], bbox[0], bbox[3], bbox[1], limit, offset)
+	}
 
 	if err != nil {
 		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
-	defer rows.Close()
-
+	defer rowsClose(query, rows)
 	cols, err := rows.Columns()
+
 	if err != nil {
+		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
 
@@ -245,16 +215,6 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
 			return
-		}
-
-		if featureId != nil {
-			switch identifier := featureId.(type) {
-			case uint64:
-				additionalWhere = fmt.Sprintf(" l.`%s`=%d AND ", identifier)
-			case string:
-				additionalWhere = fmt.Sprintf(" l.`%s`='%s' AND ", identifier)
-			}
-			result.NumberMatched++
 		}
 
 		result.NumberReturned++
@@ -285,7 +245,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 
 			switch colName {
 			case featureIdKey:
-				ID, err := convertFeatureID(vals[i])
+				ID, err := pc.ConvertFeatureID(vals[i])
 				if err != nil {
 					return result, err
 				}
@@ -346,7 +306,7 @@ func (gpkg *GeoPackage) GetApplicationID(ctx context.Context, db *sqlx.DB) (stri
 		return gpkg.ApplicationId, nil
 	}
 
-	query := "PRAGMA application_id"
+	query := "PRAGMA applicationId"
 	// retrieve
 	_, rows, err := executeRaw(ctx, db, query)
 	if err != nil {
@@ -359,10 +319,10 @@ func (gpkg *GeoPackage) GetApplicationID(ctx context.Context, db *sqlx.DB) (stri
 	}
 
 	// check length rows/colums
-	application_id := rows[0][0].(int64)
+	applicationId := rows[0][0].(int64)
 
 	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(application_id))
+	binary.BigEndian.PutUint64(b, uint64(applicationId))
 
 	gpkg.ApplicationId = string(b[4:]) // should result in GPKG
 
@@ -396,12 +356,17 @@ func (gpkg *GeoPackage) GetVersion(ctx context.Context, db *sqlx.DB) (int64, err
 func executeRaw(ctx context.Context, db *sqlx.DB, query string) (cols []string, rows [][]interface{}, err error) {
 
 	rowz, err := db.Query(query)
-	defer rowz.Close()
 
 	if err != nil {
 		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
+	defer func() {
+		err := rowz.Close()
+		if err != nil {
+			log.Printf("err during closing rows: %v - %v", query, err)
+		}
+	}()
 
 	cols, err = rowz.Columns()
 	if err != nil {
@@ -461,31 +426,12 @@ func executeRaw(ctx context.Context, db *sqlx.DB, query string) (cols []string, 
 	return
 }
 
-// convertFeatureID attempts to convert an interface value to an uint64
-// copied from https://github.com/go-spatial/jivan
-func convertFeatureID(v interface{}) (interface{}, error) {
-	switch aval := v.(type) {
-	case float64:
-		return uint64(aval), nil
-	case int64:
-		return uint64(aval), nil
-	case uint64:
-		return aval, nil
-	case uint:
-		return uint64(aval), nil
-	case int8:
-		return uint64(aval), nil
-	case uint8:
-		return uint64(aval), nil
-	case uint16:
-		return uint64(aval), nil
-	case int32:
-		return uint64(aval), nil
-	case uint32:
-		return uint64(aval), nil
-	case []byte:
-		return string(aval), nil
-	default:
-		return 0, errors.New(fmt.Sprintf("Cannot convert ID : %v", aval))
+func rowsClose(query string, rows *sqlx.Rows) {
+
+	err := rows.Close()
+
+	if err != nil {
+		log.Printf("err during closing rows: %v - %v", query, err)
 	}
+
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	cg "wfs3_server/codegen"
+	pc "wfs3_server/provider_common"
 )
 
 type GetFeaturesProvider struct {
@@ -15,9 +16,9 @@ type GetFeaturesProvider struct {
 func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
 	collectionId, limit, bbox, time, offset := cg.ParametersForGetFeatures(r)
 
-	limitParam := provider.parseLimit(limit)
-	offsetParam := provider.parseUint(offset, 0)
-	bboxParam := provider.parseBBox(bbox, provider.PostGis.DefaultBBox)
+	limitParam := pc.ParseLimit(limit, provider.defaultReturnLimit, provider.maxReturnLimit)
+	offsetParam := pc.ParseUint(offset, 0)
+	bboxParam := pc.ParseBBox(bbox, provider.PostGis.BBox)
 
 	if time != "" {
 		log.Println("Time selection currently not implemented")
@@ -38,7 +39,7 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 			continue
 		}
 
-		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.DB, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
+		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.db, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
 
 		if err != nil {
 			return nil, err
@@ -54,29 +55,16 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 		requestParams.Set("limit", fmt.Sprintf("%d", int64(limitParam)))
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", provider.ServerEndpoint, path) // /collections
-		links, _ := provider.createLinks(hrefBase, "self", ct)
-		_ = provider.procesLinksForParams(links, requestParams)
+		hrefBase := fmt.Sprintf("%s%s", provider.serviceEndpoint, path) // /collections
+
+		links, _ := pc.CreateLinks(hrefBase, "self", ct)
+		_ = pc.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
-			ilinks, _ := provider.createLinks(hrefBase, "next", ct)
+			ilinks, _ := pc.CreateLinks(hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)+int64(limitParam)))
-			_ = provider.procesLinksForParams(ilinks, requestParams)
-
-			links = append(links, ilinks...)
-		}
-
-		// prev => offsetParam + limitParam < numbersMatched
-		if int64(offsetParam) > 0 {
-			ilinks, _ := provider.createLinks(hrefBase, "prev", ct)
-			newOffset := int64(offsetParam) - int64(limitParam)
-			if newOffset < 0 {
-				newOffset = 0
-			}
-
-			requestParams.Set("offset", fmt.Sprintf("%d", newOffset))
-			_ = provider.procesLinksForParams(ilinks, requestParams)
+			_ = pc.ProcesLinksForParams(ilinks, requestParams)
 
 			links = append(links, ilinks...)
 		}

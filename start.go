@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"wfs3_server/codegen"
 	gpkg "wfs3_server/provider_gpkg"
 	postgis "wfs3_server/provider_postgis"
 	"wfs3_server/server"
@@ -14,99 +15,89 @@ import (
 	"github.com/rs/cors"
 )
 
-type arrayFlags []string
-
-func (i *arrayFlags) String() string {
-	return "my string representation"
-}
-
-func (i *arrayFlags) Set(value string) error {
-	*i = append(*i, value)
-	return nil
-}
-
 func main() {
 
-	var featureTables arrayFlags
+	// TODO parse Flags into struct and separate into private method
+
+	//var featureTables arrayFlags
 
 	bindHost := flag.String("s", "0.0.0.0", "server internal bind address, default; 8080")
 	bindPort := flag.Int("p", 8080, "server internal bind address, default; 8080")
-	serverEndpoint := flag.String("endpoint", "http://localhost:8080", "server endpoint for proxy reasons, default; http://localhost:8080")
 
+	serviceEndpoint := flag.String("endpoint", "http://localhost:8080", "server endpoint for proxy reasons, default; http://localhost:8080")
 	serviceSpecPath := flag.String("spec", "spec/wfs3.0.yml", "swagger openapi spec")
+	defaultReturnLimit := flag.Int("limit", 100, "limit, default: 100")
+	maxReturnLimit := flag.Int("limitmax", 500, "max limit, default: 1000")
+
+	providerName := flag.String("provider", "gpkg", "postgis or gpkg")
+
 	gpkgFilePath := flag.String("gpkg", "", "geopackage path")
 	crsMapFilePath := flag.String("crs", "", "crs file path")
-	connectionStr := flag.String("postgis", "", "postgis connection str")
+	configFilePath := flag.String("config", "", "configfile path")
 
-	flag.Var(&featureTables, "collection", "postgis feature table, can be repeated multiple times.")
 	featureIdKey := flag.String("featureId", "", "Default feature identification or else first column definition (fid)")
-	defaultLimit := flag.Int("limit", 100, "limit, default: 100")
-	maxLimit := flag.Int("limitmax", 1000, "max limit, default: 1000")
 
 	flag.Parse()
 
-	crsMap := make(map[string]string)
-	if *crsMapFilePath != "" {
-		csrMapFile, err := ioutil.ReadFile(*crsMapFilePath)
-		if err != nil {
-			log.Println("Could not read crsmap file: %s, using default CRS Map", *crsMapFilePath)
-		} else {
-			err := json.Unmarshal(csrMapFile, &crsMap)
-			log.Print(crsMap)
-			if err != nil {
-				log.Println("Could not unmarshal crsmap file: %s, using default CRS Map", *crsMapFilePath)
-			}
-		}
-	} else {
-		crsMap = map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"}
+	// stage 1: create server with spec path and limits
+	apiServer, err := server.NewServer(*serviceEndpoint, *serviceSpecPath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
+	if err != nil {
+		log.Fatal("Server initialisation error:", err)
 	}
 
-	var apiServer *server.Server
+	// stage 2: Create providers
+	var providers codegen.Providers
 
-	if *gpkgFilePath != "" {
-		api, err := server.NewServerWithGeopackageProvider(&gpkg.GeoPackageProvider{
-			ServerEndpoint:  *serverEndpoint,
-			ServiceSpecPath: *serviceSpecPath,
-			FilePath:        *gpkgFilePath,
-			CrsMap:          crsMap,
-			FeatureIdKey:    *featureIdKey,
-			DefaultLimit:    uint64(*defaultLimit),
-			MaxLimit:        uint64(*maxLimit),
-		})
+	if *providerName == "gpkg" {
+		providers = addGeopackageProviders(*serviceEndpoint, *serviceSpecPath, *crsMapFilePath, *gpkgFilePath, *featureIdKey, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
 
-		if err != nil {
-			log.Fatal("Server initialisation error:", err)
-		}
-		apiServer = api
-
-	} else if *connectionStr != "" {
-		api, err := server.NewServerWithPostgisProvider(&postgis.PostgisProvider{
-			ServerEndpoint:  *serverEndpoint,
-			ServiceSpecPath: *serviceSpecPath,
-			ConnectionStr:   *connectionStr,
-			FeatureTables:   featureTables,
-			DefaultLimit:    uint64(*defaultLimit),
-			MaxLimit:        uint64(*maxLimit),
-		})
-
-		if err != nil {
-			log.Fatal("Server initialisation error:", err)
-		}
-		apiServer = api
-
+	} else if *providerName == "postgis" {
+		providers = addPostgisProviders(*serviceEndpoint, *serviceSpecPath, *configFilePath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
 	}
 
+	// stage 3: Add providers, also initialise them
+	apiServer, err = apiServer.SetProviders(providers)
+	if err != nil {
+		log.Fatal("Server initialisation error:", err)
+	}
+
+	// stage 4: Prepare routing
 	router := apiServer.Router()
 	handler := cors.Default().Handler(router)
 
-	// ServerEndpoint can be different from bindaddress due to routing externally
+	// ServerEndpoint can be different from bind address due to routing externally
 	bindAddress := fmt.Sprintf("%v:%v", *bindHost, *bindPort)
 
-	log.Print("|")
-	log.Printf("| SERVING ON: %s", *serverEndpoint)
+	// print config
+	configProvider, err := json.Marshal(apiServer.Providers)
+	log.Println(string(configProvider))
 
+	log.Print("|")
+	log.Printf("| SERVING ON: %s", apiServer.ServiceEndpoint)
+
+	// stage 5: Start server
 	if err := http.ListenAndServe(bindAddress, handler); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 
+}
+
+func addPostgisProviders(serviceEndpoint, serviceSpecPath, configFilePath string, defaultReturnLimit, maxReturnLimit uint64) *postgis.PostgisProvider {
+	return postgis.NewPostgisProvider(serviceEndpoint, serviceSpecPath, configFilePath, defaultReturnLimit, maxReturnLimit)
+}
+
+func addGeopackageProviders(serviceEndpoint, serviceSpecPath, crsMapFilePath string, gpkgFilePath string, featureIdKey string, defaultReturnLimit, maxReturnLimit uint64) *gpkg.GeoPackageProvider {
+	crsMap := make(map[string]string)
+	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
+	if err != nil {
+		log.Printf("Could not read crsmap file: %s, using default CRS Map", crsMapFilePath)
+	} else {
+		err := json.Unmarshal(csrMapFile, &crsMap)
+		log.Print(crsMap)
+		if err != nil {
+			log.Printf("Could not unmarshal crsmap file: %s, using default CRS Map", crsMapFilePath)
+		}
+
+	}
+	return gpkg.NewGeopackageProvider(serviceEndpoint, serviceSpecPath, gpkgFilePath, crsMap, featureIdKey, defaultReturnLimit, maxReturnLimit)
 }

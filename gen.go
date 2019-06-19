@@ -159,7 +159,9 @@ func convertSchemaRefType(ref *openapi3.SchemaRef, builder *strings.Builder, poi
 }
 
 func responses(responses openapi3.Responses) string {
-	log.Println("Not implemented.")
+	if responses != nil {
+		log.Println("Not implemented.")
+	}
 	return ""
 }
 
@@ -191,14 +193,14 @@ func downloadFile(filepath string, url string) error {
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer closeFile(out)
 
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer closeresponse(resp)
 
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
@@ -212,7 +214,10 @@ func downloadFile(filepath string, url string) error {
 func main() {
 
 	filepath := "spec/wfs3.0.yml"
-	downloadFile(filepath, "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/openapi.yaml")
+	err := downloadFile(filepath, "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/openapi.yaml")
+	if err != nil {
+		log.Fatalf("Cannot find file %s", filepath)
+	}
 	yaml, err := ioutil.ReadFile(filepath)
 
 	if err != nil {
@@ -258,9 +263,9 @@ func main() {
 func createFile(outputPath, outputFileName, templateFileName string, swagger *openapi3.Swagger, templates *template.Template) {
 	out, err := os.Create(fmt.Sprintf("%s/%s", outputPath, outputFileName))
 	if err != nil {
-		log.Println("%v", err)
+		log.Printf("%v", err)
 	}
-	defer out.Close()
+	defer closeFile(out)
 	err = templates.ExecuteTemplate(out, templateFileName, swagger)
 }
 
@@ -271,4 +276,21 @@ func contains(a []string, x string) bool {
 		}
 	}
 	return false
+}
+
+func closeFile(f *os.File) {
+	err := f.Close()
+
+	if err != nil {
+		log.Printf("%v", err)
+	}
+}
+
+func closeresponse(h *http.Response) {
+	err := h.Body.Close()
+
+	if err != nil {
+		log.Printf("%v", err)
+	}
+
 }

@@ -14,7 +14,7 @@ const (
 )
 
 // These are the MIME types that the handlers support.
-var SupportedContentTypes = []string{JSONContentType}
+var SupportedContentTypes []string = []string{JSONContentType}
 
 type Provider interface {
 	Provide() (interface{}, error)
@@ -24,7 +24,6 @@ type Provider interface {
 
 type Providers interface {
 	Init() error
-	NewGetApiProvider(r *http.Request) (Provider, error)
 
 	NewGetLandingPageProvider(r *http.Request) (Provider, error)
 
@@ -55,7 +54,7 @@ func ParametersForDescribeCollection(r *http.Request) (collectionId string) {
 }
 
 // GetFeatures
-func ParametersForGetFeatures(r *http.Request) (collectionId string, limit string, bbox string, time string, offset string) {
+func ParametersForGetFeatures(r *http.Request) (collectionId string, limit string, bbox string, datetime string, offset string) {
 	pathSplit := strings.Split(r.URL.Path, "/")
 	collectionId = pathSplit[2]
 	limitArray, ok := r.URL.Query()["limit"]
@@ -68,9 +67,9 @@ func ParametersForGetFeatures(r *http.Request) (collectionId string, limit strin
 		bbox = bboxArray[0]
 	}
 
-	timeArray, ok := r.URL.Query()["time"]
+	datetimeArray, ok := r.URL.Query()["datetime"]
 	if ok {
-		time = timeArray[0]
+		datetime = datetimeArray[0]
 	}
 
 	offsetArray, ok := r.URL.Query()["offset"]
