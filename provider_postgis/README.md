@@ -2,46 +2,43 @@
 use the folowing config file structure :
 
 ```
-{
-    "ConnectionStr": "host=127.0.0.1 port=5432 password=bgt dbname=bgt sslmode=disable",
-    "PostGis": {
-        "ApplicationId": "POSTGIS",
-        "Layers": [
-            {
-                "SchemaName": "latest",
-                "TableName": "pand",
-                "Identifier": "pand_geometrie_vlak", // display identifier of the collection
-                "Description": "Nice description maybe a link to external page",
-                "GeometryColumn": "bbox", // should be a simple geometry (geojson)
-                "FeatureIDColumn": "ogc_fid", // unique identifier of the feature {itemId} *
-                "BBoxGeometryColumn": "bbox", // simpel 2d envelope
-                "OffsetColumn": "offset_id",
-                "BBox": [
-                    13603.33,
-                    306900.151,
-                    277924.306,
-                    617112.488
-                ],
-                "SrsId": 28992,
-                "Features": [
-                    "column_names"
-                ]
-            }
-        ],
-        
-        // encompassing bbox of all layers 
-        "BBox": [
-            13603.33,
-            306900.151,
-            277924.306,
-            617112.488
-        ],
-        "SrsId": 28992
-    },
-    "CrsMap": {
-        "4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"
-    }
-}
+ApplicationId: POSTGIS
+ConnectionStr: 'host=127.0.0.1 port=5432 dbname=bgt sslmode=disable'
+Layers:
+  - SchemaName: latest #database schema name
+    TableName: pand   #database table/view name
+    Identifier: pand  #collection name in api response
+    Description: BGT Swifterband #Description of the collection
+    GeometryColumn: bbox  #column containing the SFS geometry
+    GeometryType: GEOMETRY # has currently no use
+    FeatureIDColumn: ogc_fid #the unique indexed identifier for a given feature
+    BBoxGeometryColumn: bbox #extra column with boundingbox selection index for intersects query
+    OffsetColumn: ogc_fid # extra column to determine next keyset paging, should be numeric, indexed and unique, could be equal to feature id
+    BBox: [13603.33,306900.151,277924.306,617112.488] # Bounding box of all features can be used to display subset of features
+    SrsId: 28992 #the projection of the geometry in db's
+    # Features are column names which should be exposed in properties par of the reponse
+    Features:
+      - ogc_fid
+      - gml_id
+      - namespace
+      - lokaalid
+      - objectbegintijd
+      - objecteindtijd
+      - tijdstipregistratie
+      - eindregistratie
+      - lv_publicatiedatum
+      - bronhouder
+      - inonderzoek
+      - relatievehoogteligging
+      - bgt_status
+      - plus_status
+      - identificatiebagpnd
+      - nummeraanduidingtekst
+      - nummeraanduidinghoek
+      - identificatiebagvbolaagstehuisnummer
+      - identificatiebagvbohoogstehuisnummer
+BBox: [13603.33,306900.151,277924.306,617112.488] # bounding box of all layers
+SrsId: 28992 # and the corresponding projection
 
 ```
 ALTER TABLE .... ADD COLUMN geom geometry(Polygon,28992);
