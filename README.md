@@ -14,9 +14,11 @@ The specification is a preliminary one, with `go generate` the routing based on 
 
 example wfs-3.0 geopackage example: https://github.com/PDOK/wfs-3.0-gpkg
 
-#####minimal config, gpkg tends to be relative small e.g. < 3 GB
+***minimal config, gpkg tends to be relative small e.g. < 3 GB***
+
 go run start.go -provider gpkg -gpkg tst/bgt_wgs84.gpkg
 
-#####More elaborate config optimised performance for huge db (10M+ records/collection)
+***More elaborate config optimised performance for huge db (10M+ records/collection)***
+
 go run start.go -provider postgis -config config/config_postgis.yaml
 
