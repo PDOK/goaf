@@ -9,7 +9,7 @@ type GeoPackageProvider struct {
 	GeoPackage         GeoPackage
 	FeatureIdKey       string
 	CrsMap             map[string]string
-	serviceEndpoint    string
+	ServiceEndpoint    string
 	serviceSpecPath    string
 	maxReturnLimit     uint64
 	defaultReturnLimit uint64
@@ -20,7 +20,7 @@ func NewGeopackageProvider(serviceEndpoint, serviceSpecPath, gpkgFilePath string
 		FilePath:           gpkgFilePath,
 		CrsMap:             crsMap,
 		FeatureIdKey:       featureIdKey,
-		serviceEndpoint:    serviceEndpoint,
+		ServiceEndpoint:    serviceEndpoint,
 		serviceSpecPath:    serviceSpecPath,
 		defaultReturnLimit: defaultReturnLimit,
 		maxReturnLimit:     maxReturnLimit,

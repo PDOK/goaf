@@ -56,7 +56,7 @@ func main() {
 	}
 
 	// stage 3: Add providers, also initialise them
-	apiServer, err = apiServer.AddProviders(providers)
+	apiServer, err = apiServer.SetProviders(providers)
 	if err != nil {
 		log.Fatal("Server initialisation error:", err)
 	}

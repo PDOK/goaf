@@ -9,42 +9,43 @@ import (
 	"net/http/httptest"
 	"testing"
 	"wfs3_server/codegen"
+	"wfs3_server/provider_common"
 	gpkg "wfs3_server/provider_gpkg"
 )
 
 func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 
-	gpkgp := &gpkg.GeoPackageProvider{
-		ServerEndpoint:  "http://testhost:1234",
-		ServiceSpecPath: "../spec/wfs3.0.yml",
-		FilePath:        "../2019_gemeentegrenzen_kustlijn.gpkg",
-		//FilePath:        "/media/sf_development-virtual/brtachtergrondkaart.gpkg",l
-		//FilePath:     "/media/sf_development-virtual/natura2000.gpkg",
-		DefaultLimit: 100,
-		MaxLimit:     1000,
-	}
+	crsMap := make(map[string]string)
 
-	server, _ := NewServerWithGeopackageProvider(gpkgp)
+	serverEnppoint := "http://testhost:1234"
+
+	gpkgp := gpkg.NewGeopackageProvider(serverEnppoint, "../spec/wfs3.0.yml", "../tst/bgt_wgs84.gpkg", crsMap, "fid", 100, 500)
+
+	server, _ := NewServer(serverEnppoint, "../spec/wfs3.0.yml", 100, 500)
+	server, _ = server.SetProviders(gpkgp)
+
 	ts := httptest.NewServer(server.Router())
 	defer ts.Close()
-	gpkgp.ServerEndpoint = ts.URL
+
+	// replace with test endpoint
+	gpkgp.ServiceEndpoint = ts.URL
 
 	tests := []struct {
 		name  string
 		path  string
-		want  []codegen.Link
-		check func(want []codegen.Link) error
+		want  provider_common.GetLandingPageProvider
+		check func(want provider_common.GetLandingPageProvider) error
 	}{
-		{"root call", "", []codegen.Link{}, func(want []codegen.Link) error {
+		{"root call", "", provider_common.GetLandingPageProvider{}, func(want provider_common.GetLandingPageProvider) error {
 
-			if len(want) != 4 {
+			if len(want.Links) != 4 {
 				return errors.New("error invalid number of links")
 			}
 
 			rels := []string{"self", "service", "conformance", "data"}
 			paths := []string{"/", "/api", "/conformance", "/collections"}
 
-			for i, v := range want {
+			for i, v := range want.Links {
 				if v.Rel != rels[i] {
 					return errors.New(fmt.Sprintf("Error invalid link rel: %s", v.Rel))
 				}
@@ -83,20 +84,20 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 
 func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 
-	gpkgp := &gpkg.GeoPackageProvider{
-		ServerEndpoint:  "http://testhost:1234",
-		ServiceSpecPath: "../spec/wfs3.0.yml",
-		FilePath:        "../2019_gemeentegrenzen_kustlijn.gpkg",
-		//FilePath:        "/media/sf_development-virtual/brtachtergrondkaart.gpkg",l
-		//FilePath:     "/media/sf_development-virtual/natura2000.gpkg",
-		DefaultLimit: 20,
-		MaxLimit:     100,
-	}
+	crsMap := make(map[string]string)
 
-	server, _ := NewServerWithGeopackageProvider(gpkgp)
+	serverEnppoint := "http://testhost:1234"
+
+	gpkgp := gpkg.NewGeopackageProvider(serverEnppoint, "../spec/wfs3.0.yml", "../tst/bgt_wgs84.gpkg", crsMap, "fid", 100, 500)
+
+	server, _ := NewServer(serverEnppoint, "../spec/wfs3.0.yml", 100, 500)
+	server, _ = server.SetProviders(gpkgp)
+
 	ts := httptest.NewServer(server.Router())
 	defer ts.Close()
-	gpkgp.ServerEndpoint = ts.URL
+
+	// replace with test endpoint
+	gpkgp.ServiceEndpoint = ts.URL
 
 	tests := []struct {
 		name  string

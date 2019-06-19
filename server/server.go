@@ -20,7 +20,7 @@ type Server struct {
 	swagger            *openapi3.Swagger
 }
 
-func NewServer(serviceendpoint, serviceSpecPath string, defaultReturnlimit, maxReturnLimit uint64) (*Server, error) {
+func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnlimit, maxReturnLimit uint64) (*Server, error) {
 	swagger, err := spec.GetSwagger(serviceSpecPath)
 
 	if err != nil {
@@ -28,11 +28,11 @@ func NewServer(serviceendpoint, serviceSpecPath string, defaultReturnlimit, maxR
 		return nil, err
 	}
 
-	server := &Server{ServiceEndpoint: serviceendpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnlimit, swagger: swagger}
+	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnlimit, swagger: swagger}
 	return server, nil
 }
 
-func (s *Server) AddProviders(providers codegen.Providers) (*Server, error) {
+func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
 	err := providers.Init()
 
 	if err != nil {

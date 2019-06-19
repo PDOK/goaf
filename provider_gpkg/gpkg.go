@@ -183,51 +183,28 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	additionalWhere := ""
 
 	if featureId != nil {
-		switch identifier := featureId.(type) {
-		case uint64:
-			additionalWhere = fmt.Sprintf(" l.`%s`=%d AND ", gpkg.FeatureIdKey, identifier)
-		case string:
-			additionalWhere = fmt.Sprintf(" l.`%s`='%s' AND ", gpkg.FeatureIdKey, identifier)
-		}
-	} else {
-
-		// count total with selection
-		queryCount := fmt.Sprintf("SELECT count(*) AS `total` FROM `%s` WHERE minx <= %v AND maxx >= %v AND miny <= %v AND maxy >= %v;",
-			rtreeTablenName, bbox[2], bbox[0], bbox[3], bbox[1])
-		count, err := db.Query(queryCount)
-		if err != nil {
-			log.Printf("err during query: %v - %v", queryCount, err)
-			return result, err
-		}
-		defer count.Close()
-
-		if count.Next() {
-			err = count.Scan(&result.NumberMatched)
-			if err != nil {
-				log.Printf("err reading row values: %v", err)
-				return result, err
-			}
-		}
+		additionalWhere = fmt.Sprintf(` l."%s"=$1 AND `, featureIdKey)
 	}
 
-	/*
-		query := fmt.Sprintf("SELECT %s FROM `%s` l WHERE l.`%s` IN (SELECT id FROM %s WHERE %s minx <= %v AND maxx >= %v AND miny <= %v AND maxy >= %v ORDER BY ID LIMIT %d OFFSET %d);",
-			selectClause, layer.TableName, layer.Features[1], rtreeTablenName, additionalWhere, bbox[2], bbox[0], bbox[3], bbox[1], limit, offset)
-	*/
+	query := fmt.Sprintf("SELECT %s FROM `%s` l INNER JOIN `%s` g ON g.`id` = l.`fid` WHERE %s minx <= $2 AND maxx >= $3 AND miny <= $4 AND maxy >= $5 ORDER BY l.`%s` LIMIT $6 OFFSET $7;",
+		selectClause, layer.TableName, rtreeTablenName, additionalWhere, featureIdKey)
 
-	// query information with selection
-	query := fmt.Sprintf("SELECT %s FROM `%s` l INNER JOIN `%s` g ON g.`id` = l.`fid` WHERE %s minx <= %v AND maxx >= %v AND miny <= %v AND maxy >= %v ORDER BY l.`%s` LIMIT %d OFFSET %d;",
-		selectClause, layer.TableName, rtreeTablenName, additionalWhere, bbox[2], bbox[0], bbox[3], bbox[1], featureIdKey, limit, offset)
+	var rows *sqlx.Rows
+	if featureId != nil {
+		rows, err = db.Queryx(query, featureId, bbox[2], bbox[0], bbox[3], bbox[1], limit, offset)
+	} else {
+		rows, err = db.Queryx(query, bbox[2], bbox[0], bbox[3], bbox[1], limit, offset)
+	}
 
-	rows, err := db.Queryx(query)
 	if err != nil {
 		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
 	defer rowsClose(query, rows)
-
 	cols, err := rows.Columns()
+
 	if err != nil {
+		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
 
@@ -238,20 +215,6 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
 			return
-		}
-
-		if featureId != nil {
-			additionalWhere = fmt.Sprintf(` l."%s"=$8 AND `, featureId)
-		}
-
-		if featureId != nil {
-			switch identifier := featureId.(type) {
-			case uint64:
-				additionalWhere = fmt.Sprintf(" l.`%s`=%d AND ", identifier)
-			case string:
-				additionalWhere = fmt.Sprintf(" l.`%s`='%s' AND ", identifier)
-			}
-			result.NumberMatched++
 		}
 
 		result.NumberReturned++
@@ -393,12 +356,17 @@ func (gpkg *GeoPackage) GetVersion(ctx context.Context, db *sqlx.DB) (int64, err
 func executeRaw(ctx context.Context, db *sqlx.DB, query string) (cols []string, rows [][]interface{}, err error) {
 
 	rowz, err := db.Query(query)
-	defer rowz.Close()
 
 	if err != nil {
 		log.Printf("err during query: %v - %v", query, err)
 		return
 	}
+	defer func() {
+		err := rowz.Close()
+		if err != nil {
+			log.Printf("err during closing rows: %v - %v", query, err)
+		}
+	}()
 
 	cols, err = rowz.Columns()
 	if err != nil {

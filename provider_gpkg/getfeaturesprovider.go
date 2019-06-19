@@ -59,7 +59,7 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 		requestParams.Set("limit", fmt.Sprintf("%d", int64(limitParam)))
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", provider.serviceEndpoint, path) // /collections
+		hrefBase := fmt.Sprintf("%s%s", provider.ServiceEndpoint, path) // /collections
 		links, _ := pc.CreateLinks(hrefBase, "self", ct)
 		_ = pc.ProcesLinksForParams(links, requestParams)
 
@@ -67,20 +67,6 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
 			ilinks, _ := pc.CreateLinks(hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)+int64(limitParam)))
-			_ = pc.ProcesLinksForParams(ilinks, requestParams)
-
-			links = append(links, ilinks...)
-		}
-
-		// prev => offsetParam + limitParam < numbersMatched
-		if int64(offsetParam) > 0 {
-			ilinks, _ := pc.CreateLinks(hrefBase, "prev", ct)
-			newOffset := int64(offsetParam) - int64(limitParam)
-			if newOffset < 0 {
-				newOffset = 0
-			}
-
-			requestParams.Set("offset", fmt.Sprintf("%d", newOffset))
 			_ = pc.ProcesLinksForParams(ilinks, requestParams)
 
 			links = append(links, ilinks...)

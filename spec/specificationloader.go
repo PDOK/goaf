@@ -10,9 +10,12 @@ func GetSwagger(serviceSpecPath string) (*openapi3.Swagger, error) {
 
 	yaml, err := ioutil.ReadFile(serviceSpecPath)
 	if err != nil {
-		log.Fatalf("Cannot find file %s", serviceSpecPath)
+		log.Fatalf("Cannot find file :%s", serviceSpecPath)
 	}
 	swagger, err := openapi3.NewSwaggerLoader().LoadSwaggerFromYAMLData(yaml)
+	if err != nil {
+		log.Fatalf("Cannot Loadswagger from YAML file :%s", serviceSpecPath)
+	}
 	// tweak for missing schemaś reference to geojson
 	swagger.Components.Schemas["geometryGeoJSON"] = &openapi3.SchemaRef{Ref: "http://geojson.org/schema/Geometry.json"}
 	swagger.Components.Schemas["featureGeoJSON"] = &openapi3.SchemaRef{Ref: "http://geojson.org/schema/Feature.json"}
