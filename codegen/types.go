@@ -4,12 +4,12 @@ package codegen
 // DO NOT EDIT BY HAND!
 
 type CollectionInfo struct {
+	Title       string   `json:"title,omitempty"`
 	Crs         []string `json:"crs,omitempty"`
 	Description string   `json:"description,omitempty"`
 	Extent      *Extent  `json:"extent,omitempty"`
 	Links       []Link   `json:"links"`
 	Name        string   `json:"name"`
-	Title       string   `json:"title,omitempty"`
 }
 
 type Content struct {
@@ -23,8 +23,8 @@ type Exception struct {
 }
 
 type Extent struct {
-	Spatial  interface{} `json:"spatial,omitempty"`
 	Temporal interface{} `json:"temporal,omitempty"`
+	Spatial  interface{} `json:"spatial,omitempty"`
 }
 
 type FeatureGeoJSON struct {
