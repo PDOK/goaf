@@ -49,3 +49,6 @@ UPDATE .... SET geom=st_forcesfs(geometrie_vlak)
 
 ALTER TABLE .... ADD COLUMN bbox geometry(Polygon,28992);
 UPDATE .... SET bbox=ST_Envelope(ST_Force2D(geometrie_vlak))
+
+
+go run start.go -provider postgis -config config/config_postgis.yaml
