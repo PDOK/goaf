@@ -99,7 +99,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 	}
 
 	tableName := fmt.Sprintf(`%s.%s`, layer.SchemaName, layer.TableName)
-	selectClause := fmt.Sprintf(`l."%s", st_asgeojson(l."%s") as %s`, FeatureIDColumn, layer.GeometryColumn, layer.GeometryColumn)
+	selectClause := fmt.Sprintf(`l."%s", st_asgeojson(st_forcesfs(l."%s")) as %s`, FeatureIDColumn, layer.GeometryColumn, layer.GeometryColumn)
 
 	for _, tf := range layer.Features {
 
@@ -206,7 +206,20 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 			case layer.OffsetColumn, layer.BBoxGeometryColumn:
 				// Skip these columns used for bounding box and zoom filtering
 				continue
+			case "properties": // predefined jsonb
+				switch v := vals[i].(type) {
+				case []uint8:
+					asBytes := make([]byte, len(v))
+					for j := 0; j < len(v); j++ {
+						asBytes[j] = v[j]
+					}
+					feature.Properties = make(map[string]interface{})
+					err := json.Unmarshal(asBytes, &feature.Properties)
+					if err != nil {
+						return result, err
+					}
 
+				}
 			default:
 				// Grab any non-nil, non-id, non-bounding box, & non-geometry column as a tag
 				switch v := vals[i].(type) {
