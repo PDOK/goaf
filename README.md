@@ -1,4 +1,4 @@
-**PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/WFS_FES/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml).**
+**PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/WFS_FES/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml) EXAMPLE 1.**
 
 A a GeoJSON implementation with a Geopackage as a data provider.
 
