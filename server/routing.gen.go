@@ -57,7 +57,7 @@ func (s *Server) Router() *RegexpHandler {
 	// path: /
 	router.HandleFunc(regexp.MustCompile("/"), s.HandleForProvider(s.Providers.NewGetLandingPageProvider))
 	// path: /collections
-	router.HandleFunc(regexp.MustCompile("/collections"), s.HandleForProvider(s.Providers.NewDescribeCollectionsProvider))
+	router.HandleFunc(regexp.MustCompile("/collections"), s.HandleForProvider(s.Providers.NewGetCollectionsProvider))
 	// path: /collections/{collectionId}
 	router.HandleFunc(regexp.MustCompile("/collections/.*"), s.HandleForProvider(s.Providers.NewDescribeCollectionProvider))
 	// path: /collections/{collectionId}/items
@@ -65,6 +65,6 @@ func (s *Server) Router() *RegexpHandler {
 	// path: /collections/{collectionId}/items/{featureId}
 	router.HandleFunc(regexp.MustCompile("/collections/.*/items/.*"), s.HandleForProvider(s.Providers.NewGetFeatureProvider))
 	// path: /conformance
-	router.HandleFunc(regexp.MustCompile("/conformance"), s.HandleForProvider(s.Providers.NewGetRequirementsClassesProvider))
+	router.HandleFunc(regexp.MustCompile("/conformance"), s.HandleForProvider(s.Providers.NewGetConformanceDeclarationProvider))
 	return router
 }

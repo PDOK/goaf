@@ -8,11 +8,11 @@ Layers:
     GeometryColumn: _geom  #column containing the SFS geometry
     GeometryType: GEOMETRY # has currently no use
     FeatureIDColumn: _id #the unique indexed identifier for a given feature
-    BBoxGeometryColumn: _bbox #extra column with boundingbox selection index for intersects query, simplification and speedup
+    BBoxGeometryColumn: _bbox #extra column with bounding box selection index for intersects query, simplification and speedup
     OffsetColumn: _offset_id # extra column to determine next keyset paging, should be numeric, indexed and unique, could be equal to feature id
     BBox: [13603.33,306900.151,277924.306,617112.488] # Bounding box of all features can be used to display subset of features
     SrsId: 28992 #the projection of the geometry currently stored in database
-    # Features are column names which should be exposed in properties par of the reponse
+    # Features are column names which should be exposed in properties par of the response
     Features:
       - properties
 BBox: [13603.33,306900.151,277924.306,617112.488] # bounding box of all layers

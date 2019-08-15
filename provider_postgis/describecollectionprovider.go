@@ -9,7 +9,7 @@ import (
 )
 
 type DescribeCollectionProvider struct {
-	data CollectionInfo
+	data Collection
 }
 
 func (provider *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (Provider, error) {
@@ -29,8 +29,8 @@ func (provider *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) 
 			continue
 		}
 
-		cInfo := CollectionInfo{
-			Name:        cn.Identifier,
+		cInfo := Collection{
+			Id:          cn.Identifier,
 			Title:       cn.Identifier,
 			Description: cn.Description,
 			Crs:         []string{},

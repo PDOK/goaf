@@ -14,7 +14,7 @@ const (
 )
 
 // These are the MIME types that the handlers support.
-var SupportedContentTypes []string = []string{JSONContentType}
+var SupportedContentTypes = []string{JSONContentType}
 
 type Provider interface {
 	Provide() (interface{}, error)
@@ -27,7 +27,7 @@ type Providers interface {
 
 	NewGetLandingPageProvider(r *http.Request) (Provider, error)
 
-	NewDescribeCollectionsProvider(r *http.Request) (Provider, error)
+	NewGetCollectionsProvider(r *http.Request) (Provider, error)
 
 	NewDescribeCollectionProvider(r *http.Request) (Provider, error)
 
@@ -35,7 +35,7 @@ type Providers interface {
 
 	NewGetFeatureProvider(r *http.Request) (Provider, error)
 
-	NewGetRequirementsClassesProvider(r *http.Request) (Provider, error)
+	NewGetConformanceDeclarationProvider(r *http.Request) (Provider, error)
 }
 
 // generate convenient functions to retrieve path params
@@ -43,7 +43,7 @@ type Providers interface {
 // GetLandingPage
 // no parameters present
 
-// DescribeCollections
+// GetCollections
 // no parameters present
 
 // DescribeCollection
@@ -88,5 +88,5 @@ func ParametersForGetFeature(r *http.Request) (collectionId string, featureId st
 	return
 }
 
-// GetRequirementsClasses
+// GetConformanceDeclaration
 // no parameters present

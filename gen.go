@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/getkin/kin-openapi/openapi3"
-	"io"
-	"io/ioutil"
 	"log"
-	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -186,45 +184,38 @@ func getType(stringOnly bool, schemaType string) string {
 	return schemaType
 }
 
-func downloadFile(filepath string, url string) error {
-
-	// Create the file
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer closeFile(out)
-
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer closeresponse(resp)
-
-	// Write the body to file
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func main() {
 
+	loader := openapi3.NewSwaggerLoader()
+	loader.IsExternalRefsAllowed = true
+
+	u, _ := url.Parse("https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml")
+	components, err := loader.LoadSwaggerFromURI(u)
+
+	// file based spec based upon https://github.com/opengeospatial/WFS_FES/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml
 	filepath := "spec/wfs3.0.yml"
-	err := downloadFile(filepath, "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/openapi.yaml")
+	swagger, err := loader.LoadSwaggerFromFile(filepath)
 	if err != nil {
-		log.Fatalf("Cannot find file %s", filepath)
-	}
-	yaml, err := ioutil.ReadFile(filepath)
-
-	if err != nil {
-		log.Fatalf("Cannot find file %s", filepath)
+		log.Fatalf("Got error reading swagger file %v", err)
+		return
 	}
 
-	swagger, err := openapi3.NewSwaggerLoader().LoadSwaggerFromYAMLData(yaml)
+	// merge
+	swagger.Components = components.Components
+	// filter out geojeson stuff and non complex objects
+	// geojson type are represented in extra_types file in implementation
+	refs := swagger.Components.Schemas
+	for k, v := range refs {
+
+		// rest of GeoJSON is omitted
+		if strings.Contains(k, "GeoJSON") {
+			delete(refs, k)
+		}
+		// omit non complex types
+		if v.Value.Type != "object" {
+			delete(refs, k)
+		}
+	}
 
 	if err != nil {
 		log.Fatalf("Got error reading swagger file %v", err)
@@ -284,13 +275,4 @@ func closeFile(f *os.File) {
 	if err != nil {
 		log.Printf("%v", err)
 	}
-}
-
-func closeresponse(h *http.Response) {
-	err := h.Body.Close()
-
-	if err != nil {
-		log.Printf("%v", err)
-	}
-
 }

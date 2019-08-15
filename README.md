@@ -1,4 +1,4 @@
-**PDOK server implementation of [OGC WFS 3.0](https://github.com/opengeospatial/WFS_FES).**
+**PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/WFS_FES/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml).**
 
 A a GeoJSON implementation with a Geopackage as a data provider.
 
@@ -10,7 +10,7 @@ some tweaks for scanning the SQL features
 The specification is a preliminary one, with `go generate` the routing based on api spec, provider interfaces en types structs and convenient parameter extractions are generated to stay easily up to date.
 
 * FeatureCollectionGeoJSON is overridden in provider gpkg to use the github.com/go-spatial/geom/encoding/geojso equivalent for decoding blobs
-* https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/openapi.yaml
+* https://github.com/opengeospatial/WFS_FES/blob/master/core/openapi/ogcapi-features-1.yaml
 
 example wfs-3.0 geopackage example: https://github.com/PDOK/wfs-3.0-gpkg
 

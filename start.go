@@ -55,7 +55,7 @@ func main() {
 		providers = addPostgisProviders(*serviceEndpoint, *serviceSpecPath, *configFilePath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
 	}
 
-	// stage 3: Add providers, also initialise them
+	// stage 3: Add providers, also initialises them
 	apiServer, err = apiServer.SetProviders(providers)
 	if err != nil {
 		log.Fatal("Server initialisation error:", err)
