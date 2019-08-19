@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 	"wfs3_server/codegen"
 	gpkg "wfs3_server/provider_gpkg"
 	postgis "wfs3_server/provider_postgis"
@@ -70,7 +71,7 @@ func main() {
 
 	// print config
 	configProvider, err := json.Marshal(apiServer.Providers)
-	log.Println(string(configProvider))
+	log.Println(redactPassword(string(configProvider)))
 
 	log.Print("|")
 	log.Printf("| SERVING ON: %s", apiServer.ServiceEndpoint)
@@ -80,6 +81,12 @@ func main() {
 		log.Fatal("ListenAndServe:", err)
 	}
 
+}
+
+func redactPassword(connectionStr string) (redacted string) {
+	var re = regexp.MustCompile(`password=(.*) `)
+	redacted = re.ReplaceAllString(connectionStr, `password=******* `)
+	return
 }
 
 func addPostgisProviders(serviceEndpoint, serviceSpecPath, configFilePath string, defaultReturnLimit, maxReturnLimit uint64) *postgis.PostgisProvider {
