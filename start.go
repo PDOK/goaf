@@ -64,7 +64,7 @@ func main() {
 
 	// stage 4: Prepare routing
 	router := apiServer.Router()
-	addHealthsHandler(router)
+	addHealthHandler(router)
 	handler := cors.Default().Handler(router)
 
 	// ServerEndpoint can be different from bind address due to routing externally
@@ -84,8 +84,8 @@ func main() {
 
 }
 
-func addHealthsHandler(router *server.RegexpHandler) {
-	router.HandleFunc(regexp.MustCompile("/healthz"), func(w http.ResponseWriter, r *http.Request) {
+func addHealthHandler(router *server.RegexpHandler) {
+	router.HandleFunc(regexp.MustCompile("/health"), func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		w.Write([]byte("ok"))
 	})
