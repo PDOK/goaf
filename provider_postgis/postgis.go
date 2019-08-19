@@ -37,7 +37,6 @@ type PostgisLayer struct {
 }
 
 type Postgis struct {
-	ConnectionStr string `yaml:"ConnectionStr,omitempty"`
 	ApplicationId string `yaml:"ApplicationId,omitempty"`
 	UserVersion   string `yaml:"UserVersion,omitempty"`
 	db            *sqlx.DB
@@ -46,7 +45,7 @@ type Postgis struct {
 	SrsId         int64          `yaml:"SrsId,omitempty"`
 }
 
-func NewPostgis(configfilePath string) (Postgis, error) {
+func NewPostgis(configfilePath, connectionStr string) (Postgis, error) {
 
 	postgis := Postgis{}
 
@@ -65,7 +64,7 @@ func NewPostgis(configfilePath string) (Postgis, error) {
 
 	}
 
-	db, err := sqlx.Open("postgres", postgis.ConnectionStr)
+	db, err := sqlx.Open("postgres", connectionStr)
 	if err != nil {
 		return postgis, err
 	}

@@ -31,6 +31,7 @@ func main() {
 	gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG", ""), "geopackage path")
 	crsMapFilePath := flag.String("crs", envString("PATH_CRS", ""), "crs file path")
 	configFilePath := flag.String("config", envString("PATH_CONFIG", ""), "configfile path")
+	connectionStr := flag.String("connection", envString("CONNECTION", "host=127.0.0.1 port=5432 database=bgt_v1 user=postgres password=postgres sslmode=disable"), "connection string postgis")
 
 	featureIdKey := flag.String("featureId", envString("FEATURE_ID", ""), "Default feature identification or else first column definition (fid)")
 
@@ -52,7 +53,7 @@ func main() {
 		providers = addGeopackageProviders(*serviceEndpoint, *serviceSpecPath, *crsMapFilePath, *gpkgFilePath, *featureIdKey, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
 
 	} else if *providerName == "postgis" {
-		providers = addPostgisProviders(*serviceEndpoint, *serviceSpecPath, *configFilePath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
+		providers = addPostgisProviders(*serviceEndpoint, *serviceSpecPath, *configFilePath, *connectionStr, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
 	}
 
 	// stage 3: Add providers, also initialises them
@@ -70,7 +71,7 @@ func main() {
 
 	// print config with redacted password
 	configProvider, err := json.Marshal(apiServer.Providers)
-	log.Println(redactPassword(string(configProvider)))
+	log.Println(string(configProvider))
 
 	log.Print("|")
 	log.Printf("| SERVING ON: %s", apiServer.ServiceEndpoint)
@@ -88,8 +89,8 @@ func redactPassword(connectionStr string) (redacted string) {
 	return
 }
 
-func addPostgisProviders(serviceEndpoint, serviceSpecPath, configFilePath string, defaultReturnLimit, maxReturnLimit uint64) *postgis.PostgisProvider {
-	return postgis.NewPostgisProvider(serviceEndpoint, serviceSpecPath, configFilePath, defaultReturnLimit, maxReturnLimit)
+func addPostgisProviders(serviceEndpoint, serviceSpecPath, configFilePath, connectionStr string, defaultReturnLimit, maxReturnLimit uint64) *postgis.PostgisProvider {
+	return postgis.NewPostgisProvider(serviceEndpoint, serviceSpecPath, configFilePath, connectionStr, defaultReturnLimit, maxReturnLimit)
 }
 
 func addGeopackageProviders(serviceEndpoint, serviceSpecPath, crsMapFilePath string, gpkgFilePath string, featureIdKey string, defaultReturnLimit, maxReturnLimit uint64) *gpkg.GeoPackageProvider {

@@ -35,6 +35,7 @@ providerName := flag.String("provider", envString("PROVIDER",""), "postgis or gp
 gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG",""), "geopackage path")
 crsMapFilePath := flag.String("crs", envString("PATH_CRS",""), "crs file path")
 configFilePath := flag.String("config", envString("PATH_CONFIG",""), "configfile path")
+connectionStr := flag.String("connection", envString("CONNECTION", ""), "configfile path")
 
 featureIdKey := flag.String("featureId", envString("FEATURE_ID",""), "Default feature identification or else first column definition (fid)") //optional for gpkg provider 
 
