@@ -22,3 +22,22 @@ go run start.go -provider gpkg -gpkg tst/bgt_wgs84.gpkg
 
 go run start.go -provider postgis -config config/config_postgis.yaml
 
+parameters :
+```
+bindHost := flag.String("s", envString("BIND_HOST", "0.0.0.0"), "server internal bind address, default; 0.0.0.0")
+bindPort := flag.Int("p", envInt("BIND_PORT",8080), "server internal bind address, default; 8080")
+
+serviceEndpoint := flag.String("endpoint", envString("ENDPOINT","http://localhost:8080"), "server endpoint for proxy reasons, default; http://localhost:8080")
+serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH","spec/wfs3.0.yml"), "swagger openapi spec")
+defaultReturnLimit := flag.Int("limit", envInt("LIMIT",100), "limit, default: 100")
+maxReturnLimit := flag.Int("limitmax", envInt("LIMIT_MAX",500), "max limit, default: 1000")
+providerName := flag.String("provider", envString("PROVIDER",""), "postgis or gpkg")
+gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG",""), "geopackage path")
+crsMapFilePath := flag.String("crs", envString("PATH_CRS",""), "crs file path")
+configFilePath := flag.String("config", envString("PATH_CONFIG",""), "configfile path")
+
+featureIdKey := flag.String("featureId", envString("FEATURE_ID",""), "Default feature identification or else first column definition (fid)") //optional for gpkg provider 
+
+```
+
+

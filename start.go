@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
+	"strconv"
 	"wfs3_server/codegen"
 	gpkg "wfs3_server/provider_gpkg"
 	postgis "wfs3_server/provider_postgis"
@@ -18,25 +20,19 @@ import (
 
 func main() {
 
-	// TODO parse Flags into struct and separate into private method
+	bindHost := flag.String("s", envString("BIND_HOST", "0.0.0.0"), "server internal bind address, default; 0.0.0.0")
+	bindPort := flag.Int("p", envInt("BIND_PORT", 8080), "server internal bind address, default; 8080")
 
-	//var featureTables arrayFlags
+	serviceEndpoint := flag.String("endpoint", envString("ENDPOINT", "http://localhost:8080"), "server endpoint for proxy reasons, default; http://localhost:8080")
+	serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH", "spec/wfs3.0.yml"), "swagger openapi spec")
+	defaultReturnLimit := flag.Int("limit", envInt("LIMIT", 100), "limit, default: 100")
+	maxReturnLimit := flag.Int("limitmax", envInt("LIMIT_MAX", 500), "max limit, default: 1000")
+	providerName := flag.String("provider", envString("PROVIDER", ""), "postgis or gpkg")
+	gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG", ""), "geopackage path")
+	crsMapFilePath := flag.String("crs", envString("PATH_CRS", ""), "crs file path")
+	configFilePath := flag.String("config", envString("PATH_CONFIG", ""), "configfile path")
 
-	bindHost := flag.String("s", "0.0.0.0", "server internal bind address, default; 8080")
-	bindPort := flag.Int("p", 8080, "server internal bind address, default; 8080")
-
-	serviceEndpoint := flag.String("endpoint", "http://localhost:8080", "server endpoint for proxy reasons, default; http://localhost:8080")
-	serviceSpecPath := flag.String("spec", "spec/wfs3.0.yml", "swagger openapi spec")
-	defaultReturnLimit := flag.Int("limit", 100, "limit, default: 100")
-	maxReturnLimit := flag.Int("limitmax", 500, "max limit, default: 1000")
-
-	providerName := flag.String("provider", "gpkg", "postgis or gpkg")
-
-	gpkgFilePath := flag.String("gpkg", "", "geopackage path")
-	crsMapFilePath := flag.String("crs", "", "crs file path")
-	configFilePath := flag.String("config", "", "configfile path")
-
-	featureIdKey := flag.String("featureId", "", "Default feature identification or else first column definition (fid)")
+	featureIdKey := flag.String("featureId", envString("FEATURE_ID", ""), "Default feature identification or else first column definition (fid)")
 
 	flag.Parse()
 
@@ -46,8 +42,11 @@ func main() {
 		log.Fatal("Server initialisation error:", err)
 	}
 
-	// stage 2: Create providers
+	// stage 2: Create providers based upon provider name
 	var providers codegen.Providers
+	if *providerName == "" {
+		log.Fatal("No provider provided gpkg/postgis")
+	}
 
 	if *providerName == "gpkg" {
 		providers = addGeopackageProviders(*serviceEndpoint, *serviceSpecPath, *crsMapFilePath, *gpkgFilePath, *featureIdKey, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
@@ -69,7 +68,7 @@ func main() {
 	// ServerEndpoint can be different from bind address due to routing externally
 	bindAddress := fmt.Sprintf("%v:%v", *bindHost, *bindPort)
 
-	// print config
+	// print config with redacted password
 	configProvider, err := json.Marshal(apiServer.Providers)
 	log.Println(redactPassword(string(configProvider)))
 
@@ -107,4 +106,39 @@ func addGeopackageProviders(serviceEndpoint, serviceSpecPath, crsMapFilePath str
 
 	}
 	return gpkg.NewGeopackageProvider(serviceEndpoint, serviceSpecPath, gpkgFilePath, crsMap, featureIdKey, defaultReturnLimit, maxReturnLimit)
+}
+
+func envString(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value != "" {
+		return value
+	}
+
+	return defaultValue
+}
+
+func envInt(key string, defaultValue int) int {
+	value := os.Getenv(key)
+	if value != "" {
+		i, e := strconv.ParseInt(value, 10, 32)
+		if e != nil {
+			return defaultValue
+		}
+		return int(i)
+	}
+
+	return defaultValue
+}
+
+func envBool(key string, defaultValue bool) bool {
+	value := os.Getenv(key)
+	if value != "" {
+		b, e := strconv.ParseBool(value)
+		if e != nil {
+			return false
+		}
+		return b
+	}
+
+	return defaultValue
 }
