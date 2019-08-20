@@ -102,15 +102,13 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	tests := []struct {
 		name  string
 		path  string
-		want  codegen.Content
-		check func(want codegen.Content) error
+		want  codegen.Collections
+		check func(want codegen.Collections) error
 	}{
-		{"collection call", "collections", codegen.Content{}, func(want codegen.Content) error {
-
+		{"collection call", "collections", codegen.Collections{}, func(want codegen.Collections) error {
 			if len(want.Collections) != 1 {
 				return errors.New(fmt.Sprintf("Error invalid number of collections :%d", len(want.Collections)))
 			}
-
 			return nil
 		}},
 	}
