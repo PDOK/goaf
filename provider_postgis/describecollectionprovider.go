@@ -1,7 +1,6 @@
 package provider_postgis
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	. "wfs3_server/codegen"
@@ -57,10 +56,6 @@ func (provider *DescribeCollectionProvider) Provide() (interface{}, error) {
 	return provider.data, nil
 }
 
-func (provider *DescribeCollectionProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-func (provider *DescribeCollectionProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo create html template pdok
-	return json.Marshal(provider.data)
+func (provider *DescribeCollectionProvider) String() string {
+	return "describecollection"
 }

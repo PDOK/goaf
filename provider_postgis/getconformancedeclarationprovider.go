@@ -1,7 +1,6 @@
 package provider_postgis
 
 import (
-	"encoding/json"
 	"net/http"
 	. "wfs3_server/codegen"
 )
@@ -29,10 +28,6 @@ func (provider *GetConformanceDeclarationProvider) Provide() (interface{}, error
 	return provider.data, nil
 }
 
-func (provider *GetConformanceDeclarationProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-func (provider *GetConformanceDeclarationProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo create html template pdok
-	return json.Marshal(provider.data)
+func (provider *GetConformanceDeclarationProvider) String() string {
+	return "getconformancedeclaration"
 }

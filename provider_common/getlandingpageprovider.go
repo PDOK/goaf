@@ -1,7 +1,6 @@
 package provider_common
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	. "wfs3_server/codegen"
@@ -41,10 +40,6 @@ func (provider *GetLandingPageProvider) Provide() (interface{}, error) {
 	return provider, nil
 }
 
-func (provider *GetLandingPageProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider)
-}
-func (provider *GetLandingPageProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo create html template pdok
-	return json.Marshal(provider)
+func (provider *GetLandingPageProvider) String() string {
+	return "landingpage"
 }

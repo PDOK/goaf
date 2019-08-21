@@ -14,12 +14,11 @@ const (
 )
 
 // These are the MIME types that the handlers support.
-var SupportedContentTypes []string = []string{JSONContentType,}
+var SupportedContentTypes []string = []string{JSONContentType, HTMLContentType}
 
 type Provider interface {
+	String() string
 	Provide() (interface{}, error)
-	MarshalJSON(interface{}) ([]byte, error)
-	MarshalHTML(interface{}) ([]byte, error)
 }
 
 type Providers interface {

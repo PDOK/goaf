@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"text/template"
 	"wfs3_server/codegen"
 	"wfs3_server/spec"
 
@@ -18,6 +19,7 @@ type Server struct {
 	DefaultReturnLimit uint64
 	Providers          codegen.Providers
 	swagger            *openapi3.Swagger
+	Templates          *template.Template
 }
 
 func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnlimit, maxReturnLimit uint64) (*Server, error) {
@@ -29,6 +31,11 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnlimit, maxR
 	}
 
 	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnlimit, swagger: swagger}
+
+	// add templates to server
+	server.Templates = template.Must(template.New("templates").Funcs(
+		template.FuncMap{}).ParseGlob("templates/*"))
+
 	return server, nil
 }
 
@@ -82,14 +89,14 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 		var encodedContent []byte
 
 		if ct == codegen.JSONContentType {
-			encodedContent, err = provider.MarshalJSON(result)
+			encodedContent, err = json.Marshal(result)
 			if err != nil {
 				jsonError(w, "JSON MARSHALLER", err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 		} else if ct == codegen.HTMLContentType {
-			encodedContent, err = provider.MarshalHTML(result)
+			encodedContent, err = json.Marshal(result)
 			if err != nil {
 				jsonError(w, "HTML MARSHALLER", err.Error(), http.StatusInternalServerError)
 				return

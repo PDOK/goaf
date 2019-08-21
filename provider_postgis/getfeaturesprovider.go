@@ -1,7 +1,6 @@
 package provider_postgis
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -82,10 +81,6 @@ func (provider *GetFeaturesProvider) Provide() (interface{}, error) {
 	return provider.data, nil
 }
 
-func (provider *GetFeaturesProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-func (provider *GetFeaturesProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo create html template pdok
-	return json.Marshal(provider.data)
+func (provider *GetFeaturesProvider) String() string {
+	return "getfeatures"
 }

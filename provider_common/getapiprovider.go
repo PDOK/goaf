@@ -1,7 +1,6 @@
 package provider_common
 
 import (
-	"encoding/json"
 	"github.com/getkin/kin-openapi/openapi3"
 	"log"
 	"net/http"
@@ -45,10 +44,6 @@ func (provider *GetApiProvider) Provide() (interface{}, error) {
 	return provider.data, nil
 }
 
-func (provider *GetApiProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-func (provider *GetApiProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo html swagger API templating etc. with custom item viewer?
-	return json.Marshal(provider.data)
+func (provider *GetApiProvider) String() string {
+	return "api"
 }

@@ -1,7 +1,6 @@
 package provider_gpkg
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	. "wfs3_server/codegen"
@@ -68,10 +67,6 @@ func (provider *GetCollectionsProvider) Provide() (interface{}, error) {
 	return provider.data, nil
 }
 
-func (provider *GetCollectionsProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-
-func (provider *GetCollectionsProvider) MarshalHTML(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
+func (provider *GetCollectionsProvider) String() string {
+	return "getcollections"
 }

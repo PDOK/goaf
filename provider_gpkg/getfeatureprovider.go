@@ -1,7 +1,6 @@
 package provider_gpkg
 
 import (
-	"encoding/json"
 	"net/http"
 	cg "wfs3_server/codegen"
 )
@@ -51,10 +50,6 @@ func (provider *GetFeatureProvider) Provide() (interface{}, error) {
 	return provider.data, nil
 }
 
-func (provider *GetFeatureProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-func (provider *GetFeatureProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo create html template pdok
-	return json.Marshal(provider.data)
+func (provider *GetFeatureProvider) String() string {
+	return "getfeature"
 }
