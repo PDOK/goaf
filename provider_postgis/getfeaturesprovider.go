@@ -16,7 +16,7 @@ type GetFeaturesProvider struct {
 func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
 	collectionId, limit, bbox, time, offset := cg.ParametersForGetFeatures(r)
 
-	limitParam := pc.ParseLimit(limit, provider.defaultReturnLimit, provider.maxReturnLimit)
+	limitParam := pc.ParseLimit(limit, provider.commonProvider.DefaultReturnLimit, provider.commonProvider.MaxReturnLimit)
 	offsetParam := pc.ParseUint(offset, 0)
 	bboxParam := pc.ParseBBox(bbox, provider.PostGis.BBox)
 
@@ -55,7 +55,7 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 		requestParams.Set("limit", fmt.Sprintf("%d", int64(limitParam)))
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", provider.serviceEndpoint, path) // /collections
+		hrefBase := fmt.Sprintf("%s%s", provider.commonProvider.ServiceEndpoint, path) // /collections
 
 		links, _ := pc.CreateLinks(hrefBase, "self", ct)
 		_ = pc.ProcesLinksForParams(links, requestParams)

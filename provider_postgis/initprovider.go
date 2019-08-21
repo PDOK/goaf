@@ -2,28 +2,23 @@ package provider_postgis
 
 import (
 	_ "github.com/mattn/go-sqlite3"
+	"wfs3_server/provider_common"
 )
 
 type PostgisProvider struct {
-	PostGis            Postgis
-	CrsMap             map[string]string
-	serviceSpecPath    string
-	configFilePath     string
-	connectionStr      string
-	serviceEndpoint    string
-	maxReturnLimit     uint64
-	defaultReturnLimit uint64
+	commonProvider provider_common.CommonProvider
+	PostGis        Postgis
+	CrsMap         map[string]string
+	configFilePath string
+	connectionStr  string
 }
 
-func NewPostgisProvider(serviceEndpoint, servicespecPath, configPath, connectionStr string, defaultReturnLimit uint64, maxReturnLimit uint64) *PostgisProvider {
+func NewPostgisWithCommonProvider(commonProvider provider_common.CommonProvider, configPath, connectionStr string) *PostgisProvider {
 	return &PostgisProvider{
-		CrsMap:             map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"},
-		configFilePath:     configPath,
-		connectionStr:      connectionStr,
-		serviceEndpoint:    serviceEndpoint,
-		serviceSpecPath:    servicespecPath,
-		defaultReturnLimit: defaultReturnLimit,
-		maxReturnLimit:     maxReturnLimit,
+		CrsMap:         map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"},
+		configFilePath: configPath,
+		connectionStr:  connectionStr,
+		commonProvider: commonProvider,
 	}
 }
 

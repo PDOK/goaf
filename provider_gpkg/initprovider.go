@@ -1,29 +1,23 @@
 package provider_gpkg
 
 import (
-	_ "github.com/mattn/go-sqlite3"
+	"wfs3_server/provider_common"
 )
 
 type GeoPackageProvider struct {
-	FilePath           string
-	GeoPackage         GeoPackage
-	FeatureIdKey       string
-	CrsMap             map[string]string
-	ServiceEndpoint    string
-	serviceSpecPath    string
-	maxReturnLimit     uint64
-	defaultReturnLimit uint64
+	CommonProvider provider_common.CommonProvider
+	FilePath       string
+	GeoPackage     GeoPackage
+	FeatureIdKey   string
+	CrsMap         map[string]string
 }
 
-func NewGeopackageProvider(serviceEndpoint, serviceSpecPath, gpkgFilePath string, crsMap map[string]string, featureIdKey string, defaultReturnLimit uint64, maxReturnLimit uint64) *GeoPackageProvider {
+func NewGeopackageWithCommonProvider(commonProvider provider_common.CommonProvider, gpkgFilePath string, crsMap map[string]string, featureIdKey string) *GeoPackageProvider {
 	return &GeoPackageProvider{
-		FilePath:           gpkgFilePath,
-		CrsMap:             crsMap,
-		FeatureIdKey:       featureIdKey,
-		ServiceEndpoint:    serviceEndpoint,
-		serviceSpecPath:    serviceSpecPath,
-		defaultReturnLimit: defaultReturnLimit,
-		maxReturnLimit:     maxReturnLimit,
+		CommonProvider: commonProvider,
+		FilePath:       gpkgFilePath,
+		CrsMap:         crsMap,
+		FeatureIdKey:   featureIdKey,
 	}
 }
 

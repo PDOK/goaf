@@ -39,7 +39,7 @@ func (provider *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) 
 		}
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", provider.serviceEndpoint, path) // /collections
+		hrefBase := fmt.Sprintf("%s%s", provider.commonProvider.ServiceEndpoint, path) // /collections
 		links, _ := pc.CreateLinks(hrefBase, "self", ct)
 
 		cihrefBase := fmt.Sprintf("%s/items", hrefBase)

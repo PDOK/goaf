@@ -14,7 +14,7 @@ const (
 )
 
 // These are the MIME types that the handlers support.
-var SupportedContentTypes = []string{JSONContentType}
+var SupportedContentTypes []string = []string{JSONContentType,}
 
 type Provider interface {
 	Provide() (interface{}, error)
@@ -25,16 +25,45 @@ type Provider interface {
 type Providers interface {
 	Init() error
 
+	/*
+	   The landing page provides links to the API definition, the conformance
+	   statements and to the feature collections in this dataset.
+	*/
 	NewGetLandingPageProvider(r *http.Request) (Provider, error)
 
+	/*
+
+	 */
 	NewGetCollectionsProvider(r *http.Request) (Provider, error)
 
+	/*
+
+	 */
 	NewDescribeCollectionProvider(r *http.Request) (Provider, error)
 
+	/*
+	   Fetch features of the feature collection with id `collectionId`.
+
+	   Every feature in a dataset belongs to a collection. A dataset may
+	   consist of multiple feature collections. A feature collection is often a
+	   collection of features of a similar type, based on a common schema.
+
+	   Use content negotiation to request HTML or GeoJSON.
+	*/
 	NewGetFeaturesProvider(r *http.Request) (Provider, error)
 
+	/*
+	   Fetch the feature with id `featureId` in the feature collection
+	   with id `collectionId`.
+
+	   Use content negotiation to request HTML or GeoJSON.
+	*/
 	NewGetFeatureProvider(r *http.Request) (Provider, error)
 
+	/*
+	   A list of all conformance classes specified in a standard that the
+	   server conforms to.
+	*/
 	NewGetConformanceDeclarationProvider(r *http.Request) (Provider, error)
 }
 
@@ -90,3 +119,4 @@ func ParametersForGetFeature(r *http.Request) (collectionId string, featureId st
 
 // GetConformanceDeclaration
 // no parameters present
+

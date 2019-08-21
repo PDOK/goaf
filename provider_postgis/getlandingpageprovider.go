@@ -7,5 +7,5 @@ import (
 )
 
 func (provider *PostgisProvider) NewGetLandingPageProvider(r *http.Request) (Provider, error) {
-	return pc.NewGetLandingPageProvider(provider.serviceEndpoint)(r)
+	return pc.NewGetLandingPageProvider(provider.commonProvider.ServiceEndpoint)(r)
 }

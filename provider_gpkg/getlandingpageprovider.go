@@ -7,5 +7,5 @@ import (
 )
 
 func (provider *GeoPackageProvider) NewGetLandingPageProvider(r *http.Request) (Provider, error) {
-	return provider_common.NewGetLandingPageProvider(provider.ServiceEndpoint)(r)
+	return provider_common.NewGetLandingPageProvider(provider.CommonProvider.ServiceEndpoint)(r)
 }

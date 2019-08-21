@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/getkin/kin-openapi/openapi3"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -109,6 +111,10 @@ func property(properties map[string]*openapi3.SchemaRef, required []string) stri
 	var builder strings.Builder
 
 	for k, schemaRef := range properties {
+		if schemaRef.Value.Description != "" {
+			builder.WriteString("	/* " + strings.ReplaceAll(schemaRef.Value.Description, "\n", "\n    "))
+			builder.WriteString("	*/\n")
+		}
 		//log.Println(k)
 		builder.WriteString("	")
 		builder.WriteString(strings.Title(k))
@@ -130,7 +136,6 @@ func property(properties map[string]*openapi3.SchemaRef, required []string) stri
 
 func convertSchemaRefType(ref *openapi3.SchemaRef, builder *strings.Builder, pointer bool) {
 	if ref.Ref == "" {
-		println(ref.Ref)
 		schema := ref.Value
 		schemaType := schema.Type
 		switch schemaType {
@@ -148,6 +153,7 @@ func convertSchemaRefType(ref *openapi3.SchemaRef, builder *strings.Builder, poi
 			builder.WriteString("string")
 		}
 	} else {
+		println(ref.Ref)
 		zplit := strings.Split(ref.Ref, "/")
 		if pointer {
 			builder.WriteString("*")
@@ -184,7 +190,7 @@ func getType(stringOnly bool, schemaType string) string {
 	return schemaType
 }
 
-func main() {
+func main_gen() {
 
 	loader := openapi3.NewSwaggerLoader()
 	loader.IsExternalRefsAllowed = true
@@ -193,7 +199,7 @@ func main() {
 	components, err := loader.LoadSwaggerFromURI(u)
 
 	// file based spec based upon https://github.com/opengeospatial/WFS_FES/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml
-	filepath := "spec/wfs3.0.yml"
+	filepath := "spec/wfs3.0_org.yml"
 	swagger, err := loader.LoadSwaggerFromFile(filepath)
 	if err != nil {
 		log.Fatalf("Got error reading swagger file %v", err)
@@ -202,6 +208,14 @@ func main() {
 
 	// merge
 	swagger.Components = components.Components
+
+	out, err := json.Marshal(swagger)
+
+	err = ioutil.WriteFile("spec/wfs3.0.json", out, 0644)
+	if err != nil {
+		log.Fatalf("Got error writing combined swagger file %v", err)
+		return
+	}
 	// filter out geojeson stuff and non complex objects
 	// geojson type are represented in extra_types file in implementation
 	refs := swagger.Components.Schemas
@@ -210,10 +224,22 @@ func main() {
 		// rest of GeoJSON is omitted
 		if strings.Contains(k, "GeoJSON") {
 			delete(refs, k)
+			continue
 		}
 		// omit non complex types
 		if v.Value.Type != "object" {
 			delete(refs, k)
+			continue
+		}
+
+		// promote complex properties to structs
+		properties := v.Value.Properties
+		for k, schemaRef := range properties {
+			if schemaRef.Value.Type == "object" {
+				refs[k] = schemaRef
+				schemaRef.Ref = fmt.Sprintf("#/components/schemas/%s", k)
+			}
+
 		}
 	}
 

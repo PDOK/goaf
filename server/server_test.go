@@ -19,7 +19,8 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 
 	serverEnppoint := "http://testhost:1234"
 
-	gpkgp := gpkg.NewGeopackageProvider(serverEnppoint, "../spec/wfs3.0.yml", "../tst/bgt_wgs84.gpkg", crsMap, "fid", 100, 500)
+	commonProvider := provider_common.NewCommonProvider(serverEnppoint, "../spec/wfs3.0.yml", 100, 500)
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(commonProvider, "../tst/bgt_wgs84.gpkg", crsMap, "fid")
 
 	server, _ := NewServer(serverEnppoint, "../spec/wfs3.0.yml", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -28,7 +29,7 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	defer ts.Close()
 
 	// replace with test endpoint
-	gpkgp.ServiceEndpoint = ts.URL
+	gpkgp.CommonProvider.ServiceEndpoint = ts.URL
 
 	tests := []struct {
 		name  string
@@ -88,7 +89,9 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 
 	serverEnppoint := "http://testhost:1234"
 
-	gpkgp := gpkg.NewGeopackageProvider(serverEnppoint, "../spec/wfs3.0.yml", "../tst/bgt_wgs84.gpkg", crsMap, "fid", 100, 500)
+	commonProvider := provider_common.NewCommonProvider(serverEnppoint, "../spec/wfs3.0.yml", 100, 500)
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(commonProvider, "../tst/bgt_wgs84.gpkg", crsMap, "fid")
+
 
 	server, _ := NewServer(serverEnppoint, "../spec/wfs3.0.yml", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -97,7 +100,7 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	defer ts.Close()
 
 	// replace with test endpoint
-	gpkgp.ServiceEndpoint = ts.URL
+	gpkgp.CommonProvider.ServiceEndpoint = ts.URL
 
 	tests := []struct {
 		name  string

@@ -4,8 +4,6 @@ package codegen
 // DO NOT EDIT BY HAND!
 {{range $key, $value := .Components.Schemas}}{{template "schema" dict "Name" $key "Schema" $value.Value }}{{end}}
 
-
-
 {{define "schema"}}
 type {{normalize .Name}} struct {
 {{type .Schema.Properties .Schema.Required -}}

@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"wfs3_server/codegen"
+	"wfs3_server/provider_common"
 	gpkg "wfs3_server/provider_gpkg"
 	postgis "wfs3_server/provider_postgis"
 	"wfs3_server/server"
@@ -24,7 +25,7 @@ func main() {
 	bindPort := flag.Int("p", envInt("BIND_PORT", 8080), "server internal bind address, default; 8080")
 
 	serviceEndpoint := flag.String("endpoint", envString("ENDPOINT", "http://localhost:8080"), "server endpoint for proxy reasons, default; http://localhost:8080")
-	serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH", "spec/wfs3.0.yml"), "swagger openapi spec")
+	serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH", "spec/wfs3.0.json"), "swagger openapi spec")
 	defaultReturnLimit := flag.Int("limit", envInt("LIMIT", 100), "limit, default: 100")
 	maxReturnLimit := flag.Int("limitmax", envInt("LIMIT_MAX", 500), "max limit, default: 1000")
 	providerName := flag.String("provider", envString("PROVIDER", ""), "postgis or gpkg")
@@ -44,16 +45,11 @@ func main() {
 	}
 
 	// stage 2: Create providers based upon provider name
-	var providers codegen.Providers
-	if *providerName == "" {
-		log.Fatal("No provider provided gpkg/postgis")
-	}
+	commonProvider := provider_common.NewCommonProvider(*serviceEndpoint, *serviceSpecPath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
+	providers := getProvider(providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
 
-	if *providerName == "gpkg" {
-		providers = addGeopackageProviders(*serviceEndpoint, *serviceSpecPath, *crsMapFilePath, *gpkgFilePath, *featureIdKey, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
-
-	} else if *providerName == "postgis" {
-		providers = addPostgisProviders(*serviceEndpoint, *serviceSpecPath, *configFilePath, *connectionStr, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
+	if providers == nil {
+		log.Fatal("Incorrect provider provided valid names are: gpkg,postgis")
 	}
 
 	// stage 3: Add providers, also initialises them
@@ -64,18 +60,18 @@ func main() {
 
 	// stage 4: Prepare routing
 	router := apiServer.Router()
+
+	// extra routing for healthcheck
 	addHealthHandler(router)
+
+	// cors handler
 	handler := cors.Default().Handler(router)
 
 	// ServerEndpoint can be different from bind address due to routing externally
 	bindAddress := fmt.Sprintf("%v:%v", *bindHost, *bindPort)
 
-	// print config with redacted password
-	configProvider, err := json.Marshal(apiServer.Providers)
-	log.Println(string(configProvider))
-
-	log.Print("|")
-	log.Printf("| SERVING ON: %s", apiServer.ServiceEndpoint)
+	log.Print("|\n")
+	log.Printf("| SERVING ON: %s \n", apiServer.ServiceEndpoint)
 
 	// stage 5: Start server
 	if err := http.ListenAndServe(bindAddress, handler); err != nil {
@@ -84,24 +80,27 @@ func main() {
 
 }
 
+func getProvider(providerName *string, commonProvider provider_common.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
+	if *providerName == "gpkg" {
+		return addGeopackageProviders(commonProvider, *crsMapFilePath, *gpkgFilePath, *featureIdKey, )
+	}
+	if *providerName == "postgis" {
+		return postgis.NewPostgisWithCommonProvider(commonProvider, *configFilePath, *connectionStr, )
+	}
+	return nil
+}
+
 func addHealthHandler(router *server.RegexpHandler) {
 	router.HandleFunc(regexp.MustCompile("/health"), func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		w.Write([]byte("ok"))
+		_, err := w.Write([]byte("ok"))
+		if err != nil {
+			log.Printf("Could not write ok")
+		}
 	})
 }
 
-func redactPassword(connectionStr string) (redacted string) {
-	var re = regexp.MustCompile(`password=(.*) `)
-	redacted = re.ReplaceAllString(connectionStr, `password=******* `)
-	return
-}
-
-func addPostgisProviders(serviceEndpoint, serviceSpecPath, configFilePath, connectionStr string, defaultReturnLimit, maxReturnLimit uint64) *postgis.PostgisProvider {
-	return postgis.NewPostgisProvider(serviceEndpoint, serviceSpecPath, configFilePath, connectionStr, defaultReturnLimit, maxReturnLimit)
-}
-
-func addGeopackageProviders(serviceEndpoint, serviceSpecPath, crsMapFilePath string, gpkgFilePath string, featureIdKey string, defaultReturnLimit, maxReturnLimit uint64) *gpkg.GeoPackageProvider {
+func addGeopackageProviders(commonProvider provider_common.CommonProvider, crsMapFilePath string, gpkgFilePath string, featureIdKey string) *gpkg.GeoPackageProvider {
 	crsMap := make(map[string]string)
 	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
 	if err != nil {
@@ -112,9 +111,8 @@ func addGeopackageProviders(serviceEndpoint, serviceSpecPath, crsMapFilePath str
 		if err != nil {
 			log.Printf("Could not unmarshal crsmap file: %s, using default CRS Map", crsMapFilePath)
 		}
-
 	}
-	return gpkg.NewGeopackageProvider(serviceEndpoint, serviceSpecPath, gpkgFilePath, crsMap, featureIdKey, defaultReturnLimit, maxReturnLimit)
+	return gpkg.NewGeopackageWithCommonProvider(commonProvider, gpkgFilePath, crsMap, featureIdKey)
 }
 
 func envString(key, defaultValue string) string {
@@ -134,19 +132,6 @@ func envInt(key string, defaultValue int) int {
 			return defaultValue
 		}
 		return int(i)
-	}
-
-	return defaultValue
-}
-
-func envBool(key string, defaultValue bool) bool {
-	value := os.Getenv(key)
-	if value != "" {
-		b, e := strconv.ParseBool(value)
-		if e != nil {
-			return false
-		}
-		return b
 	}
 
 	return defaultValue
