@@ -109,7 +109,7 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 		check func(want codegen.Collections) error
 	}{
 		{"collection call", "collections", codegen.Collections{}, func(want codegen.Collections) error {
-			if len(want.Collections) != 1 {
+			if len(want.Collections) != 27 {
 				return errors.New(fmt.Sprintf("Error invalid number of collections :%d", len(want.Collections)))
 			}
 			return nil
