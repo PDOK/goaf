@@ -20,7 +20,7 @@ go run start.go -provider gpkg -gpkg tst/bgt_wgs84.gpkg
 
 ***More elaborate config optimised performance for huge db (10M+ records/collection)***
 
-go run start.go -provider postgis -config config/config_postgis.yaml
+go run start.go -provider postgis -config config/config_postgis.yaml - connection host=127.0.0.1 port=5432 database=bgt_v1 user=postgres password=postgres sslmode=disable
 
 parameters :
 ```
@@ -35,6 +35,9 @@ providerName := flag.String("provider", envString("PROVIDER",""), "postgis or gp
 gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG",""), "geopackage path")
 crsMapFilePath := flag.String("crs", envString("PATH_CRS",""), "crs file path")
 configFilePath := flag.String("config", envString("PATH_CONFIG",""), "configfile path")
+
+// for local development wit posgis db
+// 'host=127.0.0.1 port=5432 database=bgt_v1 user=postgres password=****** sslmode=disable'
 connectionStr := flag.String("connection", envString("CONNECTION", ""), "configfile path")
 
 featureIdKey := flag.String("featureId", envString("FEATURE_ID",""), "Default feature identification or else first column definition (fid)") //optional for gpkg provider 
