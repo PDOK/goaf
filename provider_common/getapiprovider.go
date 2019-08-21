@@ -30,8 +30,8 @@ func NewGetApiProvider(serviceSpecPath string) func(r *http.Request) (codegen.Pr
 		if swagger == nil {
 			swagger, err = spec.GetSwagger(serviceSpecPath)
 			if err != nil {
-				log.Fatalf("Error parsing swagger yaml file %s", serviceSpecPath)
-				return p, nil
+				log.Printf("Error parsing swagger file %s", serviceSpecPath)
+				return p, err
 			}
 		}
 

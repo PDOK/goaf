@@ -12,7 +12,7 @@ func GetSwagger(serviceSpecPath string) (*openapi3.Swagger, error) {
 
 	swagger, err := loader.LoadSwaggerFromFile(serviceSpecPath)
 	if err != nil {
-		log.Fatalf("Cannot Loadswagger from file :%s", serviceSpecPath)
+		log.Printf("Cannot Loadswagger from file :%s", serviceSpecPath)
 	}
 	// tweak for missing schemaś reference to geojson
 	//swagger.Components.Schemas["geometryGeoJSON"] = &openapi3.SchemaRef{Ref: "http://geojson.org/schema/Geometry.json"}
