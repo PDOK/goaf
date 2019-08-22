@@ -19,9 +19,6 @@ func (provider *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) 
 
 	p := &DescribeCollectionProvider{}
 
-	if ct == "" {
-		ct = JSONContentType
-	}
 	for _, cn := range provider.PostGis.Layers {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {

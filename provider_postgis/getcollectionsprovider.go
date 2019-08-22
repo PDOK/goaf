@@ -16,10 +16,6 @@ func (provider *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (Pro
 	path := r.URL.Path // collections
 	ct := r.Header.Get("Content-Type")
 
-	if ct == "" {
-		ct = JSONContentType
-	}
-
 	p := &GetCollectionsProvider{}
 
 	csInfo := Collections{Links: []Link{}, Collections: []Collection{}}

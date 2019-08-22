@@ -28,10 +28,6 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 
 	p := &GetFeaturesProvider{}
 
-	if ct == "" {
-		ct = cg.JSONContentType
-	}
-
 	for _, cn := range provider.PostGis.Layers {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {

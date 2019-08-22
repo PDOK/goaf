@@ -18,11 +18,7 @@ func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (Pr
 
 		p := &GetLandingPageProvider{}
 
-		if ct == "" {
-			ct = JSONContentType
-		}
-
-		links, _ := CreateLinks(fmt.Sprintf("%s/", serviceEndpoint), "self", ct)
+		links, _ := CreateLinks(fmt.Sprintf("%s", serviceEndpoint), "self", ct)
 		apiLink, _ := CreateLinks(fmt.Sprintf("%s/api", serviceEndpoint), "service", ct)                     // /api, "service", ct)
 		conformanceLink, _ := CreateLinks(fmt.Sprintf("%s/conformance", serviceEndpoint), "conformance", ct) // /conformance, "conformance", ct)
 		dataLink, _ := CreateLinks(fmt.Sprintf("%s/collections", serviceEndpoint), "data", ct)               // /collections, "collections", ct)

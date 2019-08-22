@@ -16,13 +16,7 @@ func (provider *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (cg.P
 	featureIdParam := featureId
 	bboxParam := provider.GeoPackage.DefaultBBox
 
-	ct := r.Header.Get("Content-Type")
-
 	p := &GetFeatureProvider{}
-
-	if ct == "" {
-		ct = cg.JSONContentType
-	}
 
 	for _, cn := range provider.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!

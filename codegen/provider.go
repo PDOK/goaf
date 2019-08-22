@@ -8,14 +8,6 @@ import (
 	"strings"
 )
 
-const (
-	JSONContentType = "application/json"
-	HTMLContentType = "text/html"
-)
-
-// These are the MIME types that the handlers support.
-var SupportedContentTypes []string = []string{JSONContentType, HTMLContentType}
-
 type Provider interface {
 	String() string
 	Provide() (interface{}, error)

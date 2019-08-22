@@ -18,13 +18,7 @@ func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Prov
 	featureIdParam := featureId
 	bboxParam := provider.PostGis.BBox
 
-	ct := r.Header.Get("Content-Type")
-
 	p := &GetFeatureProvider{}
-
-	if ct == "" {
-		ct = cg.JSONContentType
-	}
 
 	for _, cn := range provider.PostGis.Layers {
 		// maybe convert to map, but not thread safe!

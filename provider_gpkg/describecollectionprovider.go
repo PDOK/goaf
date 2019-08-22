@@ -19,9 +19,6 @@ func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Reques
 
 	p := &DescribeCollectionProvider{}
 
-	if ct == "" {
-		ct = JSONContentType
-	}
 	for _, cn := range provider.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {

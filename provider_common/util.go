@@ -10,6 +10,30 @@ import (
 	cg "wfs3_server/codegen"
 )
 
+const (
+	JSONContentType = "application/json"
+	HTMLContentType = "text/html"
+)
+
+func GetContentTypes() map[string]string {
+	ct := make(map[string]string)
+
+	ct["json"] = JSONContentType
+	ct["html"] = HTMLContentType
+
+	return ct
+}
+
+func GetContentFields() map[string]string {
+	ct := make(map[string]string)
+
+	ct[JSONContentType] = "json"
+	ct[HTMLContentType] = "html"
+
+	return ct
+}
+
+
 func ProcesLinksForParams(links []cg.Link, queryParams url.Values) error {
 	for l := range links {
 		path, err := url.Parse(links[l].Href)
@@ -36,26 +60,35 @@ func CreateLinks(path, rel, ct string) ([]cg.Link, error) {
 
 	links := make([]cg.Link, 0)
 
-	links = append(links, cg.Link{Rel: rel, Href: path, Type: ct})
+	href, err := ctLink(path, GetContentFields()[ct])
+	if err != nil {
+		return links, err
+	}
+	links = append(links, cg.Link{Rel: rel, Href: href, Type: ct})
 
 	if rel == "self" {
 		rel = "alternate"
 	}
 
-	if rel != "self" {
-		return links, nil
-	}
+	//if rel != "self" {
+	//	return links, nil
+	//}
 
-	for _, sct := range cg.SupportedContentTypes {
+	for k, sct := range GetContentTypes() {
 		if ct == sct {
 			continue
 		}
-		href, err := ctLink(path, sct)
+		href, err := ctLink(path, k)
 		if err != nil {
-			return nil, err
+			return links, err
 		}
 
 		links = append(links, cg.Link{Rel: rel, Href: href, Type: sct})
+
+		if rel == "self" {
+			rel = "alternate"
+			links = append(links, cg.Link{Rel: rel, Href: href, Type: sct})
+		}
 	}
 
 	return links, nil
@@ -72,7 +105,6 @@ func ctLink(baselink, contentType string) (string, error) {
 
 	var l string
 	switch contentType {
-	case cg.JSONContentType:
 	default:
 		q["f"] = []string{contentType}
 	}

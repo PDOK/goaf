@@ -28,10 +28,6 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 
 	p := &GetFeaturesProvider{}
 
-	if ct == "" {
-		ct = cg.JSONContentType
-	}
-
 	for _, cn := range provider.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {

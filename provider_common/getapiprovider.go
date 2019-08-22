@@ -17,13 +17,7 @@ var swagger *openapi3.Swagger
 func NewGetApiProvider(serviceSpecPath string) func(r *http.Request) (codegen.Provider, error) {
 
 	return func(r *http.Request) (codegen.Provider, error) {
-
-		ct := r.Header.Get("Content-Type")
 		p := &GetApiProvider{}
-
-		if ct == "" {
-			ct = codegen.JSONContentType
-		}
 
 		var err error
 		if swagger == nil {
