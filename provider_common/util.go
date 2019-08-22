@@ -213,3 +213,7 @@ func ParseBBox(stringValue string, defaultValue []float64) []float64 {
 
 	return value
 }
+
+func UpperFirst(title string) string {
+	return strings.Title(title)
+}

@@ -36,30 +36,36 @@
 </head>
 <body>
 
-<h3>Landingpage</h3>
+<h2>Collections</h2>
 
-<table class="pure-table pure-table-bordered">
-    <thead>
-    <tr>
-        <th>Title</th>
-        <th>Content-Type</th>
-        <th>Relation-Type</th>
-        <th>Href</th>
-    </tr>
-    </thead>
+{{range  $c, $collection := .Collections}}
+    <h3> {{upperFirst $collection.Title}} [{{$collection.Id}}] </h3>
 
-    <tbody>
-    {{range  $i, $link := .Links}}
-        <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
-            <td>{{$link.Title}}</td>
-            <td>{{$link.Type}}</td>
-            <td>{{$link.Rel}}</td>
-            <td><a href="{{$link.Href}}"> {{$link.Href}} </a></td>
+    <table class="pure-table pure-table-bordered">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Content-Type</th>
+            <th>Relation-Type</th>
+            <th>Href</th>
         </tr>
-    {{end}}
-    </tbody>
+        </thead>
 
-</table>
+        <tbody>
+        {{range  $i, $link := $collection.Links}}
+            <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
+                <td>{{$link.Title}}</td>
+                <td>{{$link.Type}}</td>
+                <td>{{$link.Rel}}</td>
+                <td><a href="{{$link.Href}}"> {{$link.Href}} </a></td>
+            </tr>
+        {{end}}
+        </tbody>
+
+    </table>
+
+
+{{end}}
 
 
 </body>

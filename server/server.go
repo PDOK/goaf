@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-	"wfs3_server/codegen"
-	"wfs3_server/provider_common"
+	cg "wfs3_server/codegen"
+	pc "wfs3_server/provider_common"
 	"wfs3_server/spec"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -21,12 +21,12 @@ type Server struct {
 	ServiceSpecPath    string
 	MaxReturnLimit     uint64
 	DefaultReturnLimit uint64
-	Providers          codegen.Providers
+	Providers          cg.Providers
 	swagger            *openapi3.Swagger
 	Templates          *template.Template
 }
 
-func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnlimit, maxReturnLimit uint64) (*Server, error) {
+func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxReturnLimit uint64) (*Server, error) {
 	swagger, err := spec.GetSwagger(serviceSpecPath)
 
 	if err != nil {
@@ -34,19 +34,20 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnlimit, maxR
 		return nil, err
 	}
 
-	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnlimit, swagger: swagger}
+	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnLimit, swagger: swagger}
 
 	// add templates to server
 	server.Templates = template.Must(template.New("templates").Funcs(
 		template.FuncMap{
-			"isOdd": func(i int) bool { return i%2 != 0 },
+			"isOdd":      func(i int) bool { return i%2 != 0 },
+			"upperFirst": pc.UpperFirst,
 		}).ParseGlob("templates/*"))
 
-	server.ContentTypes = provider_common.GetContentTypes()
+	server.ContentTypes = pc.GetContentTypes()
 	return server, nil
 }
 
-func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
+func (s *Server) SetProviders(providers cg.Providers) (*Server, error) {
 	err := providers.Init()
 
 	if err != nil {
@@ -57,7 +58,7 @@ func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
 	return s, nil
 }
 
-func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (cg.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -100,14 +101,14 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 		var encodedContent []byte
 
-		if contentResponse == provider_common.JSONContentType {
+		if contentResponse == pc.JSONContentType {
 			encodedContent, err = json.Marshal(result)
 			if err != nil {
 				jsonError(w, "JSON MARSHALLER", err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-		} else if contentResponse == provider_common.HTMLContentType {
+		} else if contentResponse == pc.HTMLContentType {
 			providerId := provider.String()
 
 				b := new(bytes.Buffer)
@@ -133,7 +134,7 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 func jsonError(w http.ResponseWriter, code string, msg string, status int) {
 	w.WriteHeader(status)
 
-	result, err := json.Marshal(&codegen.Exception{
+	result, err := json.Marshal(&cg.Exception{
 		Code:        code,
 		Description: msg,
 	})

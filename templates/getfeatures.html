@@ -36,8 +36,8 @@
 </head>
 <body>
 
-<h3>Landingpage</h3>
-
+<h2>Feature Collection</h2>
+<h3># {{.NumberReturned}}</h3>
 <table class="pure-table pure-table-bordered">
     <thead>
     <tr>
@@ -58,9 +58,31 @@
         </tr>
     {{end}}
     </tbody>
-
 </table>
 
+<h3>Features</h3>
+<table class="pure-table pure-table-bordered">
+    <thead>
+    <tr>
+        <th>ID</th>
+        {{$feature :=  index .Features 0}}
+        {{range  $k, $v :=  $feature.Properties}}
+            <th>{{$k}}</th>
+        {{end}}
 
+    </tr>
+    </thead>
+
+    <tbody>
+    {{range  $i, $feature := .Features}}
+        <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
+            <td>{{$feature.ID}}</td>
+            {{range  $k, $v :=  $feature.Properties}}
+                <td>{{$v}}</td>
+            {{end}}
+        </tr>
+    {{end}}
+    </tbody>
+</table>
 </body>
 </html>
