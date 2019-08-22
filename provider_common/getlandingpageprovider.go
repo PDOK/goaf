@@ -18,10 +18,10 @@ func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (Pr
 
 		p := &GetLandingPageProvider{}
 
-		links, _ := CreateLinks(fmt.Sprintf("%s", serviceEndpoint), "self", ct)
-		apiLink, _ := CreateLinks(fmt.Sprintf("%s/api", serviceEndpoint), "service", ct)                     // /api, "service", ct)
-		conformanceLink, _ := CreateLinks(fmt.Sprintf("%s/conformance", serviceEndpoint), "conformance", ct) // /conformance, "conformance", ct)
-		dataLink, _ := CreateLinks(fmt.Sprintf("%s/collections", serviceEndpoint), "data", ct)               // /collections, "collections", ct)
+		links, _ := CreateLinks("landing page", fmt.Sprintf("%s", serviceEndpoint), "self", ct)
+		apiLink, _ := CreateLinks("openapi3 specification", fmt.Sprintf("%s/api", serviceEndpoint), "service", ct)           // /api, "service", ct)
+		conformanceLink, _ := CreateLinks("capabilities", fmt.Sprintf("%s/conformance", serviceEndpoint), "conformance", ct) // /conformance, "conformance", ct)
+		dataLink, _ := CreateLinks("collections", fmt.Sprintf("%s/collections", serviceEndpoint), "data", ct)                // /collections, "collections", ct)
 
 		p.Links = append(p.Links, links...)
 		p.Links = append(p.Links, apiLink...)

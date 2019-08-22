@@ -24,6 +24,15 @@ func GetContentTypes() map[string]string {
 	return ct
 }
 
+func GetRelationMap() map[string]string {
+	ct := make(map[string]string)
+
+	ct["alternate"] = "Alternative"
+	ct["self"] = "This"
+
+	return ct
+}
+
 func GetContentFields() map[string]string {
 	ct := make(map[string]string)
 
@@ -56,15 +65,15 @@ func ProcesLinksForParams(links []cg.Link, queryParams url.Values) error {
 
 }
 
-func CreateLinks(path, rel, ct string) ([]cg.Link, error) {
+func CreateLinks(title, hrefPath, rel, ct string) ([]cg.Link, error) {
 
 	links := make([]cg.Link, 0)
 
-	href, err := ctLink(path, GetContentFields()[ct])
+	href, err := ctLink(hrefPath, GetContentFields()[ct])
 	if err != nil {
 		return links, err
 	}
-	links = append(links, cg.Link{Rel: rel, Href: href, Type: ct})
+	links = append(links, cg.Link{Title: formatTitle(title, rel, GetContentFields()[ct]), Rel: rel, Href: href, Type: ct})
 
 	if rel == "self" {
 		rel = "alternate"
@@ -78,20 +87,28 @@ func CreateLinks(path, rel, ct string) ([]cg.Link, error) {
 		if ct == sct {
 			continue
 		}
-		href, err := ctLink(path, k)
+		href, err := ctLink(hrefPath, k)
 		if err != nil {
 			return links, err
 		}
 
-		links = append(links, cg.Link{Rel: rel, Href: href, Type: sct})
+		links = append(links, cg.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
 
 		if rel == "self" {
 			rel = "alternate"
-			links = append(links, cg.Link{Rel: rel, Href: href, Type: sct})
+			links = append(links, cg.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
 		}
 	}
 
 	return links, nil
+}
+
+func formatTitle(title, rel, format string) string {
+	relation := rel
+	if "self" == rel {
+		relation = "this"
+	}
+	return strings.ToLower(fmt.Sprintf("%s %s in %s format", relation, title, format))
 }
 
 func ctLink(baselink, contentType string) (string, error) {

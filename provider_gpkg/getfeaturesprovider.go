@@ -55,12 +55,12 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
-		links, _ := pc.CreateLinks(hrefBase, "self", ct)
+		links, _ := pc.CreateLinks("features "+cn.Identifier, hrefBase, "self", ct)
 		_ = pc.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
-			ilinks, _ := pc.CreateLinks(hrefBase, "next", ct)
+			ilinks, _ := pc.CreateLinks("features "+cn.Identifier, hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)+int64(limitParam)))
 			_ = pc.ProcesLinksForParams(ilinks, requestParams)
 

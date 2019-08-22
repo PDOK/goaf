@@ -40,10 +40,10 @@ func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Reques
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
-		links, _ := pc.CreateLinks(hrefBase, "self", ct)
+		links, _ := pc.CreateLinks("collection "+cn.Identifier, hrefBase, "self", ct)
 
 		cihrefBase := fmt.Sprintf("%s/items", hrefBase)
-		ilinks, _ := pc.CreateLinks(cihrefBase, "item", ct)
+		ilinks, _ := pc.CreateLinks("items "+cn.Identifier, cihrefBase, "item", ct)
 		cInfo.Links = append(links, ilinks...)
 
 		p.data = cInfo

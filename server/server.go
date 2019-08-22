@@ -109,7 +109,6 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 		} else if contentResponse == provider_common.HTMLContentType {
 			providerId := provider.String()
-			if providerId == "landingpage" {
 
 				b := new(bytes.Buffer)
 				err = s.Templates.ExecuteTemplate(b, providerId+".html", result)
@@ -119,13 +118,6 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 					jsonError(w, "HTML MARSHALLER", err.Error(), http.StatusInternalServerError)
 					return
 				}
-			} else {
-				encodedContent, err = json.Marshal(result)
-				if err != nil {
-					jsonError(w, "HTML MARSHALLER", err.Error(), http.StatusInternalServerError)
-					return
-				}
-			}
 
 		} else {
 			jsonError(w, "Invalid Content Type", "Content-Type: ''"+contentResponse+"'' not supported.", http.StatusInternalServerError)

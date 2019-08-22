@@ -1170,12 +1170,8 @@
   },
   "servers": [
     {
-      "url": "https://data.example.org/",
-      "description": "Production server"
-    },
-    {
-      "url": "https://dev.example.org/",
-      "description": "Development server"
+      "url": "http://localhost:8080",
+      "description": "Local server"
     }
   ],
   "tags": [
