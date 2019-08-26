@@ -140,7 +140,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 
 	result.NumberReturned = 0
 	result.Type = "FeatureCollection"
-	result.Features = make([]Feature, 0)
+	result.Features = make([]*Feature, 0)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -160,7 +160,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 			return
 		}
 
-		feature := Feature{Type: "Feature", Properties: make(map[string]interface{})}
+		feature := &Feature{Type: "Feature", Properties: make(map[string]interface{})}
 
 		for i, colName := range cols {
 			// check if the context cancelled or timed out

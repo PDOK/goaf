@@ -40,6 +40,13 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 			return nil, err
 		}
 
+		for _, feature := range fcGeoJSON.Features {
+			hrefBase := fmt.Sprintf("%s%s/%v", provider.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
+			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
+			feature.Links = links
+		}
+
+
 		requestParams := r.URL.Query()
 
 		if int64(offsetParam) >= fcGeoJSON.NumberMatched && fcGeoJSON.NumberMatched > 0 {
@@ -76,7 +83,7 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 		}
 		fcGeoJSON.Crs = crsUri
 
-		p.data = fcGeoJSON
+		p.data = *fcGeoJSON
 		break
 	}
 

@@ -9,6 +9,7 @@ import (
 	"text/template"
 	cg "wfs3_server/codegen"
 	pc "wfs3_server/provider_common"
+	"wfs3_server/provider_gpkg"
 	"wfs3_server/spec"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -39,8 +40,9 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 	// add templates to server
 	server.Templates = template.Must(template.New("templates").Funcs(
 		template.FuncMap{
-			"isOdd":      func(i int) bool { return i%2 != 0 },
-			"upperFirst": pc.UpperFirst,
+			"isOdd":       func(i int) bool { return i%2 != 0 },
+			"hasFeatures": func(i []provider_gpkg.Feature) bool { return len(i) > 0 },
+			"upperFirst":  pc.UpperFirst,
 		}).ParseGlob("templates/*"))
 
 	server.ContentTypes = pc.GetContentTypes()

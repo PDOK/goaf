@@ -15,7 +15,7 @@ type GetFeaturesProvider struct {
 func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
 	collectionId, limit, bbox, time, offset := cg.ParametersForGetFeatures(r)
 
-	limitParam := pc.ParseLimit(limit, provider.commonProvider.DefaultReturnLimit, provider.commonProvider.MaxReturnLimit)
+	limitParam := pc.ParseLimit(limit, provider.CommonProvider.DefaultReturnLimit, provider.CommonProvider.MaxReturnLimit)
 	offsetParam := pc.ParseUint(offset, 0)
 	bboxParam := pc.ParseBBox(bbox, provider.PostGis.BBox)
 
@@ -40,6 +40,12 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 			return nil, err
 		}
 
+		for _, feature := range fcGeoJSON.Features {
+			hrefBase := fmt.Sprintf("%s%s/items/%v", provider.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
+			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
+			feature.Links = links
+		}
+
 		requestParams := r.URL.Query()
 
 		if int64(offsetParam) < 0 {
@@ -50,9 +56,9 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 		requestParams.Set("limit", fmt.Sprintf("%d", int64(limitParam)))
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", provider.commonProvider.ServiceEndpoint, path) // /collections
+		hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
 
-		links, _ := pc.CreateLinks("feastures "+cn.Identifier, hrefBase, "self", ct)
+		links, _ := pc.CreateLinks("features "+cn.Identifier, hrefBase, "self", ct)
 		_ = pc.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched

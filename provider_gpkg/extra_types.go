@@ -13,7 +13,7 @@ type FeatureCollectionGeoJSON struct {
 	NumberReturned int64          `json:"numberReturned,omitempty"`
 	TimeStamp      string         `json:"timeStamp,omitempty"`
 	Type           string         `json:"type"`
-	Features       []Feature      `json:"features"`
+	Features       []*Feature     `json:"features"`
 	Links          []codegen.Link `json:"links,omitempty"`
 	NumberMatched  int64          `json:"numberMatched,omitempty"`
 	Crs            string         `json:"crs,omitempty"`
@@ -26,4 +26,6 @@ type Feature struct {
 	Geometry geojson.Geometry `json:"geometry"`
 	// can be null
 	Properties map[string]interface{} `json:"properties"`
+	// can be null
+	Links []codegen.Link `json:"links,omitempty"`
 }
