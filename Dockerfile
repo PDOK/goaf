@@ -28,3 +28,4 @@ ENV PATH=/
 COPY --from=build-env  /go/src/server/spec/wfs3.0.json /spec/wfs3.0.json
 COPY --from=build-env  /wfs-server /
 COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build-env /templates /templates
