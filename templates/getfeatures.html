@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
     <!--<![endif]-->
 
+
     <style>
         html {
             box-sizing: border-box;
@@ -41,6 +42,8 @@
             width: 100%;
         }
     </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.5.0/proj4.js"></script>
     <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
 
 
@@ -89,70 +92,46 @@
         matrixIds[z] = 'EPSG:28992:' + z;
     }
 
-    //var geojsonData = '/collections/begroeidterreindeel/items?f=json&limit=100&offset=0'
-    var geojsonData = {
-        "numberReturned": 100, "type": "FeatureCollection", "features": [{
-            "type": "Feature",
-            "id": 1,
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [[[5.57691424189758, 52.54148714951784], [5.576813387663471, 52.543269097106055], [5.576813387663471, 52.543269097106055], [5.576811606494033, 52.54330051939217], [5.576811606494033, 52.54330051939217], [5.572463251193488, 52.54320967367748], [5.572446368632987, 52.543198160417916], [5.572446368632987, 52.543198160417916], [5.572447847039542, 52.54317112445228], [5.572447847039542, 52.54317112445228], [5.572520975810333, 52.541831441990745], [5.572520975810333, 52.541831441990745], [5.572527778045473, 52.54170685002254], [5.5725393980898215, 52.54149406756359], [5.5725393980898215, 52.54149406756359], [5.572588024820907, 52.54060333639724], [5.572588024820907, 52.54060333639724], [5.5727546174455815, 52.540606868464586], [5.5727546174455815, 52.540606868464586], [5.576959022067503, 52.54069583967344], [5.576959022067503, 52.54069583967344], [5.57691424189758, 52.54148714951784]]]
-            },
-            "properties": {
-                "LV-publicatiedatum": "2015-09-20T20:39:51Z",
-                "_geometry_group": "polygon",
-                "_id": "L0001.8ea3e922c1714b02a4eacd47a25bcc14",
-                "_version": "a83fd69f-d1ae-11e7-951f-610a7ca84980",
-                "bronhouder": "L0001",
-                "creationDate": "2014-11-26T00:00:00Z",
-                "fysiekVoorkomen": "bouwland",
-                "fysiekVoorkomen_codeSpace": "http://www.geostandaarden.nl/imgeo/def/2.1#FysiekVoorkomenBegroeidTerrein",
-                "gid": 331864,
-                "inOnderzoek_leeg": "geenWaarde",
-                "kruinlijn_leeg": "waardeOnbekend",
-                "lokaalID": "L0001.8ea3e922c1714b02a4eacd47a25bcc14",
-                "opTalud": "false",
-                "plus-fysiekVoorkomen_codeSpace": "http://www.geostandaarden.nl/imgeo/def/2.1#VoidReasonValue",
-                "plus-fysiekVoorkomen_leeg": "waardeOnbekend",
-                "plus-status_codeSpace": "http://www.geostandaarden.nl/imgeo/def/2.1#VoidReasonValue",
-                "plus-status_leeg": "geenWaarde",
-                "relatieveHoogteligging": 0,
-                "status": "bestaand",
-                "status_codeSpace": "http://www.geostandaarden.nl/imgeo/def/2.1#Status",
-                "terminationDate_leeg": "geenWaarde",
-                "tijdstipRegistratie": "2014-11-26T11:35:15Z"
-            },
-            "links": [{
-                "type": "application/json",
-                "href": "http://localhost:8080/collections/begroeidterreindeel/items/1?f=json",
-                "rel": "self",
-                "title": "this feature in json format"
-            }, {
-                "type": "text/html",
-                "href": "http://localhost:8080/collections/begroeidterreindeel/items/1?f=html",
-                "rel": "alternate",
-                "title": "alternate feature in html format"
-            }]
-        }]
-    }
+    // magic
+    proj4.defs('EPSG:28992', '+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs');
+    ol.proj.proj4.register(proj4);
+
+    vectorSource = new ol.source.Vector({
+        //  matrixSet: 'EPSG:28992',
+        format: new ol.format.GeoJSON({featureProjection: 'EPSG:28992'}),
+        projection: projection,
+        loader: function (extent, resolution, prj) {
+            var proj = prj.getCode();
+            var url = window.location.href.replace('html', 'json');
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url);
+            var onError = function () {
+                vectorSource.removeLoadedExtent(extent);
+            };
+            xhr.onerror = onError;
+            xhr.onload = function () {
+                if (xhr.status == 200) {
+                    vectorSource.addFeatures(new ol.format.GeoJSON({featureProjection: 'EPSG:28992'}).readFeatures(xhr.responseText));
+                    map.getView().fit(vectorSource.getExtent(), {duration: 0}, map.getSize());
+                } else {
+                    onError();
+                }
+            };
+            xhr.send();
+        },
+    });
 
     var vector = new ol.layer.Vector({
-        source: new ol.source.Vector({
-            //  matrixSet: 'EPSG:28992',
-            format: new ol.format.GeoJSON(),
-            projection: 'WGS:84',
-            url: '/collections/begroeidterreindeel/items?f=json&limit=100&offset=0',
-            change: zoom2extent
-        })
+        source: vectorSource
     });
     var map = new ol.Map({
         layers: [
             new ol.layer.Tile({
-                opacity: 0.1,
+                opacity: 0.7,
                 source: new ol.source.WMTS({
                     attributions: 'Kaartgegevens: &copy; <a href="https://www.kadaster.nl">Kadaster</a>',
                     url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
-                    layer: 'brtachtergrondkaart',
+                    layer: 'brtachtergrondkaartgrijs',
                     matrixSet: 'EPSG:28992',
                     format: 'image/png',
                     projection: projection,
@@ -183,8 +162,10 @@
     });
 
     function zoom2extent(event) { //the extent here should be dynamic
-        var extent = vector.getExtent();
-        map.getView().fit(extent, {duration: 1590}, map.getSize());
+
+        alert(event)
+        // var extent = vector.getExtent();
+        //map.getView().fit(extent, {duration: 1590}, map.getSize());
     }
 </script>
 
