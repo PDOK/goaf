@@ -64,7 +64,7 @@ func main() {
 	// extra routing for healthcheck
 	addHealthHandler(router)
 
-	fs := http.FileServer(http.Dir("./swagger-ui"))
+	fs := http.FileServer(http.Dir("/swagger-ui"))
 	router.Handler(regexp.MustCompile("/swagger-ui"), http.StripPrefix("/swagger-ui/", fs))
 
 	// cors handler

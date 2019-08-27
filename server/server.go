@@ -43,7 +43,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 			"isOdd":       func(i int) bool { return i%2 != 0 },
 			"hasFeatures": func(i []provider_gpkg.Feature) bool { return len(i) > 0 },
 			"upperFirst":  pc.UpperFirst,
-		}).ParseGlob("templates/*"))
+		}).ParseGlob("/templates/*"))
 
 	server.ContentTypes = pc.GetContentTypes()
 	return server, nil
