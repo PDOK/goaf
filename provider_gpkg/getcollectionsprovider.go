@@ -1,7 +1,6 @@
 package provider_gpkg
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	. "wfs3_server/codegen"
@@ -17,19 +16,15 @@ func (provider *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (
 	path := r.URL.Path // collections
 	ct := r.Header.Get("Content-Type")
 
-	if ct == "" {
-		ct = JSONContentType
-	}
-
 	p := &GetCollectionsProvider{}
 
 	csInfo := Collections{Links: []Link{}, Collections: []Collection{}}
 	// create Links
 	hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
-	links, _ := pc.CreateLinks(hrefBase, "self", ct)
+	links, _ := pc.CreateLinks("collections", hrefBase, "self", ct)
 	csInfo.Links = append(csInfo.Links, links...)
 	for _, cn := range provider.GeoPackage.Layers {
-		clinks, _ := pc.CreateLinks(fmt.Sprintf("%s/%s", hrefBase, cn.Identifier), "item", ct)
+		clinks, _ := pc.CreateLinks("collection "+cn.Identifier, fmt.Sprintf("%s/%s", hrefBase, cn.Identifier), "item", ct)
 		csInfo.Links = append(csInfo.Links, clinks...)
 	}
 
@@ -50,11 +45,11 @@ func (provider *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (
 
 		chrefBase := fmt.Sprintf("%s/%s", hrefBase, cn.Identifier)
 
-		clinks, _ := pc.CreateLinks(chrefBase, "self", ct)
+		clinks, _ := pc.CreateLinks("collection "+cn.Identifier, chrefBase, "self", ct)
 		cInfo.Links = append(cInfo.Links, clinks...)
 
 		cihrefBase := fmt.Sprintf("%s/items", chrefBase)
-		ilinks, _ := pc.CreateLinks(cihrefBase, "item", ct)
+		ilinks, _ := pc.CreateLinks("items "+cn.Identifier, cihrefBase, "item", ct)
 		cInfo.Links = append(cInfo.Links, ilinks...)
 		csInfo.Collections = append(csInfo.Collections, cInfo)
 	}
@@ -68,10 +63,6 @@ func (provider *GetCollectionsProvider) Provide() (interface{}, error) {
 	return provider.data, nil
 }
 
-func (provider *GetCollectionsProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-
-func (provider *GetCollectionsProvider) MarshalHTML(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
+func (provider *GetCollectionsProvider) String() string {
+	return "getcollections"
 }

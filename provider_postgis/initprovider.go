@@ -6,7 +6,7 @@ import (
 )
 
 type PostgisProvider struct {
-	commonProvider provider_common.CommonProvider
+	CommonProvider provider_common.CommonProvider
 	PostGis        Postgis
 	CrsMap         map[string]string
 	configFilePath string
@@ -18,7 +18,7 @@ func NewPostgisWithCommonProvider(commonProvider provider_common.CommonProvider,
 		CrsMap:         map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"},
 		configFilePath: configPath,
 		connectionStr:  connectionStr,
-		commonProvider: commonProvider,
+		CommonProvider: commonProvider,
 	}
 }
 

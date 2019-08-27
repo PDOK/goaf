@@ -31,14 +31,4 @@ func TestNewGetApiProvider(t *testing.T) {
 		t.Errorf("NewGetApiProvider.Provide() has incorrect type = %v, want %v", reflect.ValueOf(provided).Type(), "*openapi3.Swagger")
 	}
 
-	_, err = provider.MarshalJSON(provided)
-	if err != nil {
-		t.Errorf("NewGetApiProvider.MarshalJSON() has error %v, want %v", err, nil)
-	}
-
-	_, err = provider.MarshalHTML(provided)
-	if err != nil {
-		t.Errorf("NewGetApiProvider.MarshalHTML() has error %v, want %v", err, nil)
-	}
-
 }

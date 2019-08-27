@@ -1,7 +1,6 @@
 package provider_common
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	. "wfs3_server/codegen"
@@ -19,14 +18,10 @@ func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (Pr
 
 		p := &GetLandingPageProvider{}
 
-		if ct == "" {
-			ct = JSONContentType
-		}
-
-		links, _ := CreateLinks(fmt.Sprintf("%s/", serviceEndpoint), "self", ct)
-		apiLink, _ := CreateLinks(fmt.Sprintf("%s/api", serviceEndpoint), "service", ct)                     // /api, "service", ct)
-		conformanceLink, _ := CreateLinks(fmt.Sprintf("%s/conformance", serviceEndpoint), "conformance", ct) // /conformance, "conformance", ct)
-		dataLink, _ := CreateLinks(fmt.Sprintf("%s/collections", serviceEndpoint), "data", ct)               // /collections, "collections", ct)
+		links, _ := CreateLinks("landing page", fmt.Sprintf("%s", serviceEndpoint), "self", ct)
+		apiLink, _ := CreateLinks("openapi3 specification", fmt.Sprintf("%s/api", serviceEndpoint), "service", ct)           // /api, "service", ct)
+		conformanceLink, _ := CreateLinks("capabilities", fmt.Sprintf("%s/conformance", serviceEndpoint), "conformance", ct) // /conformance, "conformance", ct)
+		dataLink, _ := CreateLinks("collections", fmt.Sprintf("%s/collections", serviceEndpoint), "data", ct)                // /collections, "collections", ct)
 
 		p.Links = append(p.Links, links...)
 		p.Links = append(p.Links, apiLink...)
@@ -41,10 +36,6 @@ func (provider *GetLandingPageProvider) Provide() (interface{}, error) {
 	return provider, nil
 }
 
-func (provider *GetLandingPageProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider)
-}
-func (provider *GetLandingPageProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo create html template pdok
-	return json.Marshal(provider)
+func (provider *GetLandingPageProvider) String() string {
+	return "landingpage"
 }

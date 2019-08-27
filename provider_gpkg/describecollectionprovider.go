@@ -1,7 +1,6 @@
 package provider_gpkg
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	. "wfs3_server/codegen"
@@ -20,9 +19,6 @@ func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Reques
 
 	p := &DescribeCollectionProvider{}
 
-	if ct == "" {
-		ct = JSONContentType
-	}
 	for _, cn := range provider.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
@@ -44,10 +40,10 @@ func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Reques
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
-		links, _ := pc.CreateLinks(hrefBase, "self", ct)
+		links, _ := pc.CreateLinks("collection "+cn.Identifier, hrefBase, "self", ct)
 
 		cihrefBase := fmt.Sprintf("%s/items", hrefBase)
-		ilinks, _ := pc.CreateLinks(cihrefBase, "item", ct)
+		ilinks, _ := pc.CreateLinks("items "+cn.Identifier, cihrefBase, "item", ct)
 		cInfo.Links = append(links, ilinks...)
 
 		p.data = cInfo
@@ -61,10 +57,6 @@ func (provider *DescribeCollectionProvider) Provide() (interface{}, error) {
 	return provider.data, nil
 }
 
-func (provider *DescribeCollectionProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-func (provider *DescribeCollectionProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo create html template pdok
-	return json.Marshal(provider.data)
+func (provider *DescribeCollectionProvider) String() string {
+	return "describecollection"
 }

@@ -10,6 +10,39 @@ import (
 	cg "wfs3_server/codegen"
 )
 
+const (
+	JSONContentType = "application/json"
+	HTMLContentType = "text/html"
+)
+
+func GetContentTypes() map[string]string {
+	ct := make(map[string]string)
+
+	ct["json"] = JSONContentType
+	ct["html"] = HTMLContentType
+
+	return ct
+}
+
+func GetRelationMap() map[string]string {
+	ct := make(map[string]string)
+
+	ct["alternate"] = "Alternative"
+	ct["self"] = "This"
+
+	return ct
+}
+
+func GetContentFields() map[string]string {
+	ct := make(map[string]string)
+
+	ct[JSONContentType] = "json"
+	ct[HTMLContentType] = "html"
+
+	return ct
+}
+
+
 func ProcesLinksForParams(links []cg.Link, queryParams url.Values) error {
 	for l := range links {
 		path, err := url.Parse(links[l].Href)
@@ -32,33 +65,50 @@ func ProcesLinksForParams(links []cg.Link, queryParams url.Values) error {
 
 }
 
-func CreateLinks(path, rel, ct string) ([]cg.Link, error) {
+func CreateLinks(title, hrefPath, rel, ct string) ([]cg.Link, error) {
 
 	links := make([]cg.Link, 0)
 
-	links = append(links, cg.Link{Rel: rel, Href: path, Type: ct})
+	href, err := ctLink(hrefPath, GetContentFields()[ct])
+	if err != nil {
+		return links, err
+	}
+	links = append(links, cg.Link{Title: formatTitle(title, rel, GetContentFields()[ct]), Rel: rel, Href: href, Type: ct})
 
 	if rel == "self" {
 		rel = "alternate"
 	}
 
-	if rel != "self" {
-		return links, nil
-	}
+	//if rel != "self" {
+	//	return links, nil
+	//}
 
-	for _, sct := range cg.SupportedContentTypes {
+	for k, sct := range GetContentTypes() {
 		if ct == sct {
 			continue
 		}
-		href, err := ctLink(path, sct)
+		href, err := ctLink(hrefPath, k)
 		if err != nil {
-			return nil, err
+			return links, err
 		}
 
-		links = append(links, cg.Link{Rel: rel, Href: href, Type: sct})
+		links = append(links, cg.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
+
+		if rel == "self" {
+			rel = "alternate"
+			links = append(links, cg.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
+		}
 	}
 
 	return links, nil
+}
+
+func formatTitle(title, rel, format string) string {
+	relation := rel
+	if "self" == rel {
+		relation = "this"
+	}
+	return strings.ToLower(fmt.Sprintf("%s %s in %s format", relation, title, format))
 }
 
 func ctLink(baselink, contentType string) (string, error) {
@@ -72,7 +122,6 @@ func ctLink(baselink, contentType string) (string, error) {
 
 	var l string
 	switch contentType {
-	case cg.JSONContentType:
 	default:
 		q["f"] = []string{contentType}
 	}
@@ -163,4 +212,8 @@ func ParseBBox(stringValue string, defaultValue []float64) []float64 {
 	}
 
 	return value
+}
+
+func UpperFirst(title string) string {
+	return strings.Title(title)
 }

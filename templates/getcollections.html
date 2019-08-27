@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>BGT</title>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css"
+          integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+    <!--[if lte IE 8]>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-old-ie-min.css">
+    <![endif]-->
+    <!--[if gt IE 8]><!-->
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+    <!--<![endif]-->
+
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 20px;
+            background: #fafafa;
+        }
+    </style>
+
+</head>
+<body>
+
+<h2>Collections</h2>
+
+{{range  $c, $collection := .Collections}}
+    <h3> {{upperFirst $collection.Title}} [{{$collection.Id}}] </h3>
+
+    <table class="pure-table pure-table-bordered">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Content-Type</th>
+            <th>Relation-Type</th>
+            <th>Href</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {{range  $i, $link := $collection.Links}}
+            <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
+                <td>{{$link.Title}}</td>
+                <td>{{$link.Type}}</td>
+                <td>{{$link.Rel}}</td>
+                <td><a href="{{$link.Href}}"> {{$link.Href}} </a></td>
+            </tr>
+        {{end}}
+        </tbody>
+
+    </table>
+
+
+{{end}}
+
+
+</body>
+</html>

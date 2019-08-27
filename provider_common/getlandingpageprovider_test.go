@@ -27,14 +27,4 @@ func TestNewGetLandingPageProvider(t *testing.T) {
 	if len(links) != 4 {
 		t.Errorf("GetLandingPageProvider.Provide() has incorrect number of links = %v, want %v", len(links), 4)
 	}
-	_, err = provider.MarshalJSON(provided)
-	if err != nil {
-		t.Errorf("NewGetApiProvider.MarshalJSON() has error %v, want %v", err, nil)
-	}
-
-	_, err = provider.MarshalHTML(provided)
-	if err != nil {
-		t.Errorf("NewGetApiProvider.MarshalHTML() has error %v, want %v", err, nil)
-	}
-
 }

@@ -1,26 +1,33 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"wfs3_server/codegen"
+	"text/template"
+	cg "wfs3_server/codegen"
+	pc "wfs3_server/provider_common"
+	"wfs3_server/provider_gpkg"
 	"wfs3_server/spec"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
+
 type Server struct {
+	ContentTypes       map[string]string
 	ServiceEndpoint    string
 	ServiceSpecPath    string
 	MaxReturnLimit     uint64
 	DefaultReturnLimit uint64
-	Providers          codegen.Providers
+	Providers          cg.Providers
 	swagger            *openapi3.Swagger
+	Templates          *template.Template
 }
 
-func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnlimit, maxReturnLimit uint64) (*Server, error) {
+func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxReturnLimit uint64) (*Server, error) {
 	swagger, err := spec.GetSwagger(serviceSpecPath)
 
 	if err != nil {
@@ -28,34 +35,54 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnlimit, maxR
 		return nil, err
 	}
 
-	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnlimit, swagger: swagger}
+	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnLimit, swagger: swagger}
+
+	// add templates to server
+	server.Templates = template.Must(template.New("templates").Funcs(
+		template.FuncMap{
+			"isOdd":       func(i int) bool { return i%2 != 0 },
+			"hasFeatures": func(i []provider_gpkg.Feature) bool { return len(i) > 0 },
+			"upperFirst":  pc.UpperFirst,
+		}).ParseGlob("templates/*"))
+
+	server.ContentTypes = pc.GetContentTypes()
 	return server, nil
 }
 
-func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
+func (s *Server) SetProviders(providers cg.Providers) (*Server, error) {
 	err := providers.Init()
 
 	if err != nil {
 		log.Fatal("Provider initialisation error:", err)
 		return nil, err
 	}
-
 	s.Providers = providers
-
 	return s, nil
 }
 
-func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (cg.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		contentResponse := r.Header.Get("Content-Type")
+
 		format, ok := r.URL.Query()["f"]
 		if ok && len(format) > 0 {
-			r.Header.Add("Content-Type", format[0])
+			contentField, ok := s.ContentTypes[format[0]]
+			if ok {
+				contentResponse = contentField
+			}
 		}
+
+		if contentResponse == "" {
+			contentResponse = s.ContentTypes["json"]
+		}
+
+		r.Header.Set("Content-Type", contentResponse)
 
 		provider, err := providerFunc(r)
 
+		// todo  error based on content type
 		if err != nil {
 			jsonError(w, "PROVIDER CREATION", err.Error(), http.StatusNotFound)
 			return
@@ -66,14 +93,9 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 			return
 		}
 
-		ct := r.Header.Get("Content-Type")
-
-		if ct == "" {
-			ct = codegen.JSONContentType
-		}
-
 		result, err := provider.Provide()
 
+		// todo  error based on content type
 		if err != nil {
 			jsonError(w, "PROVIDER", err.Error(), http.StatusInternalServerError)
 			return
@@ -81,25 +103,31 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 		var encodedContent []byte
 
-		if ct == codegen.JSONContentType {
-			encodedContent, err = provider.MarshalJSON(result)
+		if contentResponse == pc.JSONContentType {
+			encodedContent, err = json.Marshal(result)
 			if err != nil {
 				jsonError(w, "JSON MARSHALLER", err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-		} else if ct == codegen.HTMLContentType {
-			encodedContent, err = provider.MarshalHTML(result)
-			if err != nil {
-				jsonError(w, "HTML MARSHALLER", err.Error(), http.StatusInternalServerError)
-				return
-			}
+		} else if contentResponse == pc.HTMLContentType {
+			providerId := provider.String()
+
+				b := new(bytes.Buffer)
+				err = s.Templates.ExecuteTemplate(b, providerId+".html", result)
+				encodedContent = b.Bytes()
+
+				if err != nil {
+					jsonError(w, "HTML MARSHALLER", err.Error(), http.StatusInternalServerError)
+					return
+				}
+
 		} else {
-			jsonError(w, "Invalid Content Type", "Content-Type: ''"+ct+"'' not supported.", http.StatusInternalServerError)
+			jsonError(w, "Invalid Content Type", "Content-Type: ''"+contentResponse+"'' not supported.", http.StatusInternalServerError)
 			return
 		}
 
-		w.Header().Set("Content-Type", ct)
+		w.Header().Set("Content-Type", contentResponse)
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(encodedContent)
 	}
@@ -108,7 +136,7 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 func jsonError(w http.ResponseWriter, code string, msg string, status int) {
 	w.WriteHeader(status)
 
-	result, err := json.Marshal(&codegen.Exception{
+	result, err := json.Marshal(&cg.Exception{
 		Code:        code,
 		Description: msg,
 	})

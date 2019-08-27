@@ -1,13 +1,14 @@
 package provider_gpkg
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/http"
 	cg "wfs3_server/codegen"
+	pc "wfs3_server/provider_common"
 )
 
 type GetFeatureProvider struct {
-	data Feature
+	data *Feature
 }
 
 func (provider *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (cg.Provider, error) {
@@ -17,13 +18,10 @@ func (provider *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (cg.P
 	featureIdParam := featureId
 	bboxParam := provider.GeoPackage.DefaultBBox
 
-	ct := r.Header.Get("Content-Type")
-
 	p := &GetFeatureProvider{}
 
-	if ct == "" {
-		ct = cg.JSONContentType
-	}
+	path := r.URL.Path
+	ct := r.Header.Get("Content-Type")
 
 	for _, cn := range provider.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
@@ -38,7 +36,14 @@ func (provider *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (cg.P
 		}
 
 		if len(fcGeoJSON.Features) == 1 {
-			p.data = fcGeoJSON.Features[0]
+
+			feature := fcGeoJSON.Features[0]
+
+			hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
+			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
+			feature.Links = links
+
+			p.data = feature
 		}
 
 		break
@@ -51,10 +56,6 @@ func (provider *GetFeatureProvider) Provide() (interface{}, error) {
 	return provider.data, nil
 }
 
-func (provider *GetFeatureProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-func (provider *GetFeatureProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo create html template pdok
-	return json.Marshal(provider.data)
+func (provider *GetFeatureProvider) String() string {
+	return "getfeature"
 }

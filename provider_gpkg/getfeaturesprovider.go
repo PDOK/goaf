@@ -1,7 +1,6 @@
 package provider_gpkg
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,10 +28,6 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 
 	p := &GetFeaturesProvider{}
 
-	if ct == "" {
-		ct = cg.JSONContentType
-	}
-
 	for _, cn := range provider.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
@@ -44,6 +39,13 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 		if err != nil {
 			return nil, err
 		}
+
+		for _, feature := range fcGeoJSON.Features {
+			hrefBase := fmt.Sprintf("%s%s/%v", provider.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
+			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
+			feature.Links = links
+		}
+
 
 		requestParams := r.URL.Query()
 
@@ -60,12 +62,12 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
-		links, _ := pc.CreateLinks(hrefBase, "self", ct)
+		links, _ := pc.CreateLinks("features "+cn.Identifier, hrefBase, "self", ct)
 		_ = pc.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
-			ilinks, _ := pc.CreateLinks(hrefBase, "next", ct)
+			ilinks, _ := pc.CreateLinks("features "+cn.Identifier, hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)+int64(limitParam)))
 			_ = pc.ProcesLinksForParams(ilinks, requestParams)
 
@@ -81,7 +83,7 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 		}
 		fcGeoJSON.Crs = crsUri
 
-		p.data = fcGeoJSON
+		p.data = *fcGeoJSON
 		break
 	}
 
@@ -92,10 +94,6 @@ func (provider *GetFeaturesProvider) Provide() (interface{}, error) {
 	return provider.data, nil
 }
 
-func (provider *GetFeaturesProvider) MarshalJSON(interface{}) ([]byte, error) {
-	return json.Marshal(provider.data)
-}
-func (provider *GetFeaturesProvider) MarshalHTML(interface{}) ([]byte, error) {
-	// todo create html template pdok
-	return json.Marshal(provider.data)
+func (provider *GetFeaturesProvider) String() string {
+	return "getfeatures"
 }
