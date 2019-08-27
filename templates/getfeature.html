@@ -37,9 +37,10 @@
     <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css"
           type="text/css">
     <style>
-        .map {
+        #map {
             height: 400px;
             width: 100%;
+            position: relative;
         }
 
         #info {
@@ -66,7 +67,9 @@
 
 <h2>Feature Collection</h2>
 
-<h3>Returned # {{.NumberReturned}}</h3>
+{{$feature :=  .}}
+
+<h3>Returned # {{$feature.ID}}</h3>
 
 <h3>Links</h3>
 <table class="pure-table pure-table-bordered">
@@ -80,7 +83,7 @@
     </thead>
 
     <tbody>
-    {{range  $i, $link := .Links}}
+    {{range  $i, $link := $feature.Links}}
         <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
             <td>{{$link.Title}}</td>
             <td>{{$link.Type}}</td>
@@ -198,36 +201,26 @@
 
 <h3>Properties</h3>
 
-{{ if  gt .NumberReturned  0 }}
-
-    <table class="pure-table pure-table-bordered">
-        <thead>
-        <tr>
-            <th>ID</th>
-            {{$feature :=  index .Features 0}}
-            {{range  $k, $v :=  $feature.Properties}}
-                <th>{{$k}}</th>
-            {{end}}
-
-        </tr>
-        </thead>
-
-        <tbody>
-        {{range  $i, $feature := .Features}}
-            <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
-                <td>{{$feature.ID}}</td>
-                {{range  $k, $v :=  $feature.Properties}}
-                    <td>{{$v}}</td>
-                {{end}}
-            </tr>
+<table class="pure-table pure-table-bordered">
+    <thead>
+    <tr>
+        <th>ID</th>
+        {{range  $k, $v :=  $feature.Properties}}
+            <th>{{$k}}</th>
         {{end}}
-        </tbody>
-    </table>
 
-{{ else }}
-    <h4>No results</h4>
-{{end}}
+    </tr>
+    </thead>
 
+    <tbody>
+    <tr>
+        <td>{{$feature.ID}}</td>
+        {{range  $k, $v :=  $feature.Properties}}
+            <td>{{$v}}</td>
+        {{end}}
+    </tr>
+    </tbody>
+</table>
 
 </body>
 </html>
