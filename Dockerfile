@@ -11,13 +11,13 @@ ADD . /go/src/server
 
 RUN go mod download
 
-#crosscompiling
+# crosscompiling
 ENV CGO_ENABLED=1
 
-#compile linux only
+# compile linux only
 ENV GOOS=linux
 
-#build the binary with debug information removed
+# build the binary with debug information removed
 RUN go build -ldflags '-w -s -linkmode external -extldflags -static' -a -installsuffix cgo -o /wfs-server start.go
 
 FROM scratch as service
