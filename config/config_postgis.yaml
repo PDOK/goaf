@@ -1,20 +1,356 @@
-ApplicationId: POSTGIS
+ApplicationId: POSTGIS-PRD
 Layers:
-  - SchemaName: bgt #database schema name
-    TableName: pand   #database table/view name
-    Identifier: pand  #collection name in api response
-    Description: BGT Test #Description of the collection
-    GeometryColumn: _geom  #column containing the SFS geometry
+  - SchemaName: bgt_wfs3_v1 #database schema name
+    TableName: bak #database table/view name
+    Identifier: bak #collection name in api response
+    Description: BGT Bak #Description of the collection
+    GeometryColumn: _geom #column containing the SFS geometry
     GeometryType: GEOMETRY # has currently no use
     FeatureIDColumn: _id #the unique indexed identifier for a given feature
     BBoxGeometryColumn: _bbox #extra column with bounding box selection index for intersects query, simplification and speedup
     OffsetColumn: _offset_id # extra column to determine next keyset paging, should be numeric, indexed and unique, could be equal to feature id
-    BBox: [13603.33,306900.151,277924.306,617112.488] # Bounding box of all features can be used to display subset of features
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999] # Bounding box of all features can be used to display subset of features
     SrsId: 28992 #the projection of the geometry currently stored in database
-    # Features are column names which should be exposed in properties par of the response
+    # Features are column names which should be exposed in properties part of the response
     Features:
       - properties
-BBox: [13603.33,306900.151,277924.306,617112.488] # bounding box of all layers
+  - SchemaName: bgt_wfs3_v1
+    TableName: begroeidterreindeel
+    Identifier: begroeidterreindeel
+    Description: BGT begroeidterreindeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: buurt
+    Identifier: buurt
+    Description: BGT buurt
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: functioneelgebied
+    Identifier: functioneelgebied
+    Description: BGT functioneelgebied
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: gebouwinstallatie
+    Identifier: gebouwinstallatie
+    Description: BGT gebouwinstallatie
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: kast
+    Identifier: kast
+    Description: BGT kast
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: kunstwerkdeel
+    Identifier: kunstwerkdeel
+    Description: BGT kunstwerkdeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: onbegroeidterreindeel
+    Identifier: onbegroeidterreindeel
+    Description: BGT onbegroeidterreindeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: ondersteunendwaterdeel
+    Identifier: ondersteunendwaterdeel
+    Description: BGT ondersteunendwaterdeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: ondersteunendwegdeel
+    Identifier: ondersteunendwegdeel
+    Description: BGT ondersteunendwegdeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: ongeclassificeerdobject
+    Identifier: ongeclassificeerdobject
+    Description: BGT ongeclassificeerdobject
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: overbruggingsdeel
+    Identifier: overbruggingsdeel
+    Description: BGT overbruggingsdeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: overigbouwwerk
+    Identifier: overigbouwwerk
+    Description: BGT overigbouwwerk
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: overigescheiding
+    Identifier: overigescheiding
+    Description: BGT overigescheiding
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: paal
+    Identifier: paal
+    Description: BGT paal
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: pand
+    Identifier: pand
+    Description: BGT pand
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: put
+    Identifier: put
+    Description: BGT put
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: scheiding
+    Identifier: scheiding
+    Description: BGT scheiding
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: spoor
+    Identifier: spoor
+    Description: BGT spoor
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: stadsdeel
+    Identifier: stadsdeel
+    Description: BGT stadsdeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: straatmeubilair
+    Identifier: straatmeubilair
+    Description: BGT straatmeubilair
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: tunneldeel
+    Identifier: tunneldeel
+    Description: BGT tunneldeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: vegetatieobject
+    Identifier: vegetatieobject
+    Description: BGT vegetatieobject
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: waterdeel
+    Identifier: waterdeel
+    Description: BGT waterdeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: wegdeel
+    Identifier: wegdeel
+    Description: BGT wegdeel
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: weginrichtingselement
+    Identifier: weginrichtingselement
+    Description: BGT weginrichtingselement
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+  - SchemaName: bgt_wfs3_v1
+    TableName: wijk
+    Identifier: wijk
+    Description: BGT wijk
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _id
+    BBoxGeometryColumn: _bbox
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    Features:
+      - properties
+BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999] # bounding box of all layers
 SrsId: 28992 # and the corresponding projection
-
-

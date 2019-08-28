@@ -16,13 +16,13 @@ example wfs-3.0 geopackage example: https://github.com/PDOK/wfs-3.0-gpkg
 
 ***Minimal config, gpkg tends to be relative small e.g. < 3 GB***
 
-go run start.go -provider gpkg -gpkg tst/bgt_wgs84.gpkg
+./run_gpkg.sh
 
 ***More elaborate config optimised performance for huge db (10M+ records/collection)***
 
-go run start.go -provider postgis -config config/config_postgis.yaml - connection host=127.0.0.1 port=5432 database=bgt_v1 user=postgres password=postgres sslmode=disable
+./run_postgis.sh
 
-parameters :
+used parameters :
 ```
 bindHost := flag.String("s", envString("BIND_HOST", "0.0.0.0"), "server internal bind address, default; 0.0.0.0")
 bindPort := flag.Int("p", envInt("BIND_PORT",8080), "server internal bind address, default; 8080")

@@ -30,3 +30,5 @@ COPY --from=build-env  /wfs-server /
 COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build-env /go/src/server/templates /templates
 COPY --from=build-env /go/src/server/swagger-ui /swagger-ui
+
+CMD ["/wfs-server"]

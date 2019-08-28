@@ -115,7 +115,7 @@
 
     vectorSource = new ol.source.Vector({
         //  matrixSet: 'EPSG:28992',
-        format: new ol.format.GeoJSON(),
+        format: new ol.format.GeoJSON({featureProjection: 'EPSG:28992'}),
         projection: projection,
         loader: function (extent, resolution, prj) {
             var proj = prj.getCode();
@@ -128,7 +128,7 @@
             xhr.onerror = onError;
             xhr.onload = function () {
                 if (xhr.status == 200) {
-                    vectorSource.addFeatures(new ol.format.GeoJSON({featureProjection: 'EPSG:28992'}).readFeatures(xhr.responseText));
+                    vectorSource.addFeatures(vectorSource.getFormat().readFeatures(xhr.responseText));
                     map.getView().fit(vectorSource.getExtent(), {duration: 0}, map.getSize());
                 } else {
                     onError();
