@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{{$result:= index . "result"}}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -38,7 +39,7 @@
 
 <h2>Collections</h2>
 
-{{range  $c, $collection := .Collections}}
+{{range  $c, $collection := $result.Collections}}
     <h3> {{upperFirst $collection.Title}} [{{$collection.Id}}] </h3>
 
     <table class="pure-table pure-table-bordered">

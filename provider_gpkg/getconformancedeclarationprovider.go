@@ -25,3 +25,7 @@ func (provider *GetConformanceDeclarationProvider) Provide() (interface{}, error
 func (provider *GetConformanceDeclarationProvider) String() string {
 	return "getconformancedeclaration"
 }
+
+func (provider *GetConformanceDeclarationProvider) SrsId() string {
+	return "n.a"
+}

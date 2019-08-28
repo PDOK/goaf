@@ -22,8 +22,28 @@ example wfs-3.0 geopackage example: https://github.com/PDOK/wfs-3.0-gpkg
 
 ./run_postgis.sh
 
-used parameters :
+example table
+```postgresql
+
+CREATE TABLE bgt_wfs3_v1.bak
+(
+    _id text COLLATE pg_catalog."default" NOT NULL,
+    _version text COLLATE pg_catalog."default",
+    properties jsonb,
+    _geom geometry,
+    _bbox geometry,
+    _offset_id bigint NOT NULL DEFAULT nextval('bgt_wfs3_v1.bak__offset_id_seq'::regclass),
+    _created timestamp without time zone,
+    CONSTRAINT bak_pkey PRIMARY KEY (_id)
+)
+WITH (
+    OIDS = FALSE
+)
 ```
+
+
+used parameters :
+```go
 bindHost := flag.String("s", envString("BIND_HOST", "0.0.0.0"), "server internal bind address, default; 0.0.0.0")
 bindPort := flag.Int("p", envInt("BIND_PORT",8080), "server internal bind address, default; 8080")
 
@@ -35,9 +55,6 @@ providerName := flag.String("provider", envString("PROVIDER",""), "postgis or gp
 gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG",""), "geopackage path")
 crsMapFilePath := flag.String("crs", envString("PATH_CRS",""), "crs file path")
 configFilePath := flag.String("config", envString("PATH_CONFIG",""), "configfile path")
-
-// for local development wit posgis db
-// 'host=127.0.0.1 port=5432 database=bgt_v1 user=postgres password=****** sslmode=disable'
 connectionStr := flag.String("connection", envString("CONNECTION", ""), "configfile path")
 
 featureIdKey := flag.String("featureId", envString("FEATURE_ID",""), "Default feature identification or else first column definition (fid)") //optional for gpkg provider 

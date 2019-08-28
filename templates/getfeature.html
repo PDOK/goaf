@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{{$result:= index . "result"}}
+{{$srsid:=  index . "srsid"}}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -67,7 +69,7 @@
 
 <h2>Feature Collection</h2>
 
-{{$feature :=  .}}
+{{$feature := $result}}
 
 <h3>Returned # {{$feature.ID}}</h3>
 
@@ -117,7 +119,7 @@
 
     vectorSource = new ol.source.Vector({
         //  matrixSet: 'EPSG:28992',
-        format: new ol.format.GeoJSON({featureProjection: 'EPSG:28992'}),
+        format: new ol.format.GeoJSON({dataProjection: '{{$srsid}}', featureProjection: 'EPSG:28992'}),
         projection: projection,
         loader: function (extent, resolution, prj) {
             var proj = prj.getCode();

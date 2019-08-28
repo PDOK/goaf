@@ -41,3 +41,7 @@ func (provider *GetApiProvider) Provide() (interface{}, error) {
 func (provider *GetApiProvider) String() string {
 	return "api"
 }
+
+func (provider *GetApiProvider) SrsId() string {
+	return "n.a"
+}

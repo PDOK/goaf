@@ -8,7 +8,8 @@ import (
 )
 
 type GetFeatureProvider struct {
-	data *Feature
+	data  *Feature
+	srsid string
 }
 
 func (provider *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (cg.Provider, error) {
@@ -18,7 +19,7 @@ func (provider *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (cg.P
 	featureIdParam := featureId
 	bboxParam := provider.GeoPackage.DefaultBBox
 
-	p := &GetFeatureProvider{}
+	p := &GetFeatureProvider{srsid: fmt.Sprintf("EPSG:%d", provider.GeoPackage.SrsId)}
 
 	path := r.URL.Path
 	ct := r.Header.Get("Content-Type")
@@ -58,4 +59,8 @@ func (provider *GetFeatureProvider) Provide() (interface{}, error) {
 
 func (provider *GetFeatureProvider) String() string {
 	return "getfeature"
+}
+
+func (provider *GetFeatureProvider) SrsId() string {
+	return provider.srsid
 }

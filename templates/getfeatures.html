@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{{$result:= index . "result"}}
+{{$srsid:=  index . "srsid"}}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -67,7 +69,7 @@
 
 <h2>Feature Collection</h2>
 
-<h3>Returned # {{.NumberReturned}}</h3>
+<h3>Returned # {{$result.NumberReturned}}</h3>
 
 <h3>Links</h3>
 <table class="pure-table pure-table-bordered">
@@ -81,7 +83,7 @@
     </thead>
 
     <tbody>
-    {{range  $i, $link := .Links}}
+    {{range  $i, $link := $result.Links}}
         <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
             <td>{{$link.Title}}</td>
             <td>{{$link.Type}}</td>
@@ -115,7 +117,7 @@
 
     vectorSource = new ol.source.Vector({
         //  matrixSet: 'EPSG:28992',
-        format: new ol.format.GeoJSON({featureProjection: 'EPSG:28992'}),
+        format: new ol.format.GeoJSON({dataProjection: '{{$srsid}}', featureProjection: 'EPSG:28992'}),
         projection: projection,
         loader: function (extent, resolution, prj) {
             var proj = prj.getCode();
@@ -199,7 +201,7 @@
 
 <h3>Properties</h3>
 
-{{ if  gt .NumberReturned  0 }}
+{{ if  gt $result.NumberReturned  0 }}
 
     <table class="pure-table pure-table-bordered">
         <thead>
@@ -207,7 +209,7 @@
             <th></th>
             <th></th>
             <th>ID</th>
-            {{$feature :=  index .Features 0}}
+            {{$feature :=  index $result.Features 0}}
             {{range  $k, $v :=  $feature.Properties}}
                 <th>{{$k}}</th>
             {{end}}
@@ -216,7 +218,7 @@
         </thead>
 
         <tbody>
-        {{range  $i, $feature := .Features}}
+        {{range  $i, $feature := $result.Features}}
             <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
                 {{range  $link := $feature.Links}}
                     <td><a href="{{$link.Href}}">{{$link.Type}}</a></td>

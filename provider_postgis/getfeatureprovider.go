@@ -9,7 +9,8 @@ import (
 )
 
 type GetFeatureProvider struct {
-	data *Feature
+	data  *Feature
+	srsid string
 }
 
 func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Provider, error) {
@@ -19,7 +20,7 @@ func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Prov
 	featureIdParam := featureId
 	bboxParam := provider.PostGis.BBox
 
-	p := &GetFeatureProvider{}
+	p := &GetFeatureProvider{srsid: fmt.Sprintf("EPSG:%d", provider.PostGis.SrsId)}
 
 	path := r.URL.Path
 	ct := r.Header.Get("Content-Type")
@@ -61,4 +62,8 @@ func (provider *GetFeatureProvider) Provide() (interface{}, error) {
 
 func (provider *GetFeatureProvider) String() string {
 	return "getfeature"
+}
+
+func (provider *GetFeatureProvider) SrsId() string {
+	return provider.srsid
 }

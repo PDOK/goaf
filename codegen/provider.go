@@ -9,6 +9,7 @@ import (
 )
 
 type Provider interface {
+	SrsId() string
 	String() string
 	Provide() (interface{}, error)
 }
@@ -110,4 +111,3 @@ func ParametersForGetFeature(r *http.Request) (collectionId string, featureId st
 
 // GetConformanceDeclaration
 // no parameters present
-

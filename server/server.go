@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
-
 
 type Server struct {
 	ContentTypes       map[string]string
@@ -43,6 +43,20 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 			"isOdd":       func(i int) bool { return i%2 != 0 },
 			"hasFeatures": func(i []provider_gpkg.Feature) bool { return len(i) > 0 },
 			"upperFirst":  pc.UpperFirst,
+			"dict": func(values ...interface{}) (map[string]interface{}, error) {
+				if len(values)%2 != 0 {
+					return nil, errors.New("invalid dict call")
+				}
+				dict := make(map[string]interface{}, len(values)/2)
+				for i := 0; i < len(values); i += 2 {
+					key, ok := values[i].(string)
+					if !ok {
+						return nil, errors.New("dict keys must be strings")
+					}
+					dict[key] = values[i+1]
+				}
+				return dict, nil
+			},
 		}).ParseGlob("/templates/*"))
 
 	server.ContentTypes = pc.GetContentTypes()
@@ -113,14 +127,18 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (cg.Provid
 		} else if contentResponse == pc.HTMLContentType {
 			providerId := provider.String()
 
-				b := new(bytes.Buffer)
-				err = s.Templates.ExecuteTemplate(b, providerId+".html", result)
-				encodedContent = b.Bytes()
+			rmap := make(map[string]interface{})
+			rmap["result"] = result
+			rmap["srsid"] = provider.SrsId()
 
-				if err != nil {
-					jsonError(w, "HTML MARSHALLER", err.Error(), http.StatusInternalServerError)
-					return
-				}
+			b := new(bytes.Buffer)
+			err = s.Templates.ExecuteTemplate(b, providerId+".html", rmap)
+			encodedContent = b.Bytes()
+
+			if err != nil {
+				jsonError(w, "HTML MARSHALLER", err.Error(), http.StatusInternalServerError)
+				return
+			}
 
 		} else {
 			jsonError(w, "Invalid Content Type", "Content-Type: ''"+contentResponse+"'' not supported.", http.StatusInternalServerError)

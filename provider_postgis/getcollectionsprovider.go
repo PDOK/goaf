@@ -61,3 +61,8 @@ func (provider *GetCollectionsProvider) Provide() (interface{}, error) {
 func (provider *GetCollectionsProvider) String() string {
 	return "getcollections"
 }
+
+func (provider *GetCollectionsProvider) SrsId() string {
+	return "n.a."
+}
+

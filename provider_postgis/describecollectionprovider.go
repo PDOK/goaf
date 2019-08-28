@@ -56,3 +56,7 @@ func (provider *DescribeCollectionProvider) Provide() (interface{}, error) {
 func (provider *DescribeCollectionProvider) String() string {
 	return "describecollection"
 }
+
+func (provider *DescribeCollectionProvider) SrsId() string {
+	return "n.a."
+}

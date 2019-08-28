@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{{$result:= index . "result"}}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -47,7 +48,7 @@
     </thead>
 
     <tbody>
-    {{range  $i, $link := .}}
+    {{range  $i, $link := $result}}
         <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
             <td>{{$link}}</td>
         </tr>

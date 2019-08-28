@@ -9,7 +9,8 @@ import (
 )
 
 type GetFeaturesProvider struct {
-	data FeatureCollectionGeoJSON
+	data  FeatureCollectionGeoJSON
+	srsid string
 }
 
 func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
@@ -26,7 +27,7 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 	path := r.URL.Path // collections/{{collectionId}}/items
 	ct := r.Header.Get("Content-Type")
 
-	p := &GetFeaturesProvider{}
+	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", provider.PostGis.SrsId)}
 
 	for _, cn := range provider.PostGis.Layers {
 		// maybe convert to map, but not thread safe!
@@ -41,7 +42,7 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 		}
 
 		for _, feature := range fcGeoJSON.Features {
-			hrefBase := fmt.Sprintf("%s%s/items/%v", provider.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
+			hrefBase := fmt.Sprintf("%s%s/%v", provider.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
 			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
@@ -85,4 +86,8 @@ func (provider *GetFeaturesProvider) Provide() (interface{}, error) {
 
 func (provider *GetFeaturesProvider) String() string {
 	return "getfeatures"
+}
+
+func (provider *GetFeaturesProvider) SrsId() string {
+	return provider.srsid
 }

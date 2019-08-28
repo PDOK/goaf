@@ -9,7 +9,8 @@ import (
 )
 
 type GetFeaturesProvider struct {
-	data FeatureCollectionGeoJSON
+	data  FeatureCollectionGeoJSON
+	srsid string
 }
 
 func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
@@ -26,7 +27,7 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 	path := r.URL.Path // collections/{{collectionId}}/items
 	ct := r.Header.Get("Content-Type")
 
-	p := &GetFeaturesProvider{}
+	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", provider.GeoPackage.SrsId)}
 
 	for _, cn := range provider.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
@@ -96,4 +97,8 @@ func (provider *GetFeaturesProvider) Provide() (interface{}, error) {
 
 func (provider *GetFeaturesProvider) String() string {
 	return "getfeatures"
+}
+
+func (provider *GetFeaturesProvider) SrsId() string {
+	return provider.srsid
 }

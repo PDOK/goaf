@@ -39,3 +39,7 @@ func (provider *GetLandingPageProvider) Provide() (interface{}, error) {
 func (provider *GetLandingPageProvider) String() string {
 	return "landingpage"
 }
+
+func (provider *GetLandingPageProvider) SrsId() string {
+	return "n.a"
+}

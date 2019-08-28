@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{{$result:= index . "result"}}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -38,7 +39,7 @@
 
 <h2>Collection</h2>
 
-<h3>{{upperFirst .Title}} [{{.Id}}]</h3>
+<h3>{{upperFirst $result.Title}} [{{$result.Id}}]</h3>
 
 <table class="pure-table pure-table-bordered">
     <thead>
@@ -51,7 +52,7 @@
     </thead>
 
     <tbody>
-    {{range  $i, $link := .Links}}
+    {{range  $i, $link := $result.Links}}
         <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
             <td>{{$link.Title}}</td>
             <td>{{$link.Type}}</td>
