@@ -24,6 +24,7 @@ type PostgisLayer struct {
 	TableName       string `yaml:"TableName,omitempty"`
 	Description     string `yaml:"Description,omitempty"`
 	Identifier      string `yaml:"Identifier,omitempty"`
+	Filter          string `yaml:"Identifier,omitempty"`
 	GeometryColumn  string `yaml:"GeometryColumn,omitempty"`
 	GeometryType    string `yaml:"GeometryType,omitempty"`
 	FeatureIDColumn string `yaml:"FeatureIDColumn,omitempty"`
@@ -109,9 +110,12 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 	}
 
 	additionalWhere := ""
-
 	if featureId != nil {
 		additionalWhere = fmt.Sprintf(` l."%s"=$8 AND `, FeatureIDColumn)
+	}
+
+	if layer.Filter != "" {
+		additionalWhere += fmt.Sprintf(` %s AND `, layer.Filter)
 	}
 
 	// query information with selection
