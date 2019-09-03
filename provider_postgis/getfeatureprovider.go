@@ -37,7 +37,7 @@ func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Prov
 			return nil, err
 		}
 
-		if len(fcGeoJSON.Features) == 1 {
+		if len(fcGeoJSON.Features) >= 1 {
 			feature := fcGeoJSON.Features[0]
 
 			hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
