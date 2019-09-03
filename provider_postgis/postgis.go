@@ -24,7 +24,7 @@ type PostgisLayer struct {
 	TableName       string `yaml:"TableName,omitempty"`
 	Description     string `yaml:"Description,omitempty"`
 	Identifier      string `yaml:"Identifier,omitempty"`
-	Filter          string `yaml:"Identifier,omitempty"`
+	Filter          string `yaml:"Filter,omitempty"`
 	GeometryColumn  string `yaml:"GeometryColumn,omitempty"`
 	GeometryType    string `yaml:"GeometryType,omitempty"`
 	FeatureIDColumn string `yaml:"FeatureIDColumn,omitempty"`
