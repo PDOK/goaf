@@ -64,8 +64,9 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
+
 			ilinks, _ := pc.CreateLinks("next features "+cn.Identifier, hrefBase, "next", ct)
-			requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)+int64(limitParam)))
+			requestParams.Set("offset", fmt.Sprintf("%d", fcGeoJSON.Offset))
 			_ = pc.ProcesLinksForParams(ilinks, requestParams)
 
 			links = append(links, ilinks...)

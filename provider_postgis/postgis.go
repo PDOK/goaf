@@ -99,7 +99,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 	}
 
 	tableName := fmt.Sprintf(`%s.%s`, layer.SchemaName, layer.TableName)
-	selectClause := fmt.Sprintf(`l."%s", st_asgeojson(st_forcesfs(l."%s")) as %s`, FeatureIDColumn, layer.GeometryColumn, layer.GeometryColumn)
+	selectClause := fmt.Sprintf(`l."%s", st_asgeojson(st_forcesfs(l."%s")) as %s, l."%s"`, FeatureIDColumn, layer.GeometryColumn, layer.GeometryColumn, layer.OffsetColumn)
 
 	for _, tf := range layer.Features {
 
@@ -190,6 +190,14 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 					feature.ID = identifier
 				}
 
+			case layer.OffsetColumn:
+				ofsset, ok := vals[i].(int64)
+				if !ok {
+					//log.Printf("unexpected column type for geom field. got %t", vals[i])
+					return result, errors.New("unexpected column type for offset field. expected int")
+				}
+				result.Offset = ofsset
+
 			case layer.GeometryColumn:
 
 				geomData, ok := vals[i].(string)
@@ -206,7 +214,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 				}
 				feature.Geometry = geometry
 
-			case layer.OffsetColumn, layer.BBoxGeometryColumn:
+			case layer.BBoxGeometryColumn:
 				// Skip these columns used for bounding box and zoom filtering
 				continue
 			case "properties": // predefined jsonb

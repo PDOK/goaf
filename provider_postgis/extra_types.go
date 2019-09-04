@@ -15,6 +15,7 @@ type FeatureCollectionGeoJSON struct {
 	Features       []*Feature     `json:"features"`
 	Links          []codegen.Link `json:"links,omitempty"`
 	NumberMatched  int64          `json:"numberMatched,omitempty"`
+	Offset         int64
 }
 
 type Feature struct {
