@@ -66,9 +66,12 @@ func NewPostgis(configfilePath, connectionStr string) (Postgis, error) {
 	}
 
 	db, err := sqlx.Open("postgres", connectionStr)
+
 	if err != nil {
 		return postgis, err
 	}
+
+	db.SetConnMaxLifetime(time.Minute * 15)
 
 	postgis.db = db
 
