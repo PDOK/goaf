@@ -65,4 +65,3 @@ func (provider *GetCollectionsProvider) String() string {
 func (provider *GetCollectionsProvider) SrsId() string {
 	return "n.a."
 }
-

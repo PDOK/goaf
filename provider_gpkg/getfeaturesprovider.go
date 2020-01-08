@@ -14,7 +14,7 @@ type GetFeaturesProvider struct {
 }
 
 func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
-	collectionId, limit, bbox, time, offset := cg.ParametersForGetFeatures(r)
+	collectionId, limit, offset, _, bbox, time := cg.ParametersForGetFeatures(r)
 
 	limitParam := pc.ParseLimit(limit, provider.CommonProvider.DefaultReturnLimit, provider.CommonProvider.MaxReturnLimit)
 	offsetParam := pc.ParseUint(offset, 0)
@@ -46,7 +46,6 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
-
 
 		requestParams := r.URL.Query()
 

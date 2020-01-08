@@ -2,7 +2,7 @@
   "components": {
     "parameters": {
       "bbox": {
-        "description": "Only features that have a geometry that intersects the bounding box are selected.\nThe bounding box is provided as four or six numbers, depending on whether the\ncoordinate reference system includes a vertical axis (elevation or depth):\n\n* Lower left corner, coordinate axis 1\n* Lower left corner, coordinate axis 2\n* Lower left corner, coordinate axis 3 (optional)\n* Upper right corner, coordinate axis 1\n* Upper right corner, coordinate axis 2\n* Upper right corner, coordinate axis 3 (optional)\n\nThe coordinate reference system of the values is WGS 84 longitude/latitude\n(http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate\nreference system is specified in the parameter `bbox-crs`.\n\nFor WGS 84 longitude/latitude the values are in most cases the sequence of\nminimum longitude, minimum latitude, maximum longitude and maximum latitude.\nHowever, in cases where the box spans the antimeridian the first value\n(west-most box edge) is larger than the third value (east-most box edge).\n\nIf a feature has multiple spatial geometry properties, it is the decision of the\nserver whether only a single spatial geometry property is used to determine\nthe extent or all relevant geometries.",
+        "description": "Only features that have a geometry that intersects the bounding box are selected.\nThe bounding box is provided as four or six numbers, depending on whether the\ncoordinate reference system includes a vertical axis (height or depth):\n\n* Lower left corner, coordinate axis 1\n* Lower left corner, coordinate axis 2\n* Minimum value, coordinate axis 3 (optional)\n* Upper right corner, coordinate axis 1\n* Upper right corner, coordinate axis 2\n* Maximum value, coordinate axis 3 (optional)\n\nThe coordinate reference system of the values is WGS 84 longitude/latitude\n(http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate\nreference system is specified in the parameter `bbox-crs`.\n\nFor WGS 84 longitude/latitude the values are in most cases the sequence of\nminimum longitude, minimum latitude, maximum longitude and maximum latitude.\nHowever, in cases where the box spans the antimeridian the first value\n(west-most box edge) is larger than the third value (east-most box edge).\n\nIf the vertical axis is included, the third and the sixth number are\nthe bottom and the top of the 3-dimensional bounding box.\n\nIf a feature has multiple spatial geometry properties, it is the decision of the\nserver whether only a single spatial geometry property is used to determine\nthe extent or all relevant geometries.",
         "explode": false,
         "in": "query",
         "name": "bbox",
@@ -37,6 +37,17 @@
         },
         "style": "form"
       },
+      "f": {
+        "description": "The optional format parameter determines the outputformat, default json.",
+        "explode": false,
+        "in": "query",
+        "name": "f",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
       "featureId": {
         "description": "local identifier of a feature",
         "in": "path",
@@ -56,6 +67,17 @@
           "default": 10,
           "maximum": 10000,
           "minimum": 1,
+          "type": "integer"
+        },
+        "style": "form"
+      },
+      "offset": {
+        "description": "The optional offset parameter offset the number of items that are presented in the response document.",
+        "explode": false,
+        "in": "query",
+        "name": "offset",
+        "required": false,
+        "schema": {
           "type": "integer"
         },
         "style": "form"
@@ -126,7 +148,7 @@
             }
           }
         },
-        "description": "Information about the feature collection with id `collectionId`.\n\nThe response contains a linkto the items in the collection \n(path `/collections/{collectionId}/items`,link relation `items`) \nas well as key information about the collection. This information \nincludes:\n\n* A local identifier for the collection that is unique for the dataset;\n* A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude);\n* An optional title and description for the collection;\n* An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data;\n* An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature')."
+        "description": "Information about the feature collection with id `collectionId`.\n\nThe response contains a link to the items in the collection\n(path `/collections/{collectionId}/items`, link relation `items`)\nas well as key information about the collection. This information\nincludes:\n\n* A local identifier for the collection that is unique for the dataset;\n* A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude);\n* An optional title and description for the collection;\n* An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data;\n* An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature')."
       },
       "Collections": {
         "content": {
@@ -223,7 +245,7 @@
             }
           }
         },
-        "description": "The feature collections shared by this API.\n\nThe dataset is organized as one or more feature collections. This resource \nprovides information about and access to the collections. \n\nThe response contains the list of collections. For each collection, a link \nto the items in the collection (path `/collections/{collectionId}/items`, \nlink relation `items`) as well as key information about the collection. \nThis information includes:\n\n* A local identifier for the collection that is unique for the dataset;\n* A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude);\n* An optional title and description for the collection;\n* An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data;\n* An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature')."
+        "description": "The feature collections shared by this API.\n\nThe dataset is organized as one or more feature collections. This resource\nprovides information about and access to the collections.\n\nThe response contains the list of collections. For each collection, a link\nto the items in the collection (path `/collections/{collectionId}/items`,\nlink relation `items`) as well as key information about the collection.\nThis information includes:\n\n* A local identifier for the collection that is unique for the dataset;\n* A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude);\n* An optional title and description for the collection;\n* An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data;\n* An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature')."
       },
       "ConformanceDeclaration": {
         "content": {
@@ -246,7 +268,7 @@
             }
           }
         },
-        "description": "The URIs of all conformance classes supported by the server.\n\nTo support \"generic\" clients that want to access multiple \nOGC API Features implementations - and not \"just\" a specific \nAPI / server, the server declares the conformance \nclasses it implements and conforms to."
+        "description": "The URIs of all conformance classes supported by the server.\n\nTo support \"generic\" clients that want to access multiple\nOGC API Features implementations - and not \"just\" a specific\nAPI / server, the server declares the conformance\nclasses it implements and conforms to."
       },
       "Feature": {
         "content": {
@@ -374,7 +396,7 @@
             }
           }
         },
-        "description": "The response is a document consisting of features in the collection. \nThe features included in the response are determined by the server \nbased on the query parameters of the request. To support access to \nlarger collections without overloading the client, the API supports \npaged access with links to the next page, if more features are selected \nthat the page size.\n\nThe `bbox` and `datetime` parameter can be used to select only a \nsubset of the features in the collection (the features that are in the \nbounding box or time interval). The `bbox` parameter matches all features \nin the collection that are not associated with a location, too. The \n`datetime` parameter matches all features in the collection that are \nnot associated with a time stamp or interval, too.\n\nThe `limit` parameter may be used to control the subset of the \nselected features that should be returned in the response, the page size.\nEach page may include information about the number of selected and \nreturned features (`numberMatched` and `numberReturned`) as well as \nlinks to support paging (link relation `next`)."
+        "description": "The response is a document consisting of features in the collection.\nThe features included in the response are determined by the server\nbased on the query parameters of the request. To support access to\nlarger collections without overloading the client, the API supports\npaged access with links to the next page, if more features are selected\nthat the page size.\n\nThe `bbox` and `datetime` parameter can be used to select only a\nsubset of the features in the collection (the features that are in the\nbounding box or time interval). The `bbox` parameter matches all features\nin the collection that are not associated with a location, too. The\n`datetime` parameter matches all features in the collection that are\nnot associated with a time stamp or interval, too.\n\nThe `limit` parameter may be used to control the subset of the\nselected features that should be returned in the response, the page size.\nEach page may include information about the number of selected and\nreturned features (`numberMatched` and `numberReturned`) as well as\nlinks to support paging (link relation `next`)."
       },
       "InvalidParameter": {
         "content": {
@@ -440,7 +462,7 @@
             }
           }
         },
-        "description": "The landing page provides links to the API definition \n(link relations `service-desc` and `service-doc`), \nthe Conformance declaration (path `/conformance`, \nlink relation `conformance`), and the Feature \nCollections (path `/collections`, link relation \n`data`)."
+        "description": "The landing page provides links to the API definition\n(link relations `service-desc` and `service-doc`),\nthe Conformance declaration (path `/conformance`,\nlink relation `conformance`), and the Feature\nCollections (path `/collections`, link relation\n`data`)."
       },
       "NotFound": {
         "description": "The requested URI was not found."
@@ -584,7 +606,7 @@
               "bbox": {
                 "description": "One or more bounding boxes that describe the spatial extent of the dataset.\nIn the Core only a single bounding box is supported. Extensions may support\nadditional areas. If multiple areas are provided, the union of the bounding\nboxes describes the spatial extent.",
                 "items": {
-                  "description": "West, south, east, north edges of the bounding box. The coordinates\nare in the coordinate reference system specified in `crs`. By default\nthis is WGS 84 longitude/latitude.",
+                  "description": "Each bounding box is provided as four or six numbers, depending on\nwhether the coordinate reference system includes a vertical axis\n(height or depth):\n\n* Lower left corner, coordinate axis 1\n* Lower left corner, coordinate axis 2\n* Minimum value, coordinate axis 3 (optional)\n* Upper right corner, coordinate axis 1\n* Upper right corner, coordinate axis 2\n* Maximum value, coordinate axis 3 (optional)\n\nThe coordinate reference system of the values is WGS 84 longitude/latitude\n(http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate\nreference system is specified in `crs`.\n\nFor WGS 84 longitude/latitude the values are in most cases the sequence of\nminimum longitude, minimum latitude, maximum longitude and maximum latitude.\nHowever, in cases where the box spans the antimeridian the first value\n(west-most box edge) is larger than the third value (east-most box edge).\n\nIf the vertical axis is included, the third and the sixth number are\nthe bottom and the top of the 3-dimensional bounding box.\n\nIf a feature has multiple spatial geometry properties, it is the decision of the\nserver whether only a single spatial geometry property is used to determine\nthe extent or all relevant geometries.",
                   "example": [
                     -180,
                     -90,
@@ -1008,30 +1030,34 @@
   },
   "info": {
     "contact": {
-      "email": "info@example.org",
-      "name": "Acme Corporation",
-      "url": "http://example.org/"
+      "name": "PDOK",
+      "url": "https://pdok.nl/contact"
     },
-    "description": "This is a sample OpenAPI definition that conforms to the conformance \nclasses \"Core\", \"GeoJSON\", \"HTML\" and \"OpenAPI 3.0\" of the draft\nstandard \"OGC API - Features - Part 1: Core\".\n\nThis example is a generic OGC API Features definition that uses path \nparameters to describe all feature collections and all features. \nThe generic OpenAPI definition does not provide any details on the \ncollections or the feature content. This information is only available \nfrom accessing the feature collection resources.\n\nThere is [another example](ogcapi-features-1-example2.yaml) \nthat specifies each collection explicitly.",
+    "description": "This is a Kadaster - PDOK OpenAPI definition that conforms to the conformance\nclasses \"Core\", \"GeoJSON\", \"HTML\" and \"OpenAPI 3.0\" of the draft\nstandard \"OGC API - Features - Part 1: Core\".\n\nThis is a generic OGC API Features definition that uses path\nparameters to describe all feature collections and all features.\nThe generic OpenAPI definition does not provide any details on the\ncollections or the feature content. This information is only available\nfrom accessing the feature collection resources.\n\nthat specifies each collection explicitly.",
     "license": {
       "name": "CC-BY 4.0 license",
       "url": "https://creativecommons.org/licenses/by/4.0/"
     },
-    "title": "A sample API conforming to the draft standard OGC API - Features - Part 1: Core",
-    "version": "1.0.0-draft.2"
+    "title": "Kadaster - PDOK API conforming to the draft standard OGC API - Features - Part 1: Core",
+    "version": "1.0.0"
   },
-  "openapi": "3.0.1",
+  "openapi": "3.0.2",
   "paths": {
     "/": {
       "get": {
         "description": "The landing page provides links to the API definition, the conformance\nstatements and to the feature collections in this dataset.",
         "operationId": "getLandingPage",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/f"
+          }
+        ],
         "responses": {
           "200": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/LandingPage"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/LandingPage"
           },
           "500": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
           }
         },
         "summary": "landing page",
@@ -1043,12 +1069,17 @@
     "/collections": {
       "get": {
         "operationId": "getCollections",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/f"
+          }
+        ],
         "responses": {
           "200": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Collections"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Collections"
           },
           "500": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
           }
         },
         "summary": "the feature collections in the dataset",
@@ -1062,18 +1093,21 @@
         "operationId": "describeCollection",
         "parameters": [
           {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId"
+          },
+          {
+            "$ref": "#/components/parameters/f"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Collection"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Collection"
           },
           "404": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/NotFound"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/NotFound"
           },
           "500": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
           }
         },
         "summary": "describe the feature collection with id `collectionId`",
@@ -1088,30 +1122,36 @@
         "operationId": "getFeatures",
         "parameters": [
           {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId"
           },
           {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/limit"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/limit"
           },
           {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/bbox"
+            "$ref": "#/components/parameters/offset"
           },
           {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/datetime"
+            "$ref": "#/components/parameters/f"
+          },
+          {
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/bbox"
+          },
+          {
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/datetime"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Features"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Features"
           },
           "400": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter"
           },
           "404": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/NotFound"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/NotFound"
           },
           "500": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
           }
         },
         "summary": "fetch features",
@@ -1126,21 +1166,24 @@
         "operationId": "getFeature",
         "parameters": [
           {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId"
           },
           {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/featureId"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/featureId"
+          },
+          {
+            "$ref": "#/components/parameters/f"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Feature"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Feature"
           },
           "404": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/NotFound"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/NotFound"
           },
           "500": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
           }
         },
         "summary": "fetch a single feature",
@@ -1151,14 +1194,19 @@
     },
     "/conformance": {
       "get": {
-        "description": "A list of all conformance classes specified in a standard that the \nserver conforms to.",
+        "description": "A list of all conformance classes specified in a standard that the\nserver conforms to.",
         "operationId": "getConformanceDeclaration",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/f"
+          }
+        ],
         "responses": {
           "200": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ConformanceDeclaration"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ConformanceDeclaration"
           },
           "500": {
-            "$ref": "https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
+            "$ref": "https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError"
           }
         },
         "summary": "information about specifications that this API conforms to",
@@ -1170,8 +1218,8 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8080",
-      "description": "Local server"
+      "url": "download.pdok.io/bgt/oaf/v1_0",
+      "description": "Production server"
     }
   ],
   "tags": [

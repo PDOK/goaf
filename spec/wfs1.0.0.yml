@@ -1,0 +1,170 @@
+openapi: 3.0.2
+info:
+  title: "Kadaster - PDOK API conforming to the draft standard OGC API - Features - Part 1: Core"
+  version: '1.0.0'
+  description: |-
+    This is a Kadaster - PDOK OpenAPI definition that conforms to the conformance
+    classes "Core", "GeoJSON", "HTML" and "OpenAPI 3.0" of the draft
+    standard "OGC API - Features - Part 1: Core".
+
+    This is a generic OGC API Features definition that uses path
+    parameters to describe all feature collections and all features.
+    The generic OpenAPI definition does not provide any details on the
+    collections or the feature content. This information is only available
+    from accessing the feature collection resources.
+
+    that specifies each collection explicitly.
+  contact:
+    name: PDOK
+    url: 'https://pdok.nl/contact'
+  license:
+    name: CC-BY 4.0 license
+    url: 'https://creativecommons.org/licenses/by/4.0/'
+servers:
+  - url: 'download.pdok.io/bgt/oaf/v1_0'
+    description: Production server
+tags:
+  - name: Capabilities
+    description: |-
+      essential characteristics of this API
+  - name: Data
+    description: |-
+      access to data (features)
+components:
+  parameters:
+    offset:
+      name: offset
+      in: query
+      description: |-
+        The optional offset parameter offset the number of items that are presented in the response document.
+
+      required: false
+      schema:
+        type: integer
+      style: form
+      explode: false
+    f:
+      name: f
+      in: query
+      description: |-
+        The optional format parameter determines the outputformat, default json.
+      required: false
+      schema:
+        type: string
+      style: form
+      explode: false
+paths:
+  '/':
+    get:
+      tags:
+        - Capabilities
+      summary: landing page
+      description: |-
+        The landing page provides links to the API definition, the conformance
+        statements and to the feature collections in this dataset.
+      operationId: getLandingPage
+      parameters:
+        - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/LandingPage'
+        '500':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError'
+  '/conformance':
+    get:
+      tags:
+        - Capabilities
+      summary: information about specifications that this API conforms to
+      description: |-
+        A list of all conformance classes specified in a standard that the
+        server conforms to.
+      operationId: getConformanceDeclaration
+      parameters:
+        - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ConformanceDeclaration'
+        '500':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError'
+  '/collections':
+    get:
+      tags:
+        - Capabilities
+      summary: the feature collections in the dataset
+      operationId: getCollections
+      parameters:
+        - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Collections'
+        '500':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError'
+  '/collections/{collectionId}':
+    get:
+      tags:
+        - Capabilities
+      summary: |-
+        describe the feature collection with id `collectionId`
+      operationId: describeCollection
+      parameters:
+        - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId'
+        - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Collection'
+        '404':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/NotFound'
+        '500':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError'
+  '/collections/{collectionId}/items':
+    get:
+      tags:
+        - Data
+      summary: fetch features
+      description: |-
+        Fetch features of the feature collection with id `collectionId`.
+
+        Every feature in a dataset belongs to a collection. A dataset may
+        consist of multiple feature collections. A feature collection is often a
+        collection of features of a similar type, based on a common schema.
+
+        Use content negotiation to request HTML or GeoJSON.
+      operationId: getFeatures
+      parameters:
+        - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId'
+        - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/f'
+        - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/bbox'
+        - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/datetime'
+      responses:
+        '200':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Features'
+        '400':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter'
+        '404':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/NotFound'
+        '500':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError'
+  '/collections/{collectionId}/items/{featureId}':
+    get:
+      tags:
+        - Data
+      summary: fetch a single feature
+      description: |-
+        Fetch the feature with id `featureId` in the feature collection
+        with id `collectionId`.
+
+        Use content negotiation to request HTML or GeoJSON.
+      operationId: getFeature
+      parameters:
+        - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/collectionId'
+        - $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/parameters/featureId'
+        - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/Feature'
+        '404':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/NotFound'
+        '500':
+          $ref: 'https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml#/components/responses/ServerError'

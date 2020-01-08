@@ -42,7 +42,6 @@ func GetContentFields() map[string]string {
 	return ct
 }
 
-
 func ProcesLinksForParams(links []cg.Link, queryParams url.Values) error {
 	for l := range links {
 		path, err := url.Parse(links[l].Href)

@@ -1,0 +1,19 @@
+ApplicationId: POSTGIS-PRD
+Layers:
+  - SchemaName: bgt_wfs3_v1
+    TableName: pand
+    Identifier: pand
+    Description: BGT pand
+    GeometryColumn: _geom
+    GeometryType: GEOMETRY
+    FeatureIDColumn: _version
+    BBoxGeometryColumn: _bbox
+    VendorSpecificParameters: ['lokaalID','bronhouder']
+    OffsetColumn: _offset_id
+    BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999]
+    SrsId: 28992
+    FeaturesJSONB: true
+    Features:
+      - properties
+BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999] # bounding box of all layers
+SrsId: 28992 # and the corresponding projection

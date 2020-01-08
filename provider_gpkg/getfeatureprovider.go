@@ -14,7 +14,7 @@ type GetFeatureProvider struct {
 
 func (provider *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (cg.Provider, error) {
 
-	collectionId, featureId := cg.ParametersForGetFeature(r)
+	collectionId, featureId, _ := cg.ParametersForGetFeature(r)
 
 	featureIdParam := featureId
 	bboxParam := provider.GeoPackage.DefaultBBox

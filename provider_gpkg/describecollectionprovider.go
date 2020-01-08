@@ -15,7 +15,7 @@ func (provider *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Reques
 	path := r.URL.Path // collections/{{collectionId}}
 	ct := r.Header.Get("Content-Type")
 
-	collectionId := ParametersForDescribeCollection(r)
+	collectionId, _ := ParametersForDescribeCollection(r)
 
 	p := &DescribeCollectionProvider{}
 

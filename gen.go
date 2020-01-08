@@ -43,14 +43,6 @@ func convfunc(path string, operation openapi3.Operation) string {
 
 	builder.WriteString(fmt.Sprintf("func ParametersFor%s(r *http.Request) ", normalize(operation.OperationID)))
 
-	limitParam := operation.Parameters.GetByInAndName("query", "limit")
-	if limitParam != nil {
-		offsetParameter := &openapi3.ParameterRef{
-			Value: &openapi3.Parameter{Name: "offset", In: "query", Schema: &openapi3.SchemaRef{Value: &openapi3.Schema{Type: "integer"}}},
-		}
-		operation.Parameters = append(operation.Parameters, offsetParameter)
-	}
-
 	// parameters
 	builder.WriteString("(")
 	paramsBuilder(operation.Parameters, &builder, true)
@@ -190,16 +182,16 @@ func getType(stringOnly bool, schemaType string) string {
 	return schemaType
 }
 
-func main_gen() {
+func main_() {
 
 	loader := openapi3.NewSwaggerLoader()
 	loader.IsExternalRefsAllowed = true
 
-	u, _ := url.Parse("https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/ogcapi-features-1.yaml")
+	u, _ := url.Parse("https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml")
 	components, err := loader.LoadSwaggerFromURI(u)
 
 	// file based spec based upon https://github.com/opengeospatial/WFS_FES/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml
-	filepath := "spec/wfs3.0_org.yml"
+	filepath := "spec/wfs1.0.0.yml"
 	swagger, err := loader.LoadSwaggerFromFile(filepath)
 	if err != nil {
 		log.Fatalf("Got error reading swagger file %v", err)
@@ -207,11 +199,14 @@ func main_gen() {
 	}
 
 	// merge
+	for k, v := range swagger.Components.Parameters {
+		components.Components.Parameters[k] = v
+	}
 	swagger.Components = components.Components
 
 	out, err := json.Marshal(swagger)
 
-	err = ioutil.WriteFile("spec/wfs3.0.json", out, 0644)
+	err = ioutil.WriteFile("spec/wfs1.0.0.json", out, 0644)
 	if err != nil {
 		log.Fatalf("Got error writing combined swagger file %v", err)
 		return

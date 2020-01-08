@@ -15,7 +15,7 @@ type GetFeatureProvider struct {
 
 func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Provider, error) {
 
-	collectionId, featureId := cg.ParametersForGetFeature(r)
+	collectionId, featureId, _ := cg.ParametersForGetFeature(r)
 
 	featureIdParam := featureId
 	bboxParam := provider.PostGis.BBox
@@ -31,7 +31,19 @@ func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Prov
 			continue
 		}
 
-		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.db, cn, collectionId, 0, 1, featureIdParam, bboxParam)
+		pathItem := provider.ApiProcessed.Paths.Find("/collections/pand/items/{featureId}")
+		if pathItem == nil {
+			return p, errors.New("Invalid path :" + path)
+		}
+
+		for k := range r.URL.Query() {
+			if notfound := pathItem.Get.Parameters.GetByInAndName("query", k) == nil; notfound {
+				return p, errors.New("Invalid query parameter :" + k)
+			}
+		}
+
+		whereMap := make(map[string]string)
+		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.db, cn, whereMap, 0, 1, featureIdParam, bboxParam)
 
 		if err != nil {
 			return nil, err
@@ -50,10 +62,10 @@ func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Prov
 			return p, errors.New(fmt.Sprintf("Feature with id: %s not found", string(featureId)))
 		}
 
-		break
+		return p, nil
 	}
 
-	return p, nil
+	return p, errors.New("Cannot find layer : " + collectionId)
 }
 
 func (provider *GetFeatureProvider) Provide() (interface{}, error) {

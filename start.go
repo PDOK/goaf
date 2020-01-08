@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/getkin/kin-openapi/openapi3"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -25,7 +26,7 @@ func main() {
 	bindPort := flag.Int("p", envInt("BIND_PORT", 8080), "server internal bind address, default; 8080")
 
 	serviceEndpoint := flag.String("endpoint", envString("ENDPOINT", "http://localhost:8080"), "server endpoint for proxy reasons, default; http://localhost:8080")
-	serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH", "spec/wfs3.0.json"), "swagger openapi spec")
+	serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH", "spec/wfs1.0.0.json"), "swagger openapi spec")
 	defaultReturnLimit := flag.Int("limit", envInt("LIMIT", 100), "limit, default: 100")
 	maxReturnLimit := flag.Int("limitmax", envInt("LIMIT_MAX", 500), "max limit, default: 1000")
 	providerName := flag.String("provider", envString("PROVIDER", ""), "postgis or gpkg")
@@ -46,10 +47,10 @@ func main() {
 
 	// stage 2: Create providers based upon provider name
 	commonProvider := provider_common.NewCommonProvider(*serviceEndpoint, *serviceSpecPath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
-	providers := getProvider(providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
+	providers := getProvider(apiServer.Swagger, providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
 
 	if providers == nil {
-		log.Fatal("Incorrect provider provided valid names are: gpkg,postgis")
+		log.Fatal("Incorrect provider provided valid names are: gpkg, postgis")
 	}
 
 	// stage 3: Add providers, also initialises them
@@ -83,12 +84,12 @@ func main() {
 
 }
 
-func getProvider(providerName *string, commonProvider provider_common.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
+func getProvider(api *openapi3.Swagger, providerName *string, commonProvider provider_common.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
 	if *providerName == "gpkg" {
-		return addGeopackageProviders(commonProvider, *crsMapFilePath, *gpkgFilePath, *featureIdKey, )
+		return addGeopackageProviders(api, commonProvider, *crsMapFilePath, *gpkgFilePath, *featureIdKey)
 	}
 	if *providerName == "postgis" {
-		return postgis.NewPostgisWithCommonProvider(commonProvider, *configFilePath, *connectionStr, )
+		return postgis.NewPostgisWithCommonProvider(api, commonProvider, *configFilePath, *connectionStr)
 	}
 	return nil
 }
@@ -103,7 +104,7 @@ func addHealthHandler(router *server.RegexpHandler) {
 	})
 }
 
-func addGeopackageProviders(commonProvider provider_common.CommonProvider, crsMapFilePath string, gpkgFilePath string, featureIdKey string) *gpkg.GeoPackageProvider {
+func addGeopackageProviders(api *openapi3.Swagger, commonProvider provider_common.CommonProvider, crsMapFilePath string, gpkgFilePath string, featureIdKey string) *gpkg.GeoPackageProvider {
 	crsMap := make(map[string]string)
 	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
 	if err != nil {
@@ -115,7 +116,7 @@ func addGeopackageProviders(commonProvider provider_common.CommonProvider, crsMa
 			log.Printf("Could not unmarshal crsmap file: %s, using default CRS Map", crsMapFilePath)
 		}
 	}
-	return gpkg.NewGeopackageWithCommonProvider(commonProvider, gpkgFilePath, crsMap, featureIdKey)
+	return gpkg.NewGeopackageWithCommonProvider(api, commonProvider, gpkgFilePath, crsMap, featureIdKey)
 }
 
 func envString(key, defaultValue string) string {

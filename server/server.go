@@ -23,7 +23,7 @@ type Server struct {
 	MaxReturnLimit     uint64
 	DefaultReturnLimit uint64
 	Providers          cg.Providers
-	swagger            *openapi3.Swagger
+	Swagger            *openapi3.Swagger
 	Templates          *template.Template
 }
 
@@ -35,7 +35,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 		return nil, err
 	}
 
-	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnLimit, swagger: swagger}
+	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnLimit, Swagger: swagger}
 
 	// add templates to server
 	server.Templates = template.Must(template.New("templates").Funcs(
@@ -57,7 +57,8 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 				}
 				return dict, nil
 			},
-		}).ParseGlob("/templates/*"))
+			//}).ParseGlob("/templates/*")) // prod
+		}).ParseGlob("templates/*")) // IDE
 
 	server.ContentTypes = pc.GetContentTypes()
 	return server, nil

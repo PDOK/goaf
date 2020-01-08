@@ -20,21 +20,23 @@ type IdNotFoundError struct {
 }
 
 type PostgisLayer struct {
-	SchemaName      string `yaml:"SchemaName,omitempty"`
-	TableName       string `yaml:"TableName,omitempty"`
-	Description     string `yaml:"Description,omitempty"`
-	Identifier      string `yaml:"Identifier,omitempty"`
-	Filter          string `yaml:"Filter,omitempty"`
-	GeometryColumn  string `yaml:"GeometryColumn,omitempty"`
-	GeometryType    string `yaml:"GeometryType,omitempty"`
-	FeatureIDColumn string `yaml:"FeatureIDColumn,omitempty"`
-	OffsetColumn    string `yaml:"OffsetColumn,omitempty"`
+	SchemaName               string   `yaml:"SchemaName,omitempty"`
+	TableName                string   `yaml:"TableName,omitempty"`
+	Description              string   `yaml:"Description,omitempty"`
+	Identifier               string   `yaml:"Identifier,omitempty"`
+	Filter                   string   `yaml:"Filter,omitempty"`
+	GeometryColumn           string   `yaml:"GeometryColumn,omitempty"`
+	VendorSpecificParameters []string `yaml:"VendorSpecificParameters,omitempty"`
+	GeometryType             string   `yaml:"GeometryType,omitempty"`
+	FeatureIDColumn          string   `yaml:"FeatureIDColumn,omitempty"`
+	OffsetColumn             string   `yaml:"OffsetColumn,omitempty"`
 
 	BBoxGeometryColumn string `yaml:"BBoxGeometryColumn,omitempty"`
 
-	BBox     []float64 `yaml:"BBox,omitempty"`
-	SrsId    int64     `yaml:"SrsId,omitempty"`
-	Features []string  `yaml:"Features,omitempty"`
+	BBox          []float64 `yaml:"BBox,omitempty"`
+	SrsId         int64     `yaml:"SrsId,omitempty"`
+	FeaturesJSONB bool      `yaml:"FeaturesJSONB,omitempty"`
+	Features      []string  `yaml:"Features,omitempty"`
 }
 
 type Postgis struct {
@@ -86,7 +88,7 @@ func (postgis Postgis) Close() error {
 	return postgis.db.Close()
 }
 
-func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer PostgisLayer, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox []float64) (result FeatureCollectionGeoJSON, err error) {
+func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer PostgisLayer, whereMap map[string]string, offset uint64, limit uint64, featureId interface{}, bbox []float64) (result FeatureCollectionGeoJSON, err error) {
 	result = FeatureCollectionGeoJSON{}
 	if len(bbox) > 4 {
 		err = errors.New("bbox with 6 elements not supported")
@@ -104,35 +106,55 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 	tableName := fmt.Sprintf(`%s.%s`, layer.SchemaName, layer.TableName)
 	selectClause := fmt.Sprintf(`l."%s", st_asgeojson(st_forcesfs(l."%s")) as %s, l."%s"`, FeatureIDColumn, layer.GeometryColumn, layer.GeometryColumn, layer.OffsetColumn)
 
+	// SELECT FEATURES
 	for _, tf := range layer.Features {
-
 		if tf == layer.GeometryColumn || tf == FeatureIDColumn {
 			continue
 		}
 		selectClause += fmt.Sprintf(`, l."%v"`, tf)
 	}
 
+	args := []interface{}{bbox[0], bbox[1], bbox[2], bbox[3], layer.SrsId, offset, limit}
+
 	additionalWhere := ""
-	if featureId != nil {
-		additionalWhere = fmt.Sprintf(` l."%s"=$8 AND `, FeatureIDColumn)
-	}
+	additionalWhereIndex := 8
 
 	if layer.Filter != "" {
 		additionalWhere += fmt.Sprintf(` %s AND `, layer.Filter)
 	}
 
+	if featureId != nil {
+		additionalWhere = fmt.Sprintf(` l."%s"=$%d AND `, FeatureIDColumn, additionalWhereIndex)
+		args = append(args, featureId)
+		additionalWhereIndex++
+	}
+	// no JSONB features where clause as usual
+	if !layer.FeaturesJSONB && len(whereMap) > 0 {
+		for k := range whereMap {
+			additionalWhere = fmt.Sprintf(` l."%s"=$%d AND `, k, additionalWhereIndex)
+			args = append(args, featureId)
+			additionalWhereIndex++
+		}
+	}
+	// JSONB
+	if layer.FeaturesJSONB && len(whereMap) > 0 {
+		// JSONB COLUMN
+		JSONBColumn := layer.Features[0]
+		//l."properties"@>  '{"lokaalID": "G1978.7afeb17a5c384f6bb08c2350e3f15b07"}'
+		data, marshalErr := json.Marshal(whereMap)
+		if marshalErr != nil {
+			log.Printf("Could not marshal map %v", whereMap)
+			err = marshalErr
+			return
+		}
+		additionalWhere = fmt.Sprintf(` l."%s"@> '%s' AND `, JSONBColumn, string(data))
+
+	}
+
 	// query information with selection
 	query := fmt.Sprintf(`SELECT %s FROM %s l WHERE %s st_intersects(st_makeenvelope($1,$2,$3,$4,$5), l."%s") AND l."%s" > $6 ORDER BY l."%s" LIMIT $7;`,
 		selectClause, tableName, additionalWhere, layer.GeometryColumn, layer.OffsetColumn, layer.OffsetColumn)
-
-	var rows *sqlx.Rows
-
-	// query params to prevent sql injection
-	if featureId != nil {
-		rows, err = db.Queryx(query, bbox[0], bbox[1], bbox[2], bbox[3], layer.SrsId, offset, limit, featureId)
-	} else {
-		rows, err = db.Queryx(query, bbox[0], bbox[1], bbox[2], bbox[3], layer.SrsId, offset, limit)
-	}
+	rows, err := db.Queryx(query, args...)
 
 	if err != nil {
 		log.Printf("err during query: %v - %v", query, err)

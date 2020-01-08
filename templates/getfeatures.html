@@ -209,8 +209,8 @@
             <th></th>
             <th></th>
             <th>ID</th>
-            {{$feature :=  index $result.Features 0}}
-            {{range  $k, $v :=  $feature.Properties}}
+            {{$feature0 :=  index $result.Features 0}}
+            {{range  $k, $v :=  $feature0.Properties}}
                 <th>{{$k}}</th>
             {{end}}
 
@@ -219,13 +219,14 @@
 
         <tbody>
         {{range  $i, $feature := $result.Features}}
+
             <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
                 {{range  $link := $feature.Links}}
                     <td><a href="{{$link.Href}}">{{$link.Type}}</a></td>
                 {{end}}
                 <td>{{$feature.ID}}</td>
-                {{range  $k, $v :=  $feature.Properties}}
-                    <td>{{$v}}</td>
+                {{range  $k, $v :=  $feature0.Properties}}
+                    <td>{{index $feature.Properties $k}}</td>
                 {{end}}
             </tr>
         {{end}}

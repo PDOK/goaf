@@ -16,6 +16,7 @@ type Provider interface {
 
 type Providers interface {
 	Init() error
+	NewGetApiProvider(r *http.Request) (Provider, error)
 
 	/*
 	   The landing page provides links to the API definition, the conformance
@@ -62,25 +63,54 @@ type Providers interface {
 // generate convenient functions to retrieve path params
 
 // GetLandingPage
-// no parameters present
+func ParametersForGetLandingPage(r *http.Request) (f string) {
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
+
+	return
+}
 
 // GetCollections
-// no parameters present
+func ParametersForGetCollections(r *http.Request) (f string) {
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
+
+	return
+}
 
 // DescribeCollection
-func ParametersForDescribeCollection(r *http.Request) (collectionId string) {
+func ParametersForDescribeCollection(r *http.Request) (collectionId string, f string) {
 	pathSplit := strings.Split(r.URL.Path, "/")
 	collectionId = pathSplit[2]
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
+
 	return
 }
 
 // GetFeatures
-func ParametersForGetFeatures(r *http.Request) (collectionId string, limit string, bbox string, datetime string, offset string) {
+func ParametersForGetFeatures(r *http.Request) (collectionId string, limit string, offset string, f string, bbox string, datetime string) {
 	pathSplit := strings.Split(r.URL.Path, "/")
 	collectionId = pathSplit[2]
 	limitArray, ok := r.URL.Query()["limit"]
 	if ok {
 		limit = limitArray[0]
+	}
+
+	offsetArray, ok := r.URL.Query()["offset"]
+	if ok {
+		offset = offsetArray[0]
+	}
+
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
 	}
 
 	bboxArray, ok := r.URL.Query()["bbox"]
@@ -93,21 +123,28 @@ func ParametersForGetFeatures(r *http.Request) (collectionId string, limit strin
 		datetime = datetimeArray[0]
 	}
 
-	offsetArray, ok := r.URL.Query()["offset"]
+	return
+}
+
+// GetFeature
+func ParametersForGetFeature(r *http.Request) (collectionId string, featureId string, f string) {
+	pathSplit := strings.Split(r.URL.Path, "/")
+	collectionId = pathSplit[2]
+	featureId = pathSplit[4]
+	fArray, ok := r.URL.Query()["f"]
 	if ok {
-		offset = offsetArray[0]
+		f = fArray[0]
 	}
 
 	return
 }
 
-// GetFeature
-func ParametersForGetFeature(r *http.Request) (collectionId string, featureId string) {
-	pathSplit := strings.Split(r.URL.Path, "/")
-	collectionId = pathSplit[2]
-	featureId = pathSplit[4]
+// GetConformanceDeclaration
+func ParametersForGetConformanceDeclaration(r *http.Request) (f string) {
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
+
 	return
 }
-
-// GetConformanceDeclaration
-// no parameters present

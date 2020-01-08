@@ -1,6 +1,7 @@
 package provider_postgis
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +15,8 @@ type GetFeaturesProvider struct {
 }
 
 func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
-	collectionId, limit, bbox, time, offset := cg.ParametersForGetFeatures(r)
+
+	collectionId, limit, offset, _, bbox, time := cg.ParametersForGetFeatures(r)
 
 	limitParam := pc.ParseLimit(limit, provider.CommonProvider.DefaultReturnLimit, provider.CommonProvider.MaxReturnLimit)
 	offsetParam := pc.ParseUint(offset, 0)
@@ -24,10 +26,21 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 		log.Println("Time selection currently not implemented")
 	}
 
-	path := r.URL.Path // collections/{{collectionId}}/items
+	path := r.URL.Path // collections/{collectionId}/items
 	ct := r.Header.Get("Content-Type")
 
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", provider.PostGis.SrsId)}
+
+	pathItem := provider.ApiProcessed.Paths.Find(path)
+	if pathItem == nil {
+		return p, errors.New("Invalid path :" + path)
+	}
+
+	for k := range r.URL.Query() {
+		if notfound := pathItem.Get.Parameters.GetByInAndName("query", k) == nil; notfound {
+			return p, errors.New("Invalid query parameter :" + k)
+		}
+	}
 
 	for _, cn := range provider.PostGis.Layers {
 		// maybe convert to map, but not thread safe!
@@ -35,7 +48,14 @@ func (provider *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (cg.Pro
 			continue
 		}
 
-		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.db, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
+		whereMap := make(map[string]string)
+		for i := range cn.VendorSpecificParameters {
+			if qpv, exists := r.URL.Query()[cn.VendorSpecificParameters[i]]; exists {
+				whereMap[cn.VendorSpecificParameters[i]] = qpv[0]
+			}
+		}
+
+		fcGeoJSON, err := provider.PostGis.GetFeatures(r.Context(), provider.PostGis.db, cn, whereMap, offsetParam, limitParam, nil, bboxParam)
 
 		if err != nil {
 			return nil, err

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
-	pc "wfs3_server/provider_common"
 )
 
 type routes []*route
@@ -53,7 +52,7 @@ func (s routes) Less(i, j int) bool {
 
 func (s *Server) Router() *RegexpHandler {
 	router := &RegexpHandler{}
-	router.HandleFunc(regexp.MustCompile("/api"), s.HandleForProvider(pc.NewGetApiProvider(s.ServiceSpecPath)))
+	router.HandleFunc(regexp.MustCompile("/api"), s.HandleForProvider(s.Providers.NewGetApiProvider))
 	// path: /
 	router.HandleFunc(regexp.MustCompile("/"), s.HandleForProvider(s.Providers.NewGetLandingPageProvider))
 	// path: /collections

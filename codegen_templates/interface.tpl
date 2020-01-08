@@ -9,13 +9,14 @@ import (
 )
 
 type Provider interface {
-    Provide() (interface{}, error)
-    MarshalJSON(interface{}) ([]byte, error)
-    MarshalHTML(interface{}) ([]byte, error)
+	SrsId() string
+	String() string
+	Provide() (interface{}, error)
 }
 
 type Providers interface {
     Init() error
+    NewGetApiProvider(r *http.Request) (Provider, error)
 {{range $key, $value := .Paths}}
 /*
 {{.Get.Description}}
