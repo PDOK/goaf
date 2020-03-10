@@ -34,6 +34,20 @@ func main() {
 	crsMapFilePath := flag.String("crs", envString("PATH_CRS", ""), "crs file path")
 	configFilePath := flag.String("config", envString("PATH_CONFIG", ""), "configfile path")
 	connectionStr := flag.String("connection", envString("CONNECTION", "host=127.0.0.1 port=5432 database=bgt_v1 user=postgres password=postgres sslmode=disable"), "connection string postgis")
+	// alternative database configuration
+	if connectionStr == nil && *providerName == "postgis"{
+		withDBHost := flag.String("db-host", envString("DB_HOST", "bgt-cloud-db.postgres.database.azure.com"), "database host")
+		withDBPort := flag.Int("db-port", envInt("DB_PORT", 5432), "database port number")
+		WithDBName := flag.String("db-name", envString("DB_NAME", "pdok"), "database name")
+		withDBSSL := flag.String("db-ssl-mode", envString("DB_SSL_MODE", "disable"), "ssl-mode")
+		withDBUser := flag.String("db-user-name", envString("DB_USERNAME", "postgres"), "database username")
+		withDBPassword := flag.String("db-password", envString("DB_PASSWORD", ""), "database password")
+
+		connectionStrAlt := fmt.Sprintf("host=%s port=%d database=%s sslmode=%s user=%s password=%s",
+			*withDBHost, *withDBPort, *WithDBName, *withDBSSL, *withDBUser, *withDBPassword)
+
+		connectionStr = &connectionStrAlt
+	}
 
 	featureIdKey := flag.String("featureId", envString("FEATURE_ID", ""), "Default feature identification or else first column definition (fid)")
 

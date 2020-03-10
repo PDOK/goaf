@@ -3,11 +3,10 @@ Layers:
   - SchemaName: bgt_wfs3_v1 #database schema name
     TableName: bak #database table/view name
     Identifier: bak #collection name in api response
-    Filter: (l."properties"->'eindRegistratie') is null
     Description: BGT Bak #Description of the collection
     GeometryColumn: _geom #column containing the SFS geometry
     GeometryType: GEOMETRY # has currently no use
-    FeatureIDColumn: _id #the unique indexed identifier for a given feature
+    FeatureIDColumn: _version #the unique indexed identifier for a given feature
     BBoxGeometryColumn: _bbox #extra column with bounding box selection index for intersects query, simplification and speedup
     OffsetColumn: _offset_id # extra column to determine next keyset paging, should be numeric, indexed and unique, could be equal to feature id
     BBox: [-285401.92, 22598.08, 595401.9199999999, 903401.9199999999] # Bounding box of all features can be used to display subset of features
