@@ -21,7 +21,7 @@ info:
     name: CC-BY 4.0 license
     url: 'https://creativecommons.org/licenses/by/4.0/'
 servers:
-  - url: 'download.pdok.io/bgt/oaf/v1_0'
+  - url: 'https://download.pdok.io/bgt/oaf/v1_0'
     description: Production server
 tags:
   - name: Capabilities
