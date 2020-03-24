@@ -1218,7 +1218,7 @@
   },
   "servers": [
     {
-      "url": "https://download.pdok.io/bgt/oaf/v1_0",
+      "url": "/bgt/oaf/v1_0",
       "description": "Production server"
     }
   ],
