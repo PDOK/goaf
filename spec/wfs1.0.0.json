@@ -1218,8 +1218,14 @@
   },
   "servers": [
     {
-      "url": "/bgt/oaf/v1_0",
-      "description": "Production server"
+      "url": "/{type}/oaf/v1_0",
+      "description": "Production server",
+      "variables" : {
+        "type" : {
+          "default" : "bgt",
+          "description" : "Different types of the WFS may be launched, i.e. bgt or bgt-hist."  
+        }
+      }
     }
   ],
   "tags": [
