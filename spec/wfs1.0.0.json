@@ -1216,18 +1216,6 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "/{type}/oaf/v1_0",
-      "description": "Production server",
-      "variables" : {
-        "type" : {
-          "default" : "bgt",
-          "description" : "Different types of the WFS may be launched, i.e. bgt or bgt-hist."  
-        }
-      }
-    }
-  ],
   "tags": [
     {
       "description": "essential characteristics of this API",

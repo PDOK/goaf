@@ -34,6 +34,8 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 		log.Fatal("Specification initialisation error:", err)
 		return nil, err
 	}
+	// Set endpoint
+	swagger.AddServer(&openapi3.Server{URL: serviceEndpoint, Description: "Production server"})
 
 	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnLimit, Swagger: swagger}
 
