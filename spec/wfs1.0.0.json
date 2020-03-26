@@ -1216,12 +1216,6 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "download.pdok.io/bgt/oaf/v1_0",
-      "description": "Production server"
-    }
-  ],
   "tags": [
     {
       "description": "essential characteristics of this API",
