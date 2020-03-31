@@ -33,9 +33,9 @@ func main() {
 	gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG", ""), "geopackage path")
 	crsMapFilePath := flag.String("crs", envString("PATH_CRS", ""), "crs file path")
 	configFilePath := flag.String("config", envString("PATH_CONFIG", ""), "configfile path")
-	connectionStr := flag.String("connection", envString("CONNECTION", "host=127.0.0.1 port=5432 database=bgt_v1 user=postgres password=postgres sslmode=disable"), "connection string postgis")
+	connectionStr := flag.String("connection", envString("CONNECTION", ""), "connection string postgis")
 	// alternative database configuration
-	if connectionStr == nil && *providerName == "postgis"{
+	if *connectionStr == "" && *providerName == "postgis"{
 		withDBHost := flag.String("db-host", envString("DB_HOST", "bgt-cloud-db.postgres.database.azure.com"), "database host")
 		withDBPort := flag.Int("db-port", envInt("DB_PORT", 5432), "database port number")
 		WithDBName := flag.String("db-name", envString("DB_NAME", "pdok"), "database name")
