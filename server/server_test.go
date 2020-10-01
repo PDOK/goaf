@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +11,8 @@ import (
 	"wfs3_server/codegen"
 	"wfs3_server/provider_common"
 	gpkg "wfs3_server/provider_gpkg"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
@@ -21,7 +22,7 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	serverEnppoint := "http://testhost:1234"
 
 	commonProvider := provider_common.NewCommonProvider(serverEnppoint, "../spec/wfs3.0.json", 100, 500)
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(commonProvider, "../tst/bgt_wgs84.gpkg", crsMap, "fid")
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../tst/bgt_wgs84.gpkg", crsMap, "fid")
 
 	server, _ := NewServer(serverEnppoint, "../spec/wfs3.0.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -91,7 +92,7 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	serverEnppoint := "http://testhost:1234"
 
 	commonProvider := provider_common.NewCommonProvider(serverEnppoint, "../spec/wfs3.0.json", 100, 500)
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(commonProvider, "../tst/bgt_wgs84.gpkg", crsMap, "fid")
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../tst/bgt_wgs84.gpkg", crsMap, "fid")
 
 	server, _ := NewServer(serverEnppoint, "../spec/wfs3.0.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
