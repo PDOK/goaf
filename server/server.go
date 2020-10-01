@@ -60,7 +60,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 				return dict, nil
 			},
 			//}).ParseGlob("/templates/*")) // prod
-		}).ParseGlob("templates/*")) // IDE
+		}).ParseGlob("../templates/*")) // IDE
 
 	server.ContentTypes = pc.GetContentTypes()
 	return server, nil
@@ -70,7 +70,7 @@ func (s *Server) SetProviders(providers cg.Providers) (*Server, error) {
 	err := providers.Init()
 
 	if err != nil {
-		log.Fatal("Provider initialisation error:", err)
+		log.Fatal("Provider initialiation error:", err)
 		return nil, err
 	}
 	s.Providers = providers
@@ -128,14 +128,14 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (cg.Provid
 			}
 
 		} else if contentResponse == pc.HTMLContentType {
-			providerId := provider.String()
+			providerID := provider.String()
 
 			rmap := make(map[string]interface{})
 			rmap["result"] = result
 			rmap["srsid"] = provider.SrsId()
 
 			b := new(bytes.Buffer)
-			err = s.Templates.ExecuteTemplate(b, providerId+".html", rmap)
+			err = s.Templates.ExecuteTemplate(b, providerID+".html", rmap)
 			encodedContent = b.Bytes()
 
 			if err != nil {

@@ -24,7 +24,7 @@ func TestNewGetLandingPageProvider(t *testing.T) {
 
 	links := provided.(*GetLandingPageProvider).Links
 
-	if len(links) != 4 {
-		t.Errorf("GetLandingPageProvider.Provide() has incorrect number of links = %v, want %v", len(links), 4)
+	if len(links) != 12 {
+		t.Errorf("GetLandingPageProvider.Provide() has incorrect number of links = %v, want %v", len(links), 12)
 	}
 }
