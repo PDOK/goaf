@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -17,6 +16,7 @@ import (
 	"wfs3_server/server"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"gopkg.in/yaml.v2"
 
 	"github.com/rs/cors"
 )
@@ -125,12 +125,17 @@ func addGeopackageProviders(api *openapi3.T, commonProvider provider_common.Comm
 	if err != nil {
 		log.Printf("Could not read crsmap file: %s, using default CRS Map", crsMapFilePath)
 	} else {
-		err := json.Unmarshal(csrMapFile, &crsMap)
+		err := yaml.Unmarshal(csrMapFile, &crsMap)
 		log.Print(crsMap)
 		if err != nil {
 			log.Printf("Could not unmarshal crsmap file: %s, using default CRS Map", crsMapFilePath)
 		}
 	}
+
+	if crsMap[`4326`] == `` {
+		crsMap[`4326`] = `http://www.opengis.net/def/crs/OGC/1.3/CRS84`
+	}
+
 	return gpkg.NewGeopackageWithCommonProvider(api, commonProvider, gpkgFilePath, crsMap, featureIdKey)
 }
 

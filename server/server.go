@@ -60,7 +60,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 				return dict, nil
 			},
 			//}).ParseGlob("/templates/*")) // prod
-		}).ParseGlob("../templates/*")) // IDE
+		}).ParseGlob("templates/*")) // IDE
 
 	server.ContentTypes = pc.GetContentTypes()
 	return server, nil
