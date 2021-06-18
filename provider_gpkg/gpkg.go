@@ -289,6 +289,10 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 					feature.Properties[colName] = v
 				case time.Time:
 					feature.Properties[colName] = v
+				case string:
+					feature.Properties[colName] = v
+				case bool:
+					feature.Properties[colName] = v
 				default:
 					log.Printf("unexpected type for sqlite column data: %v: %T", cols[i], v)
 				}
