@@ -35,10 +35,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/go-spatial/geom"
-	"github.com/go-spatial/geom/encoding/wkb"
 	"log"
 	"math"
+
+	"github.com/go-spatial/geom"
+	"github.com/go-spatial/geom/encoding/wkb"
 )
 
 type envelopeType uint8

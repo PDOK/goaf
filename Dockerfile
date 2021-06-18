@@ -1,4 +1,4 @@
-FROM golang:1.11-alpine3.8 AS build-env
+FROM golang:1.16-alpine3.13 AS build-env
  
 RUN apk update && apk upgrade && \
    apk add --no-cache bash git gcc musl-dev
@@ -25,8 +25,8 @@ EXPOSE 8080
 WORKDIR /
 ENV PATH=/
 
-COPY --from=build-env  /go/src/server/spec/wfs1.0.0.json /spec/wfs1.0.0.json
-COPY --from=build-env  /wfs-server /
+COPY --from=build-env /go/src/server/spec/wfs1.0.0.json /spec/wfs1.0.0.json
+COPY --from=build-env /wfs-server /
 COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build-env /go/src/server/templates /templates
 COPY --from=build-env /go/src/server/swagger-ui /swagger-ui

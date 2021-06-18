@@ -2,14 +2,15 @@ package provider_postgis
 
 import (
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3"
 	"net/http"
 	"strings"
 	"wfs3_server/codegen"
+
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 type GetApiProvider struct {
-	data *openapi3.Swagger
+	data *openapi3.T
 }
 
 func (provider *PostgisProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {
@@ -19,11 +20,11 @@ func (provider *PostgisProvider) NewGetApiProvider(r *http.Request) (codegen.Pro
 	return p, nil
 }
 
-func CreateProvidesSpecificParameters(provider *PostgisProvider) *openapi3.Swagger {
+func CreateProvidesSpecificParameters(provider *PostgisProvider) *openapi3.T {
 
 	api := provider.Api
 
-	copy := &openapi3.Swagger{
+	copy := &openapi3.T{
 		OpenAPI:      api.OpenAPI,
 		Info:         api.Info,
 		Servers:      api.Servers,

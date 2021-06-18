@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,6 +15,8 @@ import (
 	gpkg "wfs3_server/provider_gpkg"
 	postgis "wfs3_server/provider_postgis"
 	"wfs3_server/server"
+
+	"github.com/getkin/kin-openapi/openapi3"
 
 	"github.com/rs/cors"
 )
@@ -35,7 +36,7 @@ func main() {
 	configFilePath := flag.String("config", envString("PATH_CONFIG", ""), "configfile path")
 	connectionStr := flag.String("connection", envString("CONNECTION", ""), "connection string postgis")
 	// alternative database configuration
-	if *connectionStr == "" && *providerName == "postgis"{
+	if *connectionStr == "" && *providerName == "postgis" {
 		withDBHost := flag.String("db-host", envString("DB_HOST", "bgt-cloud-db.postgres.database.azure.com"), "database host")
 		withDBPort := flag.Int("db-port", envInt("DB_PORT", 5432), "database port number")
 		WithDBName := flag.String("db-name", envString("DB_NAME", "pdok"), "database name")
@@ -61,7 +62,7 @@ func main() {
 
 	// stage 2: Create providers based upon provider name
 	commonProvider := provider_common.NewCommonProvider(*serviceEndpoint, *serviceSpecPath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
-	providers := getProvider(apiServer.Swagger, providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
+	providers := getProvider(apiServer.Openapi, providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
 
 	if providers == nil {
 		log.Fatal("Incorrect provider provided valid names are: gpkg, postgis")
@@ -98,7 +99,7 @@ func main() {
 
 }
 
-func getProvider(api *openapi3.Swagger, providerName *string, commonProvider provider_common.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
+func getProvider(api *openapi3.T, providerName *string, commonProvider provider_common.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
 	if *providerName == "gpkg" {
 		return addGeopackageProviders(api, commonProvider, *crsMapFilePath, *gpkgFilePath, *featureIdKey)
 	}
@@ -118,7 +119,7 @@ func addHealthHandler(router *server.RegexpHandler) {
 	})
 }
 
-func addGeopackageProviders(api *openapi3.Swagger, commonProvider provider_common.CommonProvider, crsMapFilePath string, gpkgFilePath string, featureIdKey string) *gpkg.GeoPackageProvider {
+func addGeopackageProviders(api *openapi3.T, commonProvider provider_common.CommonProvider, crsMapFilePath string, gpkgFilePath string, featureIdKey string) *gpkg.GeoPackageProvider {
 	crsMap := make(map[string]string)
 	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
 	if err != nil {

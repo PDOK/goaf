@@ -23,21 +23,21 @@ type Server struct {
 	MaxReturnLimit     uint64
 	DefaultReturnLimit uint64
 	Providers          cg.Providers
-	Swagger            *openapi3.Swagger
+	Openapi            *openapi3.T
 	Templates          *template.Template
 }
 
 func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxReturnLimit uint64) (*Server, error) {
-	swagger, err := spec.GetSwagger(serviceSpecPath)
+	openapi, err := spec.GetOpenAPI(serviceSpecPath)
 
 	if err != nil {
 		log.Fatal("Specification initialisation error:", err)
 		return nil, err
 	}
 	// Set endpoint
-	swagger.AddServer(&openapi3.Server{URL: serviceEndpoint, Description: "Production server"})
+	openapi.AddServer(&openapi3.Server{URL: serviceEndpoint, Description: "Production server"})
 
-	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnLimit, Swagger: swagger}
+	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnLimit, Openapi: openapi}
 
 	// add templates to server
 	server.Templates = template.Must(template.New("templates").Funcs(
