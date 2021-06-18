@@ -150,8 +150,9 @@
                 opacity: 0.7,
                 source: new ol.source.WMTS({
                     attributions: 'Kaartgegevens: &copy; <a href="https://www.kadaster.nl">Kadaster</a>',
-                    url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
-                    layer: 'brtachtergrondkaartgrijs',
+                    url: 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0',
+                    crossOrigin: 'Anonymous',
+                    layer: "grijs",
                     matrixSet: 'EPSG:28992',
                     format: 'image/png',
                     projection: projection,
