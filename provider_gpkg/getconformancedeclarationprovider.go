@@ -2,14 +2,14 @@ package provider_gpkg
 
 import (
 	"net/http"
-	. "wfs3_server/codegen"
+	cg "wfs3_server/codegen"
 )
 
 type GetConformanceDeclarationProvider struct {
 	data []string
 }
 
-func (provider *GeoPackageProvider) NewGetConformanceDeclarationProvider(r *http.Request) (Provider, error) {
+func (provider *GeoPackageProvider) NewGetConformanceDeclarationProvider(r *http.Request) (cg.Provider, error) {
 
 	p := &GetConformanceDeclarationProvider{}
 

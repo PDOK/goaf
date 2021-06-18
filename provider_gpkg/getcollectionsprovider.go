@@ -3,22 +3,22 @@ package provider_gpkg
 import (
 	"fmt"
 	"net/http"
-	. "wfs3_server/codegen"
+	cg "wfs3_server/codegen"
 	pc "wfs3_server/provider_common"
 )
 
 type GetCollectionsProvider struct {
-	data Collections
+	data cg.Collections
 }
 
-func (provider *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (Provider, error) {
+func (provider *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (cg.Provider, error) {
 
 	path := r.URL.Path // collections
 	ct := r.Header.Get("Content-Type")
 
 	p := &GetCollectionsProvider{}
 
-	csInfo := Collections{Links: []Link{}, Collections: []Collection{}}
+	csInfo := cg.Collections{Links: []cg.Link{}, Collections: []cg.Collection{}}
 	// create Links
 	hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
 	links, _ := pc.CreateLinks("collections", hrefBase, "self", ct)
@@ -35,12 +35,12 @@ func (provider *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (
 			crss = append(crss, v)
 		}
 
-		cInfo := Collection{
+		cInfo := cg.Collection{
 			Id:          cn.Identifier,
 			Title:       cn.Identifier,
 			Description: cn.Description,
 			Crs:         crss,
-			Links:       []Link{},
+			Links:       []cg.Link{},
 		}
 
 		chrefBase := fmt.Sprintf("%s/%s", hrefBase, cn.Identifier)

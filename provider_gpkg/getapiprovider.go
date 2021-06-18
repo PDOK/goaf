@@ -1,14 +1,15 @@
 package provider_gpkg
 
 import (
-	"github.com/getkin/kin-openapi/openapi3"
 	"log"
 	"net/http"
 	"wfs3_server/codegen"
+
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 type GetApiProvider struct {
-	data *openapi3.Swagger
+	data *openapi3.T
 }
 
 func (provider *GeoPackageProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {

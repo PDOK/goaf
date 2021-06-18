@@ -48,7 +48,7 @@ func NewGeoPackage(filepath string, featureIdKey string) (GeoPackage, error) {
 	gpkg := &GeoPackage{}
 
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		return *gpkg, errors.New(fmt.Sprintf("Geopackage invalid location : %s", filepath))
+		return *gpkg, fmt.Errorf("geopackage invalid location : %s", filepath)
 	}
 
 	// Get all feature tables
@@ -65,7 +65,7 @@ func NewGeoPackage(filepath string, featureIdKey string) (GeoPackage, error) {
 	applicationId, _ := gpkg.GetApplicationID(ctx, db)
 	version, _ := gpkg.GetVersion(ctx, db)
 
-	layers, err := gpkg.GetLayers(ctx, db)
+	layers, _ := gpkg.GetLayers(ctx, db)
 
 	log.Printf("| GEOPACKAGE DETAILS \n")
 	log.Printf("|\n")

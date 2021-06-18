@@ -1,3 +1,10 @@
-special thanks to https://github.com/go-spatial/jivan and https://github.com/go-spatial/tegola
+# Thanks
 
-go run start.go -provider gpkg -gpkg tst/bgt_wgs84.gpkg
+special thanks to:
+
+- <https://github.com/go-spatial/jivan>
+- <https://github.com/go-spatial/tegola>
+
+```go
+go run start.go -provider gpkg -gpkg example/bgt_wgs84.gpkg
+```

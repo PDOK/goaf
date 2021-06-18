@@ -1,8 +1,9 @@
 package provider_gpkg
 
 import (
-	"github.com/getkin/kin-openapi/openapi3"
 	"wfs3_server/provider_common"
+
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 type GeoPackageProvider struct {
@@ -11,10 +12,10 @@ type GeoPackageProvider struct {
 	GeoPackage     GeoPackage
 	FeatureIdKey   string
 	CrsMap         map[string]string
-	Api            *openapi3.Swagger
+	Api            *openapi3.T
 }
 
-func NewGeopackageWithCommonProvider(api *openapi3.Swagger, commonProvider provider_common.CommonProvider, gpkgFilePath string, crsMap map[string]string, featureIdKey string) *GeoPackageProvider {
+func NewGeopackageWithCommonProvider(api *openapi3.T, commonProvider provider_common.CommonProvider, gpkgFilePath string, crsMap map[string]string, featureIdKey string) *GeoPackageProvider {
 	return &GeoPackageProvider{
 		CommonProvider: commonProvider,
 		FilePath:       gpkgFilePath,

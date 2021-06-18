@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3"
 	"io/ioutil"
 	"log"
 	"net/url"
@@ -12,6 +11,8 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
+
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 //go:generate go run gen.go
@@ -184,15 +185,15 @@ func getType(stringOnly bool, schemaType string) string {
 
 func main_() {
 
-	loader := openapi3.NewSwaggerLoader()
+	loader := openapi3.NewLoader()
 	loader.IsExternalRefsAllowed = true
 
 	u, _ := url.Parse("https://raw.githubusercontent.com/opengeospatial/ogcapi-features/master/core/openapi/ogcapi-features-1.yaml")
-	components, err := loader.LoadSwaggerFromURI(u)
+	components, err := loader.LoadFromURI(u)
 
 	// file based spec based upon https://github.com/opengeospatial/WFS_FES/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml
 	filepath := "spec/wfs1.0.0.yml"
-	swagger, err := loader.LoadSwaggerFromFile(filepath)
+	swagger, err := loader.LoadFromFile(filepath)
 	if err != nil {
 		log.Fatalf("Got error reading swagger file %v", err)
 		return
@@ -272,7 +273,7 @@ func main_() {
 	createFile("server", "routing.gen.go", "routing.tpl", swagger, templates)
 }
 
-func createFile(outputPath, outputFileName, templateFileName string, swagger *openapi3.Swagger, templates *template.Template) {
+func createFile(outputPath, outputFileName, templateFileName string, swagger *openapi3.T, templates *template.Template) {
 	out, err := os.Create(fmt.Sprintf("%s/%s", outputPath, outputFileName))
 	if err != nil {
 		log.Printf("%v", err)

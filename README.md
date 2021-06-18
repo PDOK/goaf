@@ -1,8 +1,10 @@
-**PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/WFS_FES/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml) EXAMPLE 1.**
+# GOGCAPI-features
+
+## PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/ogcapi-features/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml) EXAMPLE 1
 
 A a GeoJSON implementation with a Geopackage as a data provider.
 
-Inspiration en code copied from https://github.com/go-spatial/jivan and https://github.com/go-spatial/tegola
+Inspiration en code copied from <https://github.com/go-spatial/jivan> and <https://github.com/go-spatial/tegola>
 
 The main differences with regards to jivan is the data provider setup, some geopackage query speedups for larger Geopackages and
 some tweaks for scanning the SQL features
@@ -10,21 +12,27 @@ some tweaks for scanning the SQL features
 The specification is a preliminary one, with `go generate` the routing based on api spec, provider interfaces en types structs and convenient parameter extractions are generated to stay easily up to date.
 
 * FeatureCollectionGeoJSON is overridden in provider gpkg to use the github.com/go-spatial/geom/encoding/geojso equivalent for decoding blobs
-* https://github.com/opengeospatial/WFS_FES/blob/master/core/openapi/ogcapi-features-1.yaml
+* <https://github.com/opengeospatial/WFS_FES/blob/master/core/openapi/ogcapi-features-1.yaml?>
 
-example wfs-3.0 geopackage example: https://github.com/PDOK/wfs-3.0-gpkg
+example wfs-3.0 geopackage example: <https://github.com/PDOK/wfs-3.0-gpkg>
 
-***Minimal config, gpkg tends to be relative small e.g. < 3 GB***
+### Minimal config, gpkg tends to be relative small e.g. < 3 GB
+
+```docker
+docker build -t pdok/wfs3.0:latest .
+
+docker run -v `pwd`/example:/config -e PROVIDER='gpkg' -e PATH_GPKG='/config/bgt_wgs84.gpkg' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/wfs3.0:latest
+```
 
 ./run_gpkg.sh
 
-***More elaborate config optimised performance for huge db (10M+ records/collection)***
+### More elaborate config optimised performance for huge db (10M+ records/collection)
 
 ./run_postgis.sh
 
 example table
-```postgresql
 
+```sql
 CREATE TABLE bgt_wfs3_v1.bak
 (
     _id text COLLATE pg_catalog."default" NOT NULL,
@@ -41,8 +49,8 @@ WITH (
 )
 ```
 
+used parameters:
 
-used parameters :
 ```go
 bindHost := flag.String("s", envString("BIND_HOST", "0.0.0.0"), "server internal bind address, default; 0.0.0.0")
 bindPort := flag.Int("p", envInt("BIND_PORT",8080), "server internal bind address, default; 8080")
@@ -58,7 +66,18 @@ configFilePath := flag.String("config", envString("PATH_CONFIG",""), "configfile
 connectionStr := flag.String("connection", envString("CONNECTION", ""), "configfile path")
 
 featureIdKey := flag.String("featureId", envString("FEATURE_ID",""), "Default feature identification or else first column definition (fid)") //optional for gpkg provider 
-
 ```
 
+## Test
 
+```go
+go test ./... -covermode=atomic
+```
+
+## How to Contribute
+
+Make a pull request...
+
+## License
+
+Distributed under MIT License, please see license file within the code for more details.
