@@ -22,7 +22,7 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
 	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/wfs1.0.0.json", 100, 500)
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../tst/bgt_wgs84.gpkg", crsMap, "fid")
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/bgt_wgs84.gpkg", crsMap, "fid")
 
 	server, _ := NewServer(serverEndpoint, "../spec/wfs1.0.0.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -41,12 +41,12 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	}{
 		{"root call", "", provider_common.GetLandingPageProvider{}, func(want provider_common.GetLandingPageProvider) error {
 
-			if len(want.Links) != 4 {
+			if len(want.Links) != 8 {
 				return errors.New("error invalid number of links")
 			}
 
-			rels := []string{"self", "service", "conformance", "data"}
-			paths := []string{"/", "/api", "/conformance", "/collections"}
+			rels := []string{"self", "alternate", "service", "service", "conformance", "conformance", "data", "data"}
+			paths := []string{"?f=json", "?f=html", "/api?f=json", "/api?f=html", "/conformance?f=json", "/conformance?f=html", "/collections?f=json", "/collections?f=html"}
 
 			for i, v := range want.Links {
 				if v.Rel != rels[i] {
@@ -92,7 +92,7 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
 	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/wfs1.0.0.json", 100, 500)
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../tst/bgt_wgs84.gpkg", crsMap, "fid")
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/bgt_wgs84.gpkg", crsMap, "fid")
 
 	server, _ := NewServer(serverEndpoint, "../spec/wfs1.0.0.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
