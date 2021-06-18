@@ -59,7 +59,7 @@ func (provider *PostgisProvider) NewGetFeatureProvider(r *http.Request) (cg.Prov
 			p.data = feature
 
 		} else {
-			return p, errors.New(fmt.Sprintf("Feature with id: %s not found", string(featureId)))
+			return p, fmt.Errorf("Feature with id: %s not found", string(featureId))
 		}
 
 		return p, nil

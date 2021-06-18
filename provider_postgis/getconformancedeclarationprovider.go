@@ -3,14 +3,14 @@ package provider_postgis
 import (
 	"errors"
 	"net/http"
-	. "wfs3_server/codegen"
+	cg "wfs3_server/codegen"
 )
 
 type GetConformanceDeclarationProvider struct {
 	data []string
 }
 
-func (provider *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Request) (Provider, error) {
+func (provider *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Request) (cg.Provider, error) {
 	p := &GetConformanceDeclarationProvider{}
 	path := r.URL.Path
 	pathItem := provider.ApiProcessed.Paths.Find(path)

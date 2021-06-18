@@ -3,19 +3,19 @@ package provider_postgis
 import (
 	"fmt"
 	"net/http"
-	. "wfs3_server/codegen"
+	cg "wfs3_server/codegen"
 	pc "wfs3_server/provider_common"
 )
 
 type DescribeCollectionProvider struct {
-	data Collection
+	data cg.Collection
 }
 
-func (provider *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (Provider, error) {
+func (provider *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (cg.Provider, error) {
 	path := r.URL.Path // collections/{{collectionId}}
 	ct := r.Header.Get("Content-Type")
 
-	collectionId, _ := ParametersForDescribeCollection(r)
+	collectionId, _ := cg.ParametersForDescribeCollection(r)
 
 	p := &DescribeCollectionProvider{}
 
@@ -25,13 +25,13 @@ func (provider *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) 
 			continue
 		}
 
-		cInfo := Collection{
+		cInfo := cg.Collection{
 			Id:          cn.Identifier,
 			Title:       cn.Identifier,
 			Description: cn.Description,
 			Crs:         []string{},
 
-			Links: []Link{},
+			Links: []cg.Link{},
 		}
 
 		// create links

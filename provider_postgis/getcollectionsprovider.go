@@ -3,22 +3,22 @@ package provider_postgis
 import (
 	"fmt"
 	"net/http"
-	. "wfs3_server/codegen"
+	cg "wfs3_server/codegen"
 	pc "wfs3_server/provider_common"
 )
 
 type GetCollectionsProvider struct {
-	data Collections
+	data cg.Collections
 }
 
-func (provider *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (Provider, error) {
+func (provider *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (cg.Provider, error) {
 
 	path := r.URL.Path // collections
 	ct := r.Header.Get("Content-Type")
 
 	p := &GetCollectionsProvider{}
 
-	csInfo := Collections{Links: []Link{}, Collections: []Collection{}}
+	csInfo := cg.Collections{Links: []cg.Link{}, Collections: []cg.Collection{}}
 	// create Links
 	hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
 	links, _ := pc.CreateLinks("collections ", hrefBase, "self", ct)
@@ -30,12 +30,12 @@ func (provider *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (Pro
 
 	for _, cn := range provider.PostGis.Layers {
 
-		cInfo := Collection{
+		cInfo := cg.Collection{
 			Id:          cn.Identifier,
 			Title:       cn.Identifier,
 			Description: cn.Description,
 			Crs:         []string{},
-			Links:       []Link{},
+			Links:       []cg.Link{},
 		}
 
 		chrefBase := fmt.Sprintf("%s/%s", hrefBase, cn.Identifier)
