@@ -37,7 +37,7 @@ func main() {
 	connectionStr := flag.String("connection", envString("CONNECTION", ""), "connection string postgis")
 	// alternative database configuration
 	if *connectionStr == "" && *providerName == "postgis" {
-		withDBHost := flag.String("db-host", envString("DB_HOST", "bgt-cloud-db.postgres.database.azure.com"), "database host")
+		withDBHost := flag.String("db-host", envString("DB_HOST", "localhost"), "database host")
 		withDBPort := flag.Int("db-port", envInt("DB_PORT", 5432), "database port number")
 		WithDBName := flag.String("db-name", envString("DB_NAME", "pdok"), "database name")
 		withDBSSL := flag.String("db-ssl-mode", envString("DB_SSL_MODE", "disable"), "ssl-mode")

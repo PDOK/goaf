@@ -1,7 +1,12 @@
+# PostGIS provider
+
+```go
+go run start.go -provider postgis -config example/config_postgis.yaml
+```
 
 use the folowing config file structure :
 
-```
+```yaml
 ApplicationId: POSTGIS
 ConnectionStr: 'host=127.0.0.1 port=5432 dbname=bgt sslmode=disable'
 Layers:
@@ -9,7 +14,7 @@ Layers:
     TableName: pand   #database table/view name
     Identifier: pand  #collection name in api response
     Description: BGT Swifterband #Description of the collection
-    GeometryColumn: bbox  #column containing the SFS geometry
+    GeometryColumn: geom  #column containing the simple feature geometry
     GeometryType: GEOMETRY # has currently no use
     FeatureIDColumn: ogc_fid #the unique indexed identifier for a given feature
     BBoxGeometryColumn: bbox #extra column with boundingbox selection index for intersects query
@@ -40,12 +45,10 @@ Layers:
 BBox: [13603.33,306900.151,277924.306,617112.488] # bounding box of all layers
 SrsId: 28992 # and the corresponding projection
 
-```
+```sql
 ALTER TABLE .... ADD COLUMN geom geometry(Polygon,28992);
 UPDATE .... SET geom=st_forcesfs(geometrie_vlak)
 
 ALTER TABLE .... ADD COLUMN bbox geometry(Polygon,28992);
 UPDATE .... SET bbox=ST_Envelope(ST_Force2D(geometrie_vlak))
-
-
-go run start.go -provider postgis -config config/config_postgis.yaml
+```
