@@ -1,32 +1,46 @@
 # GOAF
 
-## PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/ogcapi-features/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml) EXAMPLE 1
+[![GitHub license](https://img.shields.io/github/license/PDOK/goaf)](https://github.com/PDOK/goaf/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/PDOK/goaf.svg)](https://github.com/PDOK/goaf/releases)
+[![Go Report Card](https://goreportcard.com/badge/PDOK/goaf)](https://goreportcard.com/report/PDOK/goaf)
+
+Goaf is a [OGC API - Features](https://www.ogc.org/standards/ogcapi-features) implementation in golang.
+
+It supports the following backends:
+
+* [OGC GeoPackage](https://www.geopackage.org/)
+* [Postgis](https://postgis.net/) (*Postgresql 9.4+)
+
+## PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/ogcapi-features/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml)
 
 A a GeoJSON implementation with a Geopackage as a data provider.
 
-Inspiration en code copied from <https://github.com/go-spatial/jivan> and <https://github.com/go-spatial/tegola>
-
-The main differences with regards to jivan is the data provider setup, some geopackage query speedups for larger Geopackages and
-some tweaks for scanning the SQL features
-
 The specification is a preliminary one, with `go generate` the routing based on api spec, provider interfaces en types structs and convenient parameter extractions are generated to stay easily up to date.
 
-* FeatureCollectionGeoJSON is overridden in provider gpkg to use the github.com/go-spatial/geom/encoding/geojso equivalent for decoding blobs
+* FeatureCollectionGeoJSON is overridden in the GeoPackage provider to use the [geojson](https://github.com/go-spatial/geom/tree/master/encoding/geojson) equivalent for decoding blobs
 * <https://github.com/opengeospatial/ogcapi-features/blob/master/core/openapi/ogcapi-features-1.yaml>
 
-example GOAF geopackage example: <https://github.com/PDOK/wfs-3.0-gpkg>
-
-### Minimal config, gpkg tends to be relative small e.g. < 3 GB
+## Build
 
 ```docker
 docker build -t pdok/goaf:latest .
-
-docker run --rm -v `pwd`/example:/example -e PROVIDER='gpkg' -e PATH_GPKG='/example/bgt_wgs84.gpkg' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/goaf:latest
 ```
 
-### More elaborate config optimised performance for huge db (10M+ records/collection)
+## GeoPackage
 
-./run_postgis.sh
+The geopacakge provider is a minimal config for GeoPackages that tend to be relative small e.g. < 3 GB.
+
+```docker
+docker run --rm -v `pwd`/example:/example -e PROVIDER='gpkg' -e PATH_GPKG='/example/addresses.gpkg' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/goaf:latest
+```
+
+## PostGis
+
+More elaborate config optimised performance for huge db (10M+ records/collection)
+
+```docker
+docker run -v `pwd`/example:/example -e CONNECTION='postgres://{user}:{password}@{host}:{port}/{database}?sslmode=disable' -e PROVIDER='postgis' -e PATH_CONFIG='/example/config_postgis.yaml' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/goaf:latest
+```
 
 example table
 
@@ -79,3 +93,13 @@ Make a pull request...
 ## License
 
 Distributed under MIT License, please see license file within the code for more details.
+
+## Thanks
+
+Inspiration en code copied from:
+
+* <https://github.com/go-spatial/jivan>
+* <https://github.com/go-spatial/tegola>
+
+The main differences with regards to jivan is the data provider setup, some geopackage query speedups for larger Geopackages and
+some tweaks for scanning the SQL features

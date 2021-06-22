@@ -1,7 +1,6 @@
 package provider_common
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -104,7 +103,7 @@ func CreateLinks(title, hrefPath, rel, ct string) ([]cg.Link, error) {
 
 func formatTitle(title, rel, format string) string {
 	relation := rel
-	if "self" == rel {
+	if rel == "self" {
 		relation = "this"
 	}
 	return strings.ToLower(fmt.Sprintf("%s %s in %s format", relation, title, format))
@@ -157,7 +156,7 @@ func ConvertFeatureID(v interface{}) (interface{}, error) {
 		return aval, nil
 
 	default:
-		return 0, errors.New(fmt.Sprintf("Cannot convert ID : %v", aval))
+		return 0, fmt.Errorf("cannot convert ID : %v", aval)
 	}
 }
 

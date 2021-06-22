@@ -22,7 +22,7 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
 	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/bgt_wgs84.gpkg", crsMap, "fid")
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/addresses.gpkg", crsMap, "fid")
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -92,7 +92,7 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
 	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/bgt_wgs84.gpkg", crsMap, "fid")
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/addresses.gpkg", crsMap, "fid")
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -110,7 +110,7 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 		check func(want codegen.Collections) error
 	}{
 		{"collection call", "collections", codegen.Collections{}, func(want codegen.Collections) error {
-			if len(want.Collections) != 27 {
+			if len(want.Collections) != 1 {
 				return fmt.Errorf("Error invalid number of collections :%d", len(want.Collections))
 			}
 			return nil
