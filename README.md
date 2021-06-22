@@ -1,5 +1,9 @@
 # GOAF
 
+[![GitHub license](https://img.shields.io/github/license/PDOK/goaf)](https://github.com/PDOK/goaf/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/PDOK/goaf.svg)](https://github.com/PDOK/goaf/releases)
+[![Go Report Card](https://goreportcard.com/badge/PDOK/goaf)](https://goreportcard.com/report/PDOK/goaf)
+
 ## PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/ogcapi-features/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml) EXAMPLE 1
 
 A a GeoJSON implementation with a Geopackage as a data provider.
