@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"oaf-server/codegen"
+	"oaf-server/provider_common"
+	gpkg "oaf-server/provider_gpkg"
 	"testing"
-	"wfs3_server/codegen"
-	"wfs3_server/provider_common"
-	gpkg "wfs3_server/provider_gpkg"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -21,10 +21,10 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 
 	serverEndpoint := "http://testhost:1234"
 
-	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/wfs1.0.0.json", 100, 500)
+	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
 	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/bgt_wgs84.gpkg", crsMap, "fid")
 
-	server, _ := NewServer(serverEndpoint, "../spec/wfs1.0.0.json", 100, 500)
+	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
 
 	ts := httptest.NewServer(server.Router())
@@ -91,10 +91,10 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 
 	serverEndpoint := "http://testhost:1234"
 
-	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/wfs1.0.0.json", 100, 500)
+	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
 	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/bgt_wgs84.gpkg", crsMap, "fid")
 
-	server, _ := NewServer(serverEndpoint, "../spec/wfs1.0.0.json", 100, 500)
+	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
 
 	ts := httptest.NewServer(server.Router())

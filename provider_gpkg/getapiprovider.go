@@ -3,7 +3,7 @@ package provider_gpkg
 import (
 	"log"
 	"net/http"
-	"wfs3_server/codegen"
+	"oaf-server/codegen"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )

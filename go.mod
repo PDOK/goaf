@@ -1,4 +1,4 @@
-module wfs3_server
+module oaf-server
 
 require (
 	github.com/getkin/kin-openapi v0.63.0

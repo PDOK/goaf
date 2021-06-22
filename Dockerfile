@@ -18,17 +18,17 @@ ENV CGO_ENABLED=1
 ENV GOOS=linux
 
 # build the binary with debug information removed
-RUN go build -ldflags '-w -s -linkmode external -extldflags -static' -a -installsuffix cgo -o /wfs-server start.go
+RUN go build -ldflags '-w -s -linkmode external -extldflags -static' -a -installsuffix cgo -o /oaf-server start.go
 
 FROM scratch as service
 EXPOSE 8080
 WORKDIR /
 ENV PATH=/
 
-COPY --from=build-env /go/src/server/spec/wfs1.0.0.json /spec/wfs1.0.0.json
-COPY --from=build-env /wfs-server /
+COPY --from=build-env /go/src/server/spec/oaf.json /spec/oaf.json
+COPY --from=build-env /oaf-server /
 COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build-env /go/src/server/templates /templates
 COPY --from=build-env /go/src/server/swagger-ui /swagger-ui
 
-CMD ["/wfs-server"]
+CMD ["/oaf-server"]

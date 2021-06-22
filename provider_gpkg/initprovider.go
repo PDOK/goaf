@@ -1,7 +1,7 @@
 package provider_gpkg
 
 import (
-	"wfs3_server/provider_common"
+	"oaf-server/provider_common"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )

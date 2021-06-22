@@ -6,14 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"oaf-server/codegen"
+	"oaf-server/provider_common"
+	gpkg "oaf-server/provider_gpkg"
+	postgis "oaf-server/provider_postgis"
+	"oaf-server/server"
 	"os"
 	"regexp"
 	"strconv"
-	"wfs3_server/codegen"
-	"wfs3_server/provider_common"
-	gpkg "wfs3_server/provider_gpkg"
-	postgis "wfs3_server/provider_postgis"
-	"wfs3_server/server"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"gopkg.in/yaml.v2"
@@ -27,7 +27,7 @@ func main() {
 	bindPort := flag.Int("p", envInt("BIND_PORT", 8080), "server internal bind address, default; 8080")
 
 	serviceEndpoint := flag.String("endpoint", envString("ENDPOINT", "http://localhost:8080"), "server endpoint for proxy reasons, default; http://localhost:8080")
-	serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH", "spec/wfs1.0.0.json"), "swagger openapi spec")
+	serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH", "spec/oaf.json"), "swagger openapi spec")
 	defaultReturnLimit := flag.Int("limit", envInt("LIMIT", 100), "limit, default: 100")
 	maxReturnLimit := flag.Int("limitmax", envInt("LIMIT_MAX", 500), "max limit, default: 1000")
 	providerName := flag.String("provider", envString("PROVIDER", ""), "postgis or gpkg")

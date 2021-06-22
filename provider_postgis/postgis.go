@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
+	pc "oaf-server/provider_common"
+	"time"
+
 	"github.com/go-spatial/geom/encoding/geojson"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"log"
-	"time"
-	pc "wfs3_server/provider_common"
 )
 
 type IdNotFoundError struct {

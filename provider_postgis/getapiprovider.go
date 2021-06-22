@@ -3,8 +3,8 @@ package provider_postgis
 import (
 	"fmt"
 	"net/http"
+	"oaf-server/codegen"
 	"strings"
-	"wfs3_server/codegen"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )

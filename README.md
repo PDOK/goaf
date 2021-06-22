@@ -1,4 +1,4 @@
-# GOGCAPI-features
+# GOAF
 
 ## PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/ogcapi-features/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml) EXAMPLE 1
 
@@ -12,19 +12,17 @@ some tweaks for scanning the SQL features
 The specification is a preliminary one, with `go generate` the routing based on api spec, provider interfaces en types structs and convenient parameter extractions are generated to stay easily up to date.
 
 * FeatureCollectionGeoJSON is overridden in provider gpkg to use the github.com/go-spatial/geom/encoding/geojso equivalent for decoding blobs
-* <https://github.com/opengeospatial/WFS_FES/blob/master/core/openapi/ogcapi-features-1.yaml?>
+* <https://github.com/opengeospatial/ogcapi-features/blob/master/core/openapi/ogcapi-features-1.yaml>
 
-example wfs-3.0 geopackage example: <https://github.com/PDOK/wfs-3.0-gpkg>
+example GOAF geopackage example: <https://github.com/PDOK/wfs-3.0-gpkg>
 
 ### Minimal config, gpkg tends to be relative small e.g. < 3 GB
 
 ```docker
-docker build -t pdok/wfs3.0:latest .
+docker build -t pdok/goaf:latest .
 
-docker run -v `pwd`/example:/config -e PROVIDER='gpkg' -e PATH_GPKG='/config/bgt_wgs84.gpkg' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/wfs3.0:latest
+docker run --rm -v `pwd`/example:/example -e PROVIDER='gpkg' -e PATH_GPKG='/example/bgt_wgs84.gpkg' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/goaf:latest
 ```
-
-./run_gpkg.sh
 
 ### More elaborate config optimised performance for huge db (10M+ records/collection)
 
@@ -56,7 +54,7 @@ bindHost := flag.String("s", envString("BIND_HOST", "0.0.0.0"), "server internal
 bindPort := flag.Int("p", envInt("BIND_PORT",8080), "server internal bind address, default; 8080")
 
 serviceEndpoint := flag.String("endpoint", envString("ENDPOINT","http://localhost:8080"), "server endpoint for proxy reasons, default; http://localhost:8080")
-serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH","spec/wfs3.0.yml"), "swagger openapi spec")
+serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH","spec/oaf.yml"), "swagger openapi spec")
 defaultReturnLimit := flag.Int("limit", envInt("LIMIT",100), "limit, default: 100")
 maxReturnLimit := flag.Int("limitmax", envInt("LIMIT_MAX",500), "max limit, default: 1000")
 providerName := flag.String("provider", envString("PROVIDER",""), "postgis or gpkg")

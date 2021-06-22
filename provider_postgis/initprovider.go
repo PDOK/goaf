@@ -1,7 +1,7 @@
 package provider_postgis
 
 import (
-	"wfs3_server/provider_common"
+	"oaf-server/provider_common"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	_ "github.com/mattn/go-sqlite3"
