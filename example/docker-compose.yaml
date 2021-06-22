@@ -1,0 +1,38 @@
+version: '2.1'
+services:
+  gogcapifeatures:
+    build:
+      context: ../
+    image: pdok/gogcapi-features
+    restart: unless-stopped
+    command: ["wfs-server"]
+    environment:
+      - CONNECTION=postgres://docker:docker@postgis:5432/oaf?sslmode=disable
+      - PROVIDER=postgis
+      - PATH_CONFIG=/config/config_postgis.yaml
+      - ENDPOINT=http://localhost:8080
+    ports:
+      - 8080:8080
+    depends_on:
+      - "postgis"
+    volumes:
+      - .:/config
+    networks:
+      oaf:
+  postgis:
+    image: kartoza/postgis:13-3.1
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: "exit 0"
+    environment:
+      - POSTGRES_DB=oaf
+      - POSTGRES_USER=docker
+      - POSTGRES_PASS=docker
+      - ALLOW_IP_RANGE=127.0.0.1/32
+      - POSTGRES_MULTIPLE_EXTENSIONS=postgis,hstore,postgis_topology,postgis_raster,pgrouting
+    networks:
+      oaf:
+networks:
+  oaf:
