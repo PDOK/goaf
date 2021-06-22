@@ -1,0 +1,92 @@
+{{define "viewer"}}
+<script type="text/javascript">
+const resolutions = new Array(20)
+const matrixIds = new Array(20)
+const projection = ol.proj.get('EPSG:3857')
+const projectionExtent = projection.getExtent()
+const size = ol.extent.getWidth(projectionExtent) / 256
+
+for (var z = 0; z < 20; ++z) {
+    resolutions[z] = size / Math.pow(2, z)
+    matrixIds[z] = z
+}
+
+vectorSource = new ol.source.Vector({
+    format: new ol.format.GeoJSON({dataProjection: '{{.}}', featureProjection: 'EPSG:3857'}),
+    projection: projection,
+    loader: function (extent, resolution, prj) {
+        var url = window.location.href.replace('html', 'json');
+        fetch(url).then((response) => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error(`fetching feature(s) failed ${url}, response statuscode: ${response.status}}`);
+        }
+        })
+        .then((data) => {
+            vectorSource.addFeatures(vectorSource.getFormat().readFeatures(data));
+            map.getView().fit(vectorSource.getExtent(), {duration: 0}, map.getSize());
+        })
+        .catch((error) => {
+            console.log(error)
+            vectorSource.removeLoadedExtent(extent);
+        });
+    },
+});
+
+var vector = new ol.layer.Vector({
+    source: vectorSource
+});
+var map = new ol.Map({
+    layers: [
+        new ol.layer.Tile({
+            source: new ol.source.WMTS({
+                attributions: 'Kaartgegevens: &copy; <a href="https://www.kadaster.nl">Kadaster</a>',
+                url: 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0',
+                crossOrigin: 'Anonymous',
+                layer: "grijs",
+                matrixSet: 'EPSG:3857',
+                format: 'image/png',
+                projection: projection,
+                tileGrid: new ol.tilegrid.WMTS({
+                    origin: ol.extent.getTopLeft(projectionExtent),
+                    resolutions: resolutions,
+                    matrixIds: matrixIds
+                }),
+                style: 'default',
+                wrapX: false
+            })
+        }),
+        vector,
+    ],
+    target: 'map',
+    controls: ol.control.defaults({
+        attributionOptions: {
+            collapsible: false
+        }
+    }),
+    view: new ol.View({
+        minZoom: 0,
+        maxZoom: 19,
+        projection: projection,
+        center: [609661.7376,6842031.2759], // fallback to approximate center NL
+        zoom: 10 
+    })
+});
+
+var info = document.getElementById('info');
+function showInfo(event) {
+    var features = map.getFeaturesAtPixel(event.pixel);
+    if (!features) {
+        info.innerText = '';
+        info.style.opacity = 0;
+        return;
+    }
+    var properties = features[0].getProperties();
+    delete properties.geometry;
+    info.innerText = JSON.stringify(properties, null, 2);
+    info.style.opacity = 1;
+}
+map.on('pointermove', showInfo);
+</script>
+{{end}}
