@@ -2,7 +2,7 @@ package provider_gpkg
 
 import (
 	"net/http"
-	cg "wfs3_server/codegen"
+	cg "oaf-server/codegen"
 )
 
 type GetConformanceDeclarationProvider struct {

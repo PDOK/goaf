@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	cg "oaf-server/codegen"
+	pc "oaf-server/provider_common"
+	"oaf-server/provider_gpkg"
+	"oaf-server/spec"
 	"text/template"
-	cg "wfs3_server/codegen"
-	pc "wfs3_server/provider_common"
-	"wfs3_server/provider_gpkg"
-	"wfs3_server/spec"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )

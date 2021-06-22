@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker build -t pdok/wfs3.0:latest .
+docker build -t pdok/goaf:latest .
 
 docker run \
 -v $(pwd)/example:/config \
@@ -9,4 +9,4 @@ docker run \
 -e PATH_CONFIG='/config/config_postgis.yaml' \
 -e ENDPOINT='http://localhost:8080' \
 -p 8080:8080 \
-pdok/wfs3.0:latest
+pdok/goaf:latest

@@ -3,7 +3,7 @@ package provider_common
 import (
 	"fmt"
 	"net/http"
-	. "wfs3_server/codegen"
+	. "oaf-server/codegen"
 )
 
 type GetLandingPageProvider struct {

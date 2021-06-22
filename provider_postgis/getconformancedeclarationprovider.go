@@ -3,7 +3,7 @@ package provider_postgis
 import (
 	"errors"
 	"net/http"
-	cg "wfs3_server/codegen"
+	cg "oaf-server/codegen"
 )
 
 type GetConformanceDeclarationProvider struct {

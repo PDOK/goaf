@@ -21,7 +21,7 @@ example GOAF geopackage example: <https://github.com/PDOK/wfs-3.0-gpkg>
 ```docker
 docker build -t pdok/goaf:latest .
 
-docker run -v `pwd`/example:/config -e PROVIDER='gpkg' -e PATH_GPKG='/example/bgt_wgs84.gpkg' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/goaf:latest
+docker run --rm -v `pwd`/example:/example -e PROVIDER='gpkg' -e PATH_GPKG='/example/bgt_wgs84.gpkg' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/goaf:latest
 ```
 
 ### More elaborate config optimised performance for huge db (10M+ records/collection)

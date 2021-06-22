@@ -1,7 +1,7 @@
 package provider_gpkg
 
 import (
-	"wfs3_server/codegen"
+	"oaf-server/codegen"
 
 	"github.com/go-spatial/geom/encoding/geojson"
 )

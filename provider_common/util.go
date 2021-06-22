@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	cg "oaf-server/codegen"
 	"strconv"
 	"strings"
-	cg "wfs3_server/codegen"
 )
 
 const (

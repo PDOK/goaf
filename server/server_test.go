@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"oaf-server/codegen"
+	"oaf-server/provider_common"
+	gpkg "oaf-server/provider_gpkg"
 	"testing"
-	"wfs3_server/codegen"
-	"wfs3_server/provider_common"
-	gpkg "wfs3_server/provider_gpkg"
 
 	_ "github.com/mattn/go-sqlite3"
 )
