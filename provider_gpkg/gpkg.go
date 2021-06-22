@@ -310,7 +310,7 @@ func (gpkg *GeoPackage) GetApplicationID(ctx context.Context, db *sqlx.DB) (stri
 		return gpkg.ApplicationId, nil
 	}
 
-	query := "PRAGMA applicationId"
+	query := "PRAGMA application_id"
 	// retrieve
 	_, rows, err := executeRaw(ctx, db, query)
 	if err != nil {
