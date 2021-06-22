@@ -15,8 +15,9 @@ docker run --rm -v `pwd`:/example osgeo/gdal:ubuntu-small-3.3.0 ogr2ogr -f Postg
 ## Transform data
 
 ```sql
-create table addresses.addresses as
-select fid, 
+CREATE TABLE addresses.addresses AS
+SELECT fid, 
+       fid AS offsetid,
        json_build_object(
            'alternativeidentifier', alternativeidentifier,
            'validfrom', validfrom,
@@ -57,8 +58,11 @@ select fid,
            'position_method_href', position_method_href,
            'position_default', position_default,
            'status', status,
-           'status_href', status_href) as properties,
-       ST_Envelope(geom) as bbox,
+           'status_href', status_href) AS properties,
+       ST_Envelope(geom) AS bbox,
        geom
   from addresses.addresses_alternative_encoding;
+
+CREATE INDEX addresses_geom_sidx ON addresses.addresses USING GIST (geom);
+CREATE INDEX addresses_offsetid_idx ON addresses.addresses(offsetid);
 ```

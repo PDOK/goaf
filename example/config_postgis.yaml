@@ -9,10 +9,11 @@ Layers:
     # GeometryType: POINT # has currently no use
     FeatureIDColumn: fid #the unique indexed identifier for a given feature
     BBoxGeometryColumn: bbox #extra column with bounding box selection index for intersects query, simplification and speedup
-    OffsetColumn: fid # extra column to determine next keyset paging, should be numeric, indexed and unique, could be equal to feature id
+    OffsetColumn: offsetid # extra column to determine next keyset paging, should be numeric, indexed and unique, could be equal to feature id
     BBox: [4.709923493810017,53.00079137013467,4.897723983538761,53.18212166845569] # Bounding box of all features can be used to display subset of features
     SrsId: 4326 #the projection of the geometry currently stored in database
     # Features are column names which should be exposed in properties part of the response
+    FeaturesJSONB: true
     Features:
       - properties
 BBox: [4.709923493810017,53.00079137013467,4.897723983538761,53.18212166845569] # bounding box of all layers
