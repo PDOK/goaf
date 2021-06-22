@@ -6,7 +6,13 @@
 
 Goaf is a [OGC API - Features](https://www.ogc.org/standards/ogcapi-features) implementation in golang.
 
-It supports the following backends:
+## For who is it?
+
+If you are looking for a very fast OGC API - Features application and are not afraid for some data tuning, this could be the application for you!
+
+## Datasources
+
+It supports the following datasources:
 
 * [OGC GeoPackage](https://www.geopackage.org/)
 * [Postgis](https://postgis.net/) (*Postgresql 9.4+)
