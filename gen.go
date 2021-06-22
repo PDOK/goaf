@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
 	"regexp"
 	"strings"
-	"text/template"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
