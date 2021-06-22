@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	cg "oaf-server/codegen"
 	pc "oaf-server/provider_common"
 	"oaf-server/provider_gpkg"
 	"oaf-server/spec"
-	"text/template"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
