@@ -1,12 +1,11 @@
 {{define "viewer"}}
 <script type="text/javascript">
-// Resoluties (pixels per meter) van de zoomniveaus:
 const resolutions = new Array(20)
 const matrixIds = new Array(20)
 const projection = ol.proj.get('EPSG:3857')
 const projectionExtent = projection.getExtent()
 const size = ol.extent.getWidth(projectionExtent) / 256
-// TODO: retrieve nr of zoomlevels from service capabilities
+
 for (var z = 0; z < 20; ++z) {
     resolutions[z] = size / Math.pow(2, z)
     matrixIds[z] = z
@@ -16,24 +15,22 @@ vectorSource = new ol.source.Vector({
     format: new ol.format.GeoJSON({dataProjection: '{{.}}', featureProjection: 'EPSG:3857'}),
     projection: projection,
     loader: function (extent, resolution, prj) {
-        var proj = prj.getCode();
         var url = window.location.href.replace('html', 'json');
-        // TODO: improve by using fetch api
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
-        var onError = function () {
+        fetch(url).then((response) => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error(`fetching feature(s) failed ${url}, response statuscode: ${response.status}}`);
+        }
+        })
+        .then((data) => {
+            vectorSource.addFeatures(vectorSource.getFormat().readFeatures(data));
+            map.getView().fit(vectorSource.getExtent(), {duration: 0}, map.getSize());
+        })
+        .catch((error) => {
+            console.log(error)
             vectorSource.removeLoadedExtent(extent);
-        };
-        xhr.onerror = onError;
-        xhr.onload = function () {
-            if (xhr.status == 200) {
-                vectorSource.addFeatures(vectorSource.getFormat().readFeatures(xhr.responseText));
-                map.getView().fit(vectorSource.getExtent(), {duration: 0}, map.getSize());
-            } else {
-                onError();
-            }
-        };
-        xhr.send();
+        });
     },
 });
 
