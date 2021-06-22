@@ -1,6 +1,6 @@
 version: '2.1'
 services:
-  gogcapifeatures:
+  goaf:
     build:
       context: ../
     image: pdok/gogcapi-features
