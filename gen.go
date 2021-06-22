@@ -192,7 +192,7 @@ func main_() {
 	components, err := loader.LoadFromURI(u)
 
 	// file based spec based upon https://github.com/opengeospatial/WFS_FES/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml
-	filepath := "spec/wfs1.0.0.yml"
+	filepath := "spec/oaf.yml"
 	swagger, err := loader.LoadFromFile(filepath)
 	if err != nil {
 		log.Fatalf("Got error reading swagger file %v", err)
@@ -207,7 +207,7 @@ func main_() {
 
 	out, err := json.Marshal(swagger)
 
-	err = ioutil.WriteFile("spec/wfs1.0.0.json", out, 0644)
+	err = ioutil.WriteFile("spec/oaf.json", out, 0644)
 	if err != nil {
 		log.Fatalf("Got error writing combined swagger file %v", err)
 		return
