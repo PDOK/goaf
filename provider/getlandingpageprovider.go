@@ -32,14 +32,14 @@ func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (co
 	}
 }
 
-func (provider *GetLandingPageProvider) Provide() (interface{}, error) {
-	return provider, nil
+func (glp *GetLandingPageProvider) Provide() (interface{}, error) {
+	return glp, nil
 }
 
-func (provider *GetLandingPageProvider) String() string {
+func (glp *GetLandingPageProvider) String() string {
 	return "landingpage"
 }
 
-func (provider *GetLandingPageProvider) SrsId() string {
+func (glp *GetLandingPageProvider) SrsId() string {
 	return "n.a"
 }
