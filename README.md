@@ -86,6 +86,20 @@ connectionStr := flag.String("connection", envString("CONNECTION", ""), "configf
 featureIdKey := flag.String("featureId", envString("FEATURE_ID",""), "Default feature identification or else first column definition (fid)") //optional for gpkg provider 
 ```
 
+## Generate
+
+Some of the code is generated based on the given oas.yaml:
+
+```bash
+codegen/provider.go
+codegen/types.go
+server/routing.gen.go
+```
+
+```go
+go generate generate/gen.go
+```
+
 ## Test
 
 ```go
