@@ -57,6 +57,10 @@ func NewGeoPackage(filepath string, featureIdKey string) (GeoPackage, error) {
 		return *gpkg, err
 	}
 
+	// featureIdKey is used for a alternate fid.
+	// GeoPackage is limited in the spec that the PK a integer is.
+	// A lot of dataset have unique identifiers build from UUID or meaningful strings
+	// Setting this parameter allow the items/features to be queried on that key.
 	gpkg.FeatureIdKey = featureIdKey
 	gpkg.DB = db
 
