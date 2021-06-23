@@ -150,12 +150,15 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 		switch p.String() {
 		case "getfeature":
-			w.Header().Set("Content-Type", provider.GEOJSONContentType)
+			if contentResponse != provider.HTMLContentType {
+				contentResponse = provider.GEOJSONContentType
+			}
 		case "getfeatures":
-			w.Header().Set("Content-Type", provider.GEOJSONContentType)
-		default:
-			w.Header().Set("Content-Type", contentResponse)
+			if contentResponse != provider.HTMLContentType {
+				contentResponse = provider.GEOJSONContentType
+			}
 		}
+		w.Header().Set("Content-Type", contentResponse)
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(encodedContent)
 	}
