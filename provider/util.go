@@ -1,10 +1,10 @@
-package provider_common
+package provider
 
 import (
 	"fmt"
 	"log"
 	"net/url"
-	cg "oaf-server/codegen"
+	"oaf-server/codegen"
 	"strconv"
 	"strings"
 )
@@ -41,7 +41,7 @@ func GetContentFields() map[string]string {
 	return ct
 }
 
-func ProcesLinksForParams(links []cg.Link, queryParams url.Values) error {
+func ProcesLinksForParams(links []codegen.Link, queryParams url.Values) error {
 	for l := range links {
 		path, err := url.Parse(links[l].Href)
 		if err != nil {
@@ -63,15 +63,15 @@ func ProcesLinksForParams(links []cg.Link, queryParams url.Values) error {
 
 }
 
-func CreateLinks(title, hrefPath, rel, ct string) ([]cg.Link, error) {
+func CreateLinks(title, hrefPath, rel, ct string) ([]codegen.Link, error) {
 
-	links := make([]cg.Link, 0)
+	links := make([]codegen.Link, 0)
 
 	href, err := ctLink(hrefPath, GetContentFields()[ct])
 	if err != nil {
 		return links, err
 	}
-	links = append(links, cg.Link{Title: formatTitle(title, rel, GetContentFields()[ct]), Rel: rel, Href: href, Type: ct})
+	links = append(links, codegen.Link{Title: formatTitle(title, rel, GetContentFields()[ct]), Rel: rel, Href: href, Type: ct})
 
 	if rel == "self" {
 		rel = "alternate"
@@ -90,11 +90,11 @@ func CreateLinks(title, hrefPath, rel, ct string) ([]cg.Link, error) {
 			return links, err
 		}
 
-		links = append(links, cg.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
+		links = append(links, codegen.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
 
 		if rel == "self" {
 			rel = "alternate"
-			links = append(links, cg.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
+			links = append(links, codegen.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
 		}
 	}
 

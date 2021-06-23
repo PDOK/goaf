@@ -1,4 +1,4 @@
-package provider_common
+package provider
 
 type CommonProvider struct {
 	ServiceSpecPath    string

@@ -1,18 +1,18 @@
-package provider_common
+package provider
 
 import (
 	"fmt"
 	"net/http"
-	cg "oaf-server/codegen"
+	"oaf-server/codegen"
 )
 
 type GetLandingPageProvider struct {
-	Links []cg.Link `json:"links"`
+	Links []codegen.Link `json:"links"`
 }
 
-func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (cg.Provider, error) {
+func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (codegen.Provider, error) {
 
-	return func(r *http.Request) (cg.Provider, error) {
+	return func(r *http.Request) (codegen.Provider, error) {
 
 		ct := r.Header.Get("Content-Type")
 
@@ -32,14 +32,14 @@ func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (cg
 	}
 }
 
-func (provider *GetLandingPageProvider) Provide() (interface{}, error) {
-	return provider, nil
+func (glp *GetLandingPageProvider) Provide() (interface{}, error) {
+	return glp, nil
 }
 
-func (provider *GetLandingPageProvider) String() string {
+func (glp *GetLandingPageProvider) String() string {
 	return "landingpage"
 }
 
-func (provider *GetLandingPageProvider) SrsId() string {
+func (glp *GetLandingPageProvider) SrsId() string {
 	return "n.a"
 }

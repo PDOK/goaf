@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"oaf-server/codegen"
-	"oaf-server/provider_common"
-	gpkg "oaf-server/provider_gpkg"
+	gpkg "oaf-server/gpkg"
+	"oaf-server/provider"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -21,7 +21,7 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 
 	serverEndpoint := "http://testhost:1234"
 
-	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
+	commonProvider := provider.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
 	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/addresses.gpkg", crsMap, "fid")
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
@@ -36,10 +36,10 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	tests := []struct {
 		name  string
 		path  string
-		want  provider_common.GetLandingPageProvider
-		check func(want provider_common.GetLandingPageProvider) error
+		want  provider.GetLandingPageProvider
+		check func(want provider.GetLandingPageProvider) error
 	}{
-		{"root call", "", provider_common.GetLandingPageProvider{}, func(want provider_common.GetLandingPageProvider) error {
+		{"root call", "", provider.GetLandingPageProvider{}, func(want provider.GetLandingPageProvider) error {
 
 			if len(want.Links) != 8 {
 				return errors.New("error invalid number of links")
@@ -91,7 +91,7 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 
 	serverEndpoint := "http://testhost:1234"
 
-	commonProvider := provider_common.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
+	commonProvider := provider.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
 	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, "../example/addresses.gpkg", crsMap, "fid")
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)

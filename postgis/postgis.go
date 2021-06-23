@@ -1,4 +1,4 @@
-package provider_postgis
+package postgis
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	pc "oaf-server/provider_common"
+	"oaf-server/provider"
 	"time"
 
 	"github.com/go-spatial/geom/encoding/geojson"
@@ -205,7 +205,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, layer Postg
 
 			switch colName {
 			case FeatureIDColumn:
-				ID, err := pc.ConvertFeatureID(vals[i])
+				ID, err := provider.ConvertFeatureID(vals[i])
 				if err != nil {
 					return result, err
 				}

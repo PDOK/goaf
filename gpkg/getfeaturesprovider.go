@@ -1,11 +1,11 @@
-package provider_gpkg
+package gpkg
 
 import (
 	"fmt"
 	"log"
 	"net/http"
-	cg "oaf-server/codegen"
-	pc "oaf-server/provider_common"
+	"oaf-server/codegen"
+	pc "oaf-server/provider"
 )
 
 type GetFeaturesProvider struct {
@@ -13,12 +13,12 @@ type GetFeaturesProvider struct {
 	srsid string
 }
 
-func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.Provider, error) {
-	collectionId, limit, offset, _, bbox, time := cg.ParametersForGetFeatures(r)
+func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
+	collectionId, limit, offset, _, bbox, time := codegen.ParametersForGetFeatures(r)
 
-	limitParam := pc.ParseLimit(limit, provider.CommonProvider.DefaultReturnLimit, provider.CommonProvider.MaxReturnLimit)
+	limitParam := pc.ParseLimit(limit, gp.CommonProvider.DefaultReturnLimit, gp.CommonProvider.MaxReturnLimit)
 	offsetParam := pc.ParseUint(offset, 0)
-	bboxParam := pc.ParseBBox(bbox, provider.GeoPackage.DefaultBBox)
+	bboxParam := pc.ParseBBox(bbox, gp.GeoPackage.DefaultBBox)
 
 	if time != "" {
 		log.Println("Time selection currently not implemented")
@@ -27,22 +27,22 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 	path := r.URL.Path // collections/{{collectionId}}/items
 	ct := r.Header.Get("Content-Type")
 
-	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", provider.GeoPackage.SrsId)}
+	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.SrsId)}
 
-	for _, cn := range provider.GeoPackage.Layers {
+	for _, cn := range gp.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
 			continue
 		}
 
-		fcGeoJSON, err := provider.GeoPackage.GetFeatures(r.Context(), provider.GeoPackage.DB, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
+		fcGeoJSON, err := gp.GeoPackage.GetFeatures(r.Context(), gp.GeoPackage.DB, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
 
 		if err != nil {
 			return nil, err
 		}
 
 		for _, feature := range fcGeoJSON.Features {
-			hrefBase := fmt.Sprintf("%s%s/%v", provider.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
+			hrefBase := fmt.Sprintf("%s%s/%v", gp.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
 			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
@@ -61,7 +61,7 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 		requestParams.Set("limit", fmt.Sprintf("%d", int64(limitParam)))
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", provider.CommonProvider.ServiceEndpoint, path) // /collections
+		hrefBase := fmt.Sprintf("%s%s", gp.CommonProvider.ServiceEndpoint, path) // /collections
 		links, _ := pc.CreateLinks("features "+cn.Identifier, hrefBase, "self", ct)
 		_ = pc.ProcesLinksForParams(links, requestParams)
 
@@ -76,7 +76,7 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 
 		fcGeoJSON.Links = links
 
-		crsUri, ok := provider.CrsMap[fmt.Sprintf("%d", cn.SrsId)]
+		crsUri, ok := gp.CrsMap[fmt.Sprintf("%d", cn.SrsId)]
 		if !ok {
 			log.Printf("SRS ID: %s, not found", fmt.Sprintf("%d", cn.SrsId))
 			crsUri = ""
@@ -90,14 +90,14 @@ func (provider *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (cg.
 	return p, nil
 }
 
-func (provider *GetFeaturesProvider) Provide() (interface{}, error) {
-	return provider.data, nil
+func (gfp *GetFeaturesProvider) Provide() (interface{}, error) {
+	return gfp.data, nil
 }
 
-func (provider *GetFeaturesProvider) String() string {
+func (gfp *GetFeaturesProvider) String() string {
 	return "getfeatures"
 }
 
-func (provider *GetFeaturesProvider) SrsId() string {
-	return provider.srsid
+func (gfp *GetFeaturesProvider) SrsId() string {
+	return gfp.srsid
 }

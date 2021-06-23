@@ -7,9 +7,9 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/provider_common"
-	gpkg "oaf-server/provider_gpkg"
-	postgis "oaf-server/provider_postgis"
+	gpkg "oaf-server/gpkg"
+	postgis "oaf-server/postgis"
+	"oaf-server/provider"
 	"oaf-server/server"
 	"os"
 	"regexp"
@@ -61,7 +61,7 @@ func main() {
 	}
 
 	// stage 2: Create providers based upon provider name
-	commonProvider := provider_common.NewCommonProvider(*serviceEndpoint, *serviceSpecPath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
+	commonProvider := provider.NewCommonProvider(*serviceEndpoint, *serviceSpecPath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
 	providers := getProvider(apiServer.Openapi, providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
 
 	if providers == nil {
@@ -99,7 +99,7 @@ func main() {
 
 }
 
-func getProvider(api *openapi3.T, providerName *string, commonProvider provider_common.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
+func getProvider(api *openapi3.T, providerName *string, commonProvider provider.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
 	if *providerName == "gpkg" {
 		return addGeopackageProviders(api, commonProvider, *crsMapFilePath, *gpkgFilePath, *featureIdKey)
 	}
@@ -119,7 +119,7 @@ func addHealthHandler(router *server.RegexpHandler) {
 	})
 }
 
-func addGeopackageProviders(api *openapi3.T, commonProvider provider_common.CommonProvider, crsMapFilePath string, gpkgFilePath string, featureIdKey string) *gpkg.GeoPackageProvider {
+func addGeopackageProviders(api *openapi3.T, commonProvider provider.CommonProvider, crsMapFilePath string, gpkgFilePath string, featureIdKey string) *gpkg.GeoPackageProvider {
 	crsMap := make(map[string]string)
 	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
 	if err != nil {

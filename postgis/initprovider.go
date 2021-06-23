@@ -1,14 +1,14 @@
-package provider_postgis
+package postgis
 
 import (
-	"oaf-server/provider_common"
+	"oaf-server/provider"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type PostgisProvider struct {
-	CommonProvider provider_common.CommonProvider
+	CommonProvider provider.CommonProvider
 	PostGis        Postgis
 	CrsMap         map[string]string
 	configFilePath string
@@ -17,7 +17,7 @@ type PostgisProvider struct {
 	ApiProcessed   *openapi3.T
 }
 
-func NewPostgisWithCommonProvider(api *openapi3.T, commonProvider provider_common.CommonProvider, configPath, connectionStr string) *PostgisProvider {
+func NewPostgisWithCommonProvider(api *openapi3.T, commonProvider provider.CommonProvider, configPath, connectionStr string) *PostgisProvider {
 	p := &PostgisProvider{
 		CrsMap:         map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"},
 		configFilePath: configPath,

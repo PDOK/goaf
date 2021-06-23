@@ -1,4 +1,4 @@
-package provider_postgis
+package postgis
 
 import (
 	"fmt"
@@ -13,10 +13,10 @@ type GetApiProvider struct {
 	data *openapi3.T
 }
 
-func (provider *PostgisProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {
+func (pp *PostgisProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {
 	p := &GetApiProvider{}
 
-	p.data = provider.ApiProcessed
+	p.data = pp.ApiProcessed
 	return p, nil
 }
 
@@ -98,14 +98,14 @@ func CreateProvidesSpecificParameters(provider *PostgisProvider) *openapi3.T {
 	return copy
 }
 
-func (provider *GetApiProvider) Provide() (interface{}, error) {
-	return provider.data, nil
+func (gap *GetApiProvider) Provide() (interface{}, error) {
+	return gap.data, nil
 }
 
-func (provider *GetApiProvider) String() string {
+func (gap *GetApiProvider) String() string {
 	return "api"
 }
 
-func (provider *GetApiProvider) SrsId() string {
+func (gap *GetApiProvider) SrsId() string {
 	return "n.a"
 }

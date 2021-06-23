@@ -1,4 +1,4 @@
-package provider_gpkg
+package gpkg
 
 import (
 	"oaf-server/codegen"
