@@ -10,8 +10,9 @@ import (
 )
 
 type GetFeaturesProvider struct {
-	data  FeatureCollectionGeoJSON
-	srsid string
+	data        FeatureCollectionGeoJSON
+	srsid       string
+	contenttype string
 }
 
 func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
@@ -30,6 +31,10 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 	ct := r.Header.Get("Content-Type")
 
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.SrsId)}
+	if ct == provider.JSONContentType {
+		ct = provider.GEOJSONContentType
+	}
+	p.contenttype = ct
 
 	pathItem := pp.ApiProcessed.Paths.Find(path)
 	if pathItem == nil {
@@ -103,6 +108,10 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 
 func (gfp *GetFeaturesProvider) Provide() (interface{}, error) {
 	return gfp.data, nil
+}
+
+func (gfp *GetFeaturesProvider) ContentType() string {
+	return gfp.contenttype
 }
 
 func (gfp *GetFeaturesProvider) String() string {

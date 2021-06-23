@@ -10,11 +10,13 @@ import (
 )
 
 type GetApiProvider struct {
-	data *openapi3.T
+	data        *openapi3.T
+	contenttype string
 }
 
 func (pp *PostgisProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {
 	p := &GetApiProvider{}
+	p.contenttype = r.Header.Get("Content-Type")
 
 	p.data = pp.ApiProcessed
 	return p, nil
@@ -100,6 +102,10 @@ func CreateProvidesSpecificParameters(provider *PostgisProvider) *openapi3.T {
 
 func (gap *GetApiProvider) Provide() (interface{}, error) {
 	return gap.data, nil
+}
+
+func (gap *GetApiProvider) ContentType() string {
+	return gap.contenttype
 }
 
 func (gap *GetApiProvider) String() string {

@@ -8,7 +8,8 @@ import (
 )
 
 type DescribeCollectionProvider struct {
-	data codegen.Collection
+	data        codegen.Collection
+	contenttype string
 }
 
 func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codegen.Provider, error) {
@@ -18,6 +19,7 @@ func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codeg
 	collectionId, _ := codegen.ParametersForDescribeCollection(r)
 
 	p := &DescribeCollectionProvider{}
+	p.contenttype = ct
 
 	for _, cn := range pp.PostGis.Layers {
 		// maybe convert to map, but not thread safe!
@@ -51,6 +53,10 @@ func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codeg
 
 func (dcp *DescribeCollectionProvider) Provide() (interface{}, error) {
 	return dcp.data, nil
+}
+
+func (dcp *DescribeCollectionProvider) ContentType() string {
+	return dcp.contenttype
 }
 
 func (dcp *DescribeCollectionProvider) String() string {

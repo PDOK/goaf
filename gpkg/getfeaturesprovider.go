@@ -5,12 +5,14 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
+	"oaf-server/provider"
 	pc "oaf-server/provider"
 )
 
 type GetFeaturesProvider struct {
-	data  FeatureCollectionGeoJSON
-	srsid string
+	data        FeatureCollectionGeoJSON
+	srsid       string
+	contenttype string
 }
 
 func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
@@ -26,8 +28,12 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 	path := r.URL.Path // collections/{{collectionId}}/items
 	ct := r.Header.Get("Content-Type")
+	if ct == provider.JSONContentType {
+		ct = provider.GEOJSONContentType
+	}
 
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.SrsId)}
+	p.contenttype = ct
 
 	for _, cn := range gp.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
@@ -92,6 +98,10 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 func (gfp *GetFeaturesProvider) Provide() (interface{}, error) {
 	return gfp.data, nil
+}
+
+func (gfp *GetFeaturesProvider) ContentType() string {
+	return gfp.contenttype
 }
 
 func (gfp *GetFeaturesProvider) String() string {
