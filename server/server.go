@@ -8,9 +8,9 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	cg "oaf-server/codegen"
-	pc "oaf-server/provider_common"
-	"oaf-server/provider_gpkg"
+	"oaf-server/codegen"
+	"oaf-server/gpkg"
+	pc "oaf-server/provider"
 	"oaf-server/spec"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -22,7 +22,7 @@ type Server struct {
 	ServiceSpecPath    string
 	MaxReturnLimit     uint64
 	DefaultReturnLimit uint64
-	Providers          cg.Providers
+	Providers          codegen.Providers
 	Openapi            *openapi3.T
 	Templates          *template.Template
 }
@@ -43,7 +43,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 	server.Templates = template.Must(template.New("templates").Funcs(
 		template.FuncMap{
 			"isOdd":       func(i int) bool { return i%2 != 0 },
-			"hasFeatures": func(i []provider_gpkg.Feature) bool { return len(i) > 0 },
+			"hasFeatures": func(i []gpkg.Feature) bool { return len(i) > 0 },
 			"upperFirst":  pc.UpperFirst,
 			"dict": func(values ...interface{}) (map[string]interface{}, error) {
 				if len(values)%2 != 0 {
@@ -66,7 +66,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 	return server, nil
 }
 
-func (s *Server) SetProviders(providers cg.Providers) (*Server, error) {
+func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
 	err := providers.Init()
 
 	if err != nil {
@@ -77,7 +77,7 @@ func (s *Server) SetProviders(providers cg.Providers) (*Server, error) {
 	return s, nil
 }
 
-func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (cg.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -157,7 +157,7 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (cg.Provid
 func jsonError(w http.ResponseWriter, code string, msg string, status int) {
 	w.WriteHeader(status)
 
-	result, err := json.Marshal(&cg.Exception{
+	result, err := json.Marshal(&codegen.Exception{
 		Code:        code,
 		Description: msg,
 	})

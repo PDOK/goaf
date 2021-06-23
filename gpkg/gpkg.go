@@ -1,4 +1,4 @@
-package provider_gpkg
+package gpkg
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	pc "oaf-server/provider_common"
+	pc "oaf-server/provider"
 	"os"
 	"regexp"
 	"time"

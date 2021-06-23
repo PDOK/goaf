@@ -1,19 +1,19 @@
-package provider_postgis
+package postgis
 
 import (
 	"errors"
 	"net/http"
-	cg "oaf-server/codegen"
+	"oaf-server/codegen"
 )
 
 type GetConformanceDeclarationProvider struct {
 	data []string
 }
 
-func (provider *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Request) (cg.Provider, error) {
+func (pp *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Request) (codegen.Provider, error) {
 	p := &GetConformanceDeclarationProvider{}
 	path := r.URL.Path
-	pathItem := provider.ApiProcessed.Paths.Find(path)
+	pathItem := pp.ApiProcessed.Paths.Find(path)
 	if pathItem == nil {
 		return p, errors.New("Invalid path :" + path)
 	}
@@ -27,14 +27,14 @@ func (provider *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Re
 	return p, nil
 }
 
-func (provider *GetConformanceDeclarationProvider) Provide() (interface{}, error) {
-	return provider.data, nil
+func (gcdp *GetConformanceDeclarationProvider) Provide() (interface{}, error) {
+	return gcdp.data, nil
 }
 
-func (provider *GetConformanceDeclarationProvider) String() string {
+func (gcdp *GetConformanceDeclarationProvider) String() string {
 	return "getconformancedeclaration"
 }
 
-func (provider *GetConformanceDeclarationProvider) SrsId() string {
+func (gcdp *GetConformanceDeclarationProvider) SrsId() string {
 	return "n.a."
 }

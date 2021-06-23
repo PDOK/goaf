@@ -1,4 +1,4 @@
-package provider_postgis
+package postgis
 
 import (
 	"oaf-server/codegen"
