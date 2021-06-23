@@ -10,9 +10,28 @@ import (
 )
 
 const (
-	JSONContentType = "application/json"
-	HTMLContentType = "text/html"
+	GEOJSONContentType = "application/geo+json"
+	JSONContentType    = "application/json"
+	HTMLContentType    = "text/html"
 )
+
+func GetFeatureContentTypes() map[string]string {
+	ct := make(map[string]string)
+
+	ct["json"] = GEOJSONContentType
+	ct["html"] = HTMLContentType
+
+	return ct
+}
+
+func GetFeatureContentFields() map[string]string {
+	ct := make(map[string]string)
+
+	ct[GEOJSONContentType] = "json"
+	ct[HTMLContentType] = "html"
+
+	return ct
+}
 
 func GetContentTypes() map[string]string {
 	ct := make(map[string]string)
@@ -61,6 +80,40 @@ func ProcesLinksForParams(links []codegen.Link, queryParams url.Values) error {
 
 	return nil
 
+}
+
+func CreateFeatureLinks(title, hrefPath, rel, ct string) ([]codegen.Link, error) {
+
+	links := make([]codegen.Link, 0)
+
+	href, err := ctLink(hrefPath, GetFeatureContentFields()[ct])
+	if err != nil {
+		return links, err
+	}
+	links = append(links, codegen.Link{Title: formatTitle(title, rel, GetFeatureContentFields()[ct]), Rel: rel, Href: href, Type: ct})
+
+	if rel == "self" {
+		rel = "alternate"
+	}
+
+	for k, sct := range GetFeatureContentTypes() {
+		if ct == sct {
+			continue
+		}
+		href, err := ctLink(hrefPath, k)
+		if err != nil {
+			return links, err
+		}
+
+		links = append(links, codegen.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
+
+		if rel == "self" {
+			rel = "alternate"
+			links = append(links, codegen.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
+		}
+	}
+
+	return links, nil
 }
 
 func CreateLinks(title, hrefPath, rel, ct string) ([]codegen.Link, error) {

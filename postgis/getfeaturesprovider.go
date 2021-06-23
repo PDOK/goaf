@@ -63,7 +63,7 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 
 		for _, feature := range fcGeoJSON.Features {
 			hrefBase := fmt.Sprintf("%s%s/%v", pp.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
-			links, _ := provider.CreateLinks("feature", hrefBase, "self", ct)
+			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
 
@@ -79,13 +79,13 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", pp.CommonProvider.ServiceEndpoint, path) // /collections
 
-		links, _ := provider.CreateLinks("features "+cn.Identifier, hrefBase, "self", ct)
+		links, _ := provider.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
 		_ = provider.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
 
-			ilinks, _ := provider.CreateLinks("next features "+cn.Identifier, hrefBase, "next", ct)
+			ilinks, _ := provider.CreateFeatureLinks("next features "+cn.Identifier, hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", fcGeoJSON.Offset))
 			_ = provider.ProcesLinksForParams(ilinks, requestParams)
 

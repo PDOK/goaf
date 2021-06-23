@@ -53,7 +53,7 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 			feature := fcGeoJSON.Features[0]
 
 			hrefBase := fmt.Sprintf("%s%s", pp.CommonProvider.ServiceEndpoint, path) // /collections
-			links, _ := provider.CreateLinks("feature", hrefBase, "self", ct)
+			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 
 			p.data = feature

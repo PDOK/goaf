@@ -41,7 +41,7 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 			feature := fcGeoJSON.Features[0]
 
 			hrefBase := fmt.Sprintf("%s%s", gp.CommonProvider.ServiceEndpoint, path) // /collections
-			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
+			links, _ := pc.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 
 			p.data = feature
