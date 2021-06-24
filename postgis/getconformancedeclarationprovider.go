@@ -7,11 +7,13 @@ import (
 )
 
 type GetConformanceDeclarationProvider struct {
-	data []string
+	data        []string
+	contenttype string
 }
 
 func (pp *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Request) (codegen.Provider, error) {
 	p := &GetConformanceDeclarationProvider{}
+	p.contenttype = r.Header.Get("Content-Type")
 	path := r.URL.Path
 	pathItem := pp.ApiProcessed.Paths.Find(path)
 	if pathItem == nil {
@@ -29,6 +31,10 @@ func (pp *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Request)
 
 func (gcdp *GetConformanceDeclarationProvider) Provide() (interface{}, error) {
 	return gcdp.data, nil
+}
+
+func (gcdp *GetConformanceDeclarationProvider) ContentType() string {
+	return gcdp.contenttype
 }
 
 func (gcdp *GetConformanceDeclarationProvider) String() string {

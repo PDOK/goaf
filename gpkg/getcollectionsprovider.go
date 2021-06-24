@@ -8,7 +8,8 @@ import (
 )
 
 type GetCollectionsProvider struct {
-	data codegen.Collections
+	data        codegen.Collections
+	contenttype string
 }
 
 func (gp *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (codegen.Provider, error) {
@@ -17,6 +18,7 @@ func (gp *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (codege
 	ct := r.Header.Get("Content-Type")
 
 	p := &GetCollectionsProvider{}
+	p.contenttype = ct
 
 	csInfo := codegen.Collections{Links: []codegen.Link{}, Collections: []codegen.Collection{}}
 	// create Links
@@ -61,6 +63,10 @@ func (gp *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (codege
 
 func (gp *GetCollectionsProvider) Provide() (interface{}, error) {
 	return gp.data, nil
+}
+
+func (gp *GetCollectionsProvider) ContentType() string {
+	return gp.contenttype
 }
 
 func (gp *GetCollectionsProvider) String() string {

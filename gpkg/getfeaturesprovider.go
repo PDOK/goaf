@@ -5,12 +5,14 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
+	"oaf-server/provider"
 	pc "oaf-server/provider"
 )
 
 type GetFeaturesProvider struct {
-	data  FeatureCollectionGeoJSON
-	srsid string
+	data        FeatureCollectionGeoJSON
+	srsid       string
+	contenttype string
 }
 
 func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
@@ -26,8 +28,12 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 	path := r.URL.Path // collections/{{collectionId}}/items
 	ct := r.Header.Get("Content-Type")
+	if ct == provider.JSONContentType {
+		ct = provider.GEOJSONContentType
+	}
 
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.SrsId)}
+	p.contenttype = ct
 
 	for _, cn := range gp.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
@@ -43,7 +49,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 		for _, feature := range fcGeoJSON.Features {
 			hrefBase := fmt.Sprintf("%s%s/%v", gp.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
-			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
+			links, _ := pc.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
 
@@ -62,12 +68,12 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", gp.CommonProvider.ServiceEndpoint, path) // /collections
-		links, _ := pc.CreateLinks("features "+cn.Identifier, hrefBase, "self", ct)
+		links, _ := pc.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
 		_ = pc.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
-			ilinks, _ := pc.CreateLinks("features "+cn.Identifier, hrefBase, "next", ct)
+			ilinks, _ := pc.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)+int64(limitParam)))
 			_ = pc.ProcesLinksForParams(ilinks, requestParams)
 
@@ -92,6 +98,10 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 func (gfp *GetFeaturesProvider) Provide() (interface{}, error) {
 	return gfp.data, nil
+}
+
+func (gfp *GetFeaturesProvider) ContentType() string {
+	return gfp.contenttype
 }
 
 func (gfp *GetFeaturesProvider) String() string {

@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"oaf-server/codegen"
-	pc "oaf-server/provider"
+	"oaf-server/provider"
 )
 
 type GetFeatureProvider struct {
-	data  *Feature
-	srsid string
+	data        *Feature
+	srsid       string
+	contenttype string
 }
 
 func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provider, error) {
@@ -23,6 +24,12 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 
 	path := r.URL.Path
 	ct := r.Header.Get("Content-Type")
+
+	if ct == provider.JSONContentType {
+		ct = provider.GEOJSONContentType
+	}
+
+	p.contenttype = ct
 
 	for _, cn := range gp.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
@@ -41,7 +48,7 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 			feature := fcGeoJSON.Features[0]
 
 			hrefBase := fmt.Sprintf("%s%s", gp.CommonProvider.ServiceEndpoint, path) // /collections
-			links, _ := pc.CreateLinks("feature", hrefBase, "self", ct)
+			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 
 			p.data = feature
@@ -55,6 +62,10 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 
 func (gfp *GetFeatureProvider) Provide() (interface{}, error) {
 	return gfp.data, nil
+}
+
+func (gfp *GetFeatureProvider) ContentType() string {
+	return gfp.contenttype
 }
 
 func (gfp *GetFeatureProvider) String() string {

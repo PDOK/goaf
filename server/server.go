@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"oaf-server/codegen"
 	"oaf-server/gpkg"
-	pc "oaf-server/provider"
+	"oaf-server/provider"
 	"oaf-server/spec"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -44,7 +44,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 		template.FuncMap{
 			"isOdd":       func(i int) bool { return i%2 != 0 },
 			"hasFeatures": func(i []gpkg.Feature) bool { return len(i) > 0 },
-			"upperFirst":  pc.UpperFirst,
+			"upperFirst":  provider.UpperFirst,
 			"dict": func(values ...interface{}) (map[string]interface{}, error) {
 				if len(values)%2 != 0 {
 					return nil, errors.New("invalid dict call")
@@ -62,7 +62,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 			//}).ParseGlob("/templates/*")) // prod
 		}).ParseGlob("templates/*")) // IDE
 
-	server.ContentTypes = pc.GetContentTypes()
+	server.ContentTypes = provider.GetContentTypes()
 	return server, nil
 }
 
@@ -97,7 +97,7 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 		r.Header.Set("Content-Type", contentResponse)
 
-		provider, err := providerFunc(r)
+		p, err := providerFunc(r)
 
 		// todo  error based on content type
 		if err != nil {
@@ -105,12 +105,12 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 			return
 		}
 
-		if provider == nil {
+		if p == nil {
 			http.NotFound(w, r)
 			return
 		}
 
-		result, err := provider.Provide()
+		result, err := p.Provide()
 
 		// todo  error based on content type
 		if err != nil {
@@ -120,19 +120,19 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 		var encodedContent []byte
 
-		if contentResponse == pc.JSONContentType {
+		if contentResponse == provider.JSONContentType {
 			encodedContent, err = json.Marshal(result)
 			if err != nil {
 				jsonError(w, "JSON MARSHALLER", err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-		} else if contentResponse == pc.HTMLContentType {
-			providerID := provider.String()
+		} else if contentResponse == provider.HTMLContentType {
+			providerID := p.String()
 
 			rmap := make(map[string]interface{})
 			rmap["result"] = result
-			rmap["srsid"] = provider.SrsId()
+			rmap["srsid"] = p.SrsId()
 
 			b := new(bytes.Buffer)
 			err = s.Templates.ExecuteTemplate(b, providerID+".html", rmap)
@@ -148,7 +148,7 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 			return
 		}
 
-		w.Header().Set("Content-Type", contentResponse)
+		w.Header().Set("Content-Type", p.ContentType())
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(encodedContent)
 	}

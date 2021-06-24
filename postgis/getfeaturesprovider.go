@@ -10,8 +10,9 @@ import (
 )
 
 type GetFeaturesProvider struct {
-	data  FeatureCollectionGeoJSON
-	srsid string
+	data        FeatureCollectionGeoJSON
+	srsid       string
+	contenttype string
 }
 
 func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
@@ -30,6 +31,10 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 	ct := r.Header.Get("Content-Type")
 
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.SrsId)}
+	if ct == provider.JSONContentType {
+		ct = provider.GEOJSONContentType
+	}
+	p.contenttype = ct
 
 	pathItem := pp.ApiProcessed.Paths.Find(path)
 	if pathItem == nil {
@@ -63,7 +68,7 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 
 		for _, feature := range fcGeoJSON.Features {
 			hrefBase := fmt.Sprintf("%s%s/%v", pp.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
-			links, _ := provider.CreateLinks("feature", hrefBase, "self", ct)
+			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
 
@@ -79,13 +84,13 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", pp.CommonProvider.ServiceEndpoint, path) // /collections
 
-		links, _ := provider.CreateLinks("features "+cn.Identifier, hrefBase, "self", ct)
+		links, _ := provider.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
 		_ = provider.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
 
-			ilinks, _ := provider.CreateLinks("next features "+cn.Identifier, hrefBase, "next", ct)
+			ilinks, _ := provider.CreateFeatureLinks("next features "+cn.Identifier, hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", fcGeoJSON.Offset))
 			_ = provider.ProcesLinksForParams(ilinks, requestParams)
 
@@ -103,6 +108,10 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 
 func (gfp *GetFeaturesProvider) Provide() (interface{}, error) {
 	return gfp.data, nil
+}
+
+func (gfp *GetFeaturesProvider) ContentType() string {
+	return gfp.contenttype
 }
 
 func (gfp *GetFeaturesProvider) String() string {

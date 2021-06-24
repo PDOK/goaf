@@ -12,6 +12,7 @@ type Provider interface {
 	SrsId() string
 	String() string
 	Provide() (interface{}, error)
+	ContentType() string
 }
 
 type Providers interface {

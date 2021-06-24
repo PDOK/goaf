@@ -7,7 +7,8 @@ import (
 )
 
 type GetLandingPageProvider struct {
-	Links []codegen.Link `json:"links"`
+	Links       []codegen.Link `json:"links"`
+	contenttype string
 }
 
 func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (codegen.Provider, error) {
@@ -17,6 +18,7 @@ func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (co
 		ct := r.Header.Get("Content-Type")
 
 		p := &GetLandingPageProvider{}
+		p.contenttype = ct
 
 		links, _ := CreateLinks("landing page", serviceEndpoint, "self", ct)
 		apiLink, _ := CreateLinks("openapi3 specification", fmt.Sprintf("%s/api", serviceEndpoint), "service", ct)           // /api, "service", ct)
@@ -34,6 +36,10 @@ func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (co
 
 func (glp *GetLandingPageProvider) Provide() (interface{}, error) {
 	return glp, nil
+}
+
+func (glp *GetLandingPageProvider) ContentType() string {
+	return glp.contenttype
 }
 
 func (glp *GetLandingPageProvider) String() string {

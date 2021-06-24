@@ -9,8 +9,9 @@ import (
 )
 
 type GetFeatureProvider struct {
-	data  *Feature
-	srsid string
+	data        *Feature
+	srsid       string
+	contenttype string
 }
 
 func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provider, error) {
@@ -24,6 +25,11 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 
 	path := r.URL.Path
 	ct := r.Header.Get("Content-Type")
+	if ct == provider.JSONContentType {
+		ct = provider.GEOJSONContentType
+	}
+
+	p.contenttype = ct
 
 	for _, cn := range pp.PostGis.Layers {
 		// maybe convert to map, but not thread safe!
@@ -53,7 +59,7 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 			feature := fcGeoJSON.Features[0]
 
 			hrefBase := fmt.Sprintf("%s%s", pp.CommonProvider.ServiceEndpoint, path) // /collections
-			links, _ := provider.CreateLinks("feature", hrefBase, "self", ct)
+			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 
 			p.data = feature
@@ -70,6 +76,10 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 
 func (gfp *GetFeatureProvider) Provide() (interface{}, error) {
 	return gfp.data, nil
+}
+
+func (gfp *GetFeatureProvider) ContentType() string {
+	return gfp.contenttype
 }
 
 func (gfp *GetFeatureProvider) String() string {
