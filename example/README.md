@@ -63,6 +63,7 @@ SELECT fid,
        geom
   from addresses.addresses_alternative_encoding;
 
+ALTER TABLE addresses.addresses ADD PRIMARY KEY (fid)
 CREATE INDEX addresses_geom_sidx ON addresses.addresses USING GIST (geom);
 CREATE INDEX addresses_offsetid_idx ON addresses.addresses(offsetid);
 ```
