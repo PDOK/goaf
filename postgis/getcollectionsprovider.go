@@ -25,12 +25,12 @@ func (pp *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (codegen.P
 	hrefBase := fmt.Sprintf("%s%s", pp.CommonProvider.ServiceEndpoint, path) // /collections
 	links, _ := provider.CreateLinks("collections ", hrefBase, "self", ct)
 	csInfo.Links = append(csInfo.Links, links...)
-	for _, cn := range pp.PostGis.Layers {
+	for _, cn := range pp.PostGis.Collections {
 		clinks, _ := provider.CreateLinks("collection "+cn.Identifier, fmt.Sprintf("%s/%s", hrefBase, cn.Identifier), "item", ct)
 		csInfo.Links = append(csInfo.Links, clinks...)
 	}
 
-	for _, cn := range pp.PostGis.Layers {
+	for _, cn := range pp.PostGis.Collections {
 
 		cInfo := codegen.Collection{
 			Id:          cn.Identifier,

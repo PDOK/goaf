@@ -11,17 +11,15 @@ type PostgisProvider struct {
 	CommonProvider provider.CommonProvider
 	PostGis        Postgis
 	CrsMap         map[string]string
-	configFilePath string
-	connectionStr  string
+	Config         provider.Config
 	Api            *openapi3.T
 	ApiProcessed   *openapi3.T
 }
 
-func NewPostgisWithCommonProvider(api *openapi3.T, commonProvider provider.CommonProvider, configPath, connectionStr string) *PostgisProvider {
+func NewPostgisWithCommonProvider(api *openapi3.T, commonProvider provider.CommonProvider, config provider.Config) *PostgisProvider {
 	p := &PostgisProvider{
 		CrsMap:         map[string]string{"4326": "http://wfww.opengis.net/def/crs/OGC/1.3/CRS84"},
-		configFilePath: configPath,
-		connectionStr:  connectionStr,
+		Config:         config,
 		CommonProvider: commonProvider,
 		Api:            api,
 	}
@@ -29,7 +27,7 @@ func NewPostgisWithCommonProvider(api *openapi3.T, commonProvider provider.Commo
 }
 
 func (provider *PostgisProvider) Init() (err error) {
-	provider.PostGis, err = NewPostgis(provider.configFilePath, provider.connectionStr)
+	provider.PostGis, err = NewPostgis(provider.Config)
 	provider.ApiProcessed = CreateProvidesSpecificParameters(provider)
 	return
 }

@@ -26,43 +26,23 @@ func main() {
 	bindHost := flag.String("s", envString("BIND_HOST", "0.0.0.0"), "server internal bind address, default; 0.0.0.0")
 	bindPort := flag.Int("p", envInt("BIND_PORT", 8080), "server internal bind address, default; 8080")
 
-	serviceEndpoint := flag.String("endpoint", envString("ENDPOINT", "http://localhost:8080"), "server endpoint for proxy reasons, default; http://localhost:8080")
-	serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH", "spec/oaf.json"), "swagger openapi spec")
-	defaultReturnLimit := flag.Int("limit", envInt("LIMIT", 100), "limit, default: 100")
-	maxReturnLimit := flag.Int("limitmax", envInt("LIMIT_MAX", 500), "max limit, default: 1000")
-	providerName := flag.String("provider", envString("PROVIDER", ""), "postgis or gpkg")
-	gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG", ""), "geopackage path")
-	crsMapFilePath := flag.String("crs", envString("PATH_CRS", ""), "crs file path")
-	configFilePath := flag.String("config", envString("PATH_CONFIG", ""), "configfile path")
-	connectionStr := flag.String("connection", envString("CONNECTION", ""), "connection string postgis")
-	// alternative database configuration
-	if *connectionStr == "" && *providerName == "postgis" {
-		withDBHost := flag.String("db-host", envString("DB_HOST", "localhost"), "database host")
-		withDBPort := flag.Int("db-port", envInt("DB_PORT", 5432), "database port number")
-		WithDBName := flag.String("db-name", envString("DB_NAME", "pdok"), "database name")
-		withDBSSL := flag.String("db-ssl-mode", envString("DB_SSL_MODE", "disable"), "ssl-mode")
-		withDBUser := flag.String("db-user-name", envString("DB_USERNAME", "postgres"), "database username")
-		withDBPassword := flag.String("db-password", envString("DB_PASSWORD", ""), "database password")
-
-		connectionStrAlt := fmt.Sprintf("host=%s port=%d database=%s sslmode=%s user=%s password=%s",
-			*withDBHost, *withDBPort, *WithDBName, *withDBSSL, *withDBUser, *withDBPassword)
-
-		connectionStr = &connectionStrAlt
-	}
-
-	featureIdKey := flag.String("featureId", envString("FEATURE_ID", ""), "Default feature identification or else first column definition (fid)")
-
+	configfilepath := flag.String("c", envString("CONFIG", ""), "configfile path")
 	flag.Parse()
 
+	config := &provider.Config{}
+	config.ReadConfig(*configfilepath)
+
 	// stage 1: create server with spec path and limits
-	apiServer, err := server.NewServer(*serviceEndpoint, *serviceSpecPath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
+	apiServer, err := server.NewServer(config.Endpoint, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
 	if err != nil {
 		log.Fatal("Server initialisation error:", err)
 	}
 
 	// stage 2: Create providers based upon provider name
-	commonProvider := provider.NewCommonProvider(*serviceEndpoint, *serviceSpecPath, uint64(*defaultReturnLimit), uint64(*maxReturnLimit))
-	providers := getProvider(apiServer.Openapi, providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
+	commonProvider := provider.NewCommonProvider(config.Endpoint, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+	// providers := getProvider(apiServer.Openapi, providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
+
+	providers := getProvider(apiServer.Openapi, commonProvider, *config)
 
 	if providers == nil {
 		log.Fatal("Incorrect provider provided valid names are: gpkg, postgis")
@@ -99,15 +79,25 @@ func main() {
 
 }
 
-func getProvider(api *openapi3.T, providerName *string, commonProvider provider.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
-	if *providerName == "gpkg" {
-		return addGeopackageProviders(api, commonProvider, *crsMapFilePath, *gpkgFilePath, *featureIdKey)
+func getProvider(api *openapi3.T, commonProvider provider.CommonProvider, config provider.Config) codegen.Providers {
+	if config.Datasource.Geopackage != nil {
+		return addGeopackageProviders(api, commonProvider, "", config.Datasource.Geopackage.File, config.Datasource.Geopackage.Fid)
+	} else if config.Datasource.PostGIS != nil {
+		return postgis.NewPostgisWithCommonProvider(api, commonProvider, config)
 	}
-	if *providerName == "postgis" {
-		return postgis.NewPostgisWithCommonProvider(api, commonProvider, *configFilePath, *connectionStr)
-	}
+
 	return nil
 }
+
+// func getProvider(api *openapi3.T, providerName *string, commonProvider provider.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
+// 	if *providerName == "gpkg" {
+// 		return addGeopackageProviders(api, commonProvider, *crsMapFilePath, *gpkgFilePath, *featureIdKey)
+// 	}
+// 	if *providerName == "postgis" {
+// 		return postgis.NewPostgisWithCommonProvider(api, commonProvider, *configFilePath, *connectionStr)
+// 	}
+// 	return nil
+// }
 
 func addHealthHandler(router *server.RegexpHandler) {
 	router.HandleFunc(regexp.MustCompile("/health"), func(w http.ResponseWriter, r *http.Request) {

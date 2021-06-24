@@ -21,7 +21,7 @@ func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codeg
 	p := &DescribeCollectionProvider{}
 	p.contenttype = ct
 
-	for _, cn := range pp.PostGis.Layers {
+	for _, cn := range pp.PostGis.Collections {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
 			continue

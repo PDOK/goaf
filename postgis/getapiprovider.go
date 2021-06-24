@@ -48,10 +48,10 @@ func CreateProvidesSpecificParameters(provider *PostgisProvider) *openapi3.T {
 	}
 
 	// adjust swagger to accommodate individual parameters
-	for _, layer := range provider.PostGis.Layers {
+	for _, collection := range provider.PostGis.Collections {
 		for k, v := range provider.Api.Paths {
 			if strings.Contains(k, "{collectionId}") {
-				k := strings.Replace(k, "{collectionId}", strings.ToLower(layer.TableName), 1)
+				k := strings.Replace(k, "{collectionId}", strings.ToLower(collection.Tablename), 1)
 				params := openapi3.NewParameters()
 				paramsQueryExists := false
 
@@ -69,7 +69,7 @@ func CreateProvidesSpecificParameters(provider *PostgisProvider) *openapi3.T {
 				}
 				// only add vendor specific parameters to query params are already allowed
 				if paramsQueryExists {
-					for _, specificParam := range layer.VendorSpecificParameters {
+					for _, specificParam := range collection.VendorSpecificParameters {
 						sp := openapi3.NewQueryParameter(specificParam)
 						sp.Description = fmt.Sprintf("Vendor specific parameter : %s", specificParam)
 						sp.Required = false

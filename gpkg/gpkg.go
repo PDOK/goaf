@@ -39,7 +39,7 @@ type GeoPackage struct {
 	DB            *sqlx.DB
 	FeatureIdKey  string
 	Layers        []GeoPackageLayer
-	DefaultBBox   []float64
+	DefaultBBox   [4]float64
 	SrsId         int64
 }
 
@@ -82,7 +82,7 @@ func NewGeoPackage(filepath string, featureIdKey string) (GeoPackage, error) {
 		log.Printf("| 	LAYER: %d. ID: %s, SRS_ID: %d, TABLE: %s PK: %s, FEATURES : %v\n", i+1, layer.Identifier, layer.SrsId, layer.Features[0], layer.Features[1], layer.Features[2:])
 
 		if i == 0 {
-			gpkg.DefaultBBox = []float64{layer.MinX, layer.MinY, layer.MaxX, layer.MaxY}
+			gpkg.DefaultBBox = [4]float64{layer.MinX, layer.MinY, layer.MaxX, layer.MaxY}
 			gpkg.SrsId = layer.SrsId
 		}
 		if layer.MinX < gpkg.DefaultBBox[0] {
@@ -158,7 +158,7 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 	return
 }
 
-func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPackageLayer, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox []float64) (result *FeatureCollectionGeoJSON, err error) {
+func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPackageLayer, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *FeatureCollectionGeoJSON, err error) {
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
 	result = &FeatureCollectionGeoJSON{}
 	if len(bbox) > 4 {
