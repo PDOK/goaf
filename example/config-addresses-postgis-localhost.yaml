@@ -27,11 +27,11 @@ datasource:
     - href: https://geodata.nationaalgeoregister.nl/inspireadressen/extract/inspireadressen.zip
       hreflang: nl
       length: 1911454553
-      rel: alternative
+      rel: alternate
       type: application/x-compressed
       title: INSPIRE harmonized Addresses
     - href: https://geodata.nationaalgeoregister.nl/inspireadressen/extract/inspireadressen.gpkg
-      rel: alternative
+      rel: alternate
       type: application/geopackage+sqlite3
       title: Addresses Geopackage
   bbox: [4.709923493810017,53.00079137013467,4.897723983538761,53.18212166845569]
