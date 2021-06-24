@@ -21,7 +21,7 @@ func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (co
 		p.contenttype = ct
 
 		links, _ := CreateLinks("landing page", serviceEndpoint, "self", ct)
-		apiLink, _ := CreateLinks("openapi3 specification", fmt.Sprintf("%s/api", serviceEndpoint), "service", ct)           // /api, "service", ct)
+		apiLink, _ := GetApiLinks(fmt.Sprintf("%s/api", serviceEndpoint))                                                    // /api, "service", ct)
 		conformanceLink, _ := CreateLinks("capabilities", fmt.Sprintf("%s/conformance", serviceEndpoint), "conformance", ct) // /conformance, "conformance", ct)
 		dataLink, _ := CreateLinks("collections", fmt.Sprintf("%s/collections", serviceEndpoint), "data", ct)                // /collections, "collections", ct)
 
