@@ -42,7 +42,7 @@ docker run --rm -v `pwd`/example:/example -e PROVIDER='gpkg' -e PATH_GPKG='/exam
 
 ## PostGis
 
-More elaborate config optimised performance for huge db (10M+ records/collection)
+More elaborate config optimised performance for huge db (10M+ features/collection)
 
 ```docker
 docker run -v `pwd`/example:/example -e CONNECTION='postgres://{user}:{password}@{host}:{port}/{database}?sslmode=disable' -e PROVIDER='postgis' -e PATH_CONFIG='/example/config_postgis.yaml' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/goaf:latest

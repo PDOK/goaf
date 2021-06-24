@@ -1,0 +1,3 @@
+datasource:
+  gpkg:
+    file: example/addresses.gpkg

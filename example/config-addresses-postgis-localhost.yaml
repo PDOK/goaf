@@ -1,0 +1,27 @@
+endpoint: http://localhost:8080
+openapi: spec/oaf.json
+defaultfeaturelimit: 100
+maxfeaturelimit: 500
+datasource:
+  postgis:
+    connection: postgres://docker:docker@localhost:5432/oaf?sslmode=disable
+  collections:
+  - schemaname: addresses #database schema name
+    tablename: addresses #database table/view name
+    identifier: addresses #collection name in api response
+    # filter: (l."properties"->'eindRegistratie') is null # extra filtering option is added to where clause
+    description: INSPIRE Alternative Encoding Addresses #Description of the collection
+    columns:
+      geometry: geom #column containing the SFS geometry
+      # geometryType: POINT # has currently no use
+      fid: fid #the unique indexed identifier for a given feature
+      offset: offsetid # extra column to determine next keyset paging, should be numeric, indexed and unique, could be equal to feature id
+      bbox: bbox #extra column with bounding box selection index for intersects query, simplification and speedup
+    bbox: [4.709923493810017,53.00079137013467,4.897723983538761,53.18212166845569] # Bounding box of all features can be used to display subset of features
+    srid: 4326 #the projection of the geometry currently stored in database
+    # Properties are column names which should be exposed in properties part of the response
+    jsonb: true
+    properties:
+      - properties
+  bbox: [4.709923493810017,53.00079137013467,4.897723983538761,53.18212166845569]
+  srid: 4326

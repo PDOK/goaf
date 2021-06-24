@@ -248,7 +248,7 @@ func ParseFloat64(stringValue string, defaultValue float64) float64 {
 	return value
 }
 
-func ParseBBox(stringValue string, defaultValue []float64) []float64 {
+func ParseBBox(stringValue string, defaultValue [4]float64) [4]float64 {
 	if stringValue == "" {
 		return defaultValue
 	}
@@ -257,7 +257,7 @@ func ParseBBox(stringValue string, defaultValue []float64) []float64 {
 		return defaultValue
 	}
 
-	value := make([]float64, len(bboxValues))
+	var value [4]float64
 	for i, v := range bboxValues {
 		value[i] = ParseFloat64(v, value[i])
 	}

@@ -30,7 +30,7 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 	path := r.URL.Path // collections/{collectionId}/items
 	ct := r.Header.Get("Content-Type")
 
-	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.SrsId)}
+	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.Srid)}
 	if ct == provider.JSONContentType {
 		ct = provider.GEOJSONContentType
 	}
@@ -47,7 +47,7 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 		}
 	}
 
-	for _, cn := range pp.PostGis.Layers {
+	for _, cn := range pp.PostGis.Collections {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
 			continue

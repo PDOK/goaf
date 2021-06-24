@@ -3,14 +3,11 @@ services:
   goaf:
     build:
       context: ../
-    image: pdok/gogcapi-features
+    image: pdok/goaf:latest
     restart: unless-stopped
-    command: ["wfs-server"]
+    command: ["oaf-server"]
     environment:
-      - CONNECTION=postgres://docker:docker@postgis:5432/oaf?sslmode=disable
-      - PROVIDER=postgis
-      - PATH_CONFIG=/config/config_postgis.yaml
-      - ENDPOINT=http://localhost:8080
+      - CONFIG=/config/config-addresses-postgis.yaml
     ports:
       - 8080:8080
     depends_on:

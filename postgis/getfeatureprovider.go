@@ -21,7 +21,7 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 	featureIdParam := featureId
 	bboxParam := pp.PostGis.BBox
 
-	p := &GetFeatureProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.SrsId)}
+	p := &GetFeatureProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.Srid)}
 
 	path := r.URL.Path
 	ct := r.Header.Get("Content-Type")
@@ -31,13 +31,13 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 
 	p.contenttype = ct
 
-	for _, cn := range pp.PostGis.Layers {
+	for _, cn := range pp.PostGis.Collections {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
 			continue
 		}
 
-		pathItem := pp.ApiProcessed.Paths.Find("/collections/pand/items/{featureId}")
+		pathItem := pp.ApiProcessed.Paths.Find("/collections/" + collectionId + "/items/{featureId}")
 		if pathItem == nil {
 			return p, errors.New("Invalid path :" + path)
 		}
@@ -71,7 +71,7 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 		return p, nil
 	}
 
-	return p, errors.New("Cannot find layer : " + collectionId)
+	return p, errors.New("Cannot find collection : " + collectionId)
 }
 
 func (gfp *GetFeatureProvider) Provide() (interface{}, error) {

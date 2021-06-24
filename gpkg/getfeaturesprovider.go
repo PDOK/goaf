@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"oaf-server/codegen"
 	"oaf-server/provider"
-	pc "oaf-server/provider"
 )
 
 type GetFeaturesProvider struct {
@@ -18,9 +17,9 @@ type GetFeaturesProvider struct {
 func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
 	collectionId, limit, offset, _, bbox, time := codegen.ParametersForGetFeatures(r)
 
-	limitParam := pc.ParseLimit(limit, gp.CommonProvider.DefaultReturnLimit, gp.CommonProvider.MaxReturnLimit)
-	offsetParam := pc.ParseUint(offset, 0)
-	bboxParam := pc.ParseBBox(bbox, gp.GeoPackage.DefaultBBox)
+	limitParam := provider.ParseLimit(limit, gp.CommonProvider.DefaultReturnLimit, gp.CommonProvider.MaxReturnLimit)
+	offsetParam := provider.ParseUint(offset, 0)
+	bboxParam := provider.ParseBBox(bbox, gp.GeoPackage.DefaultBBox)
 
 	if time != "" {
 		log.Println("Time selection currently not implemented")
@@ -49,7 +48,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 		for _, feature := range fcGeoJSON.Features {
 			hrefBase := fmt.Sprintf("%s%s/%v", gp.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
-			links, _ := pc.CreateFeatureLinks("feature", hrefBase, "self", ct)
+			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
 
@@ -68,14 +67,14 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", gp.CommonProvider.ServiceEndpoint, path) // /collections
-		links, _ := pc.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
-		_ = pc.ProcesLinksForParams(links, requestParams)
+		links, _ := provider.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
+		_ = provider.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
-			ilinks, _ := pc.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "next", ct)
+			ilinks, _ := provider.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)+int64(limitParam)))
-			_ = pc.ProcesLinksForParams(ilinks, requestParams)
+			_ = provider.ProcesLinksForParams(ilinks, requestParams)
 
 			links = append(links, ilinks...)
 		}
