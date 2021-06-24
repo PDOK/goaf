@@ -37,7 +37,7 @@ docker build -t pdok/goaf:latest .
 The geopacakge provider is a minimal config for GeoPackages that tend to be relative small e.g. < 3 GB.
 
 ```docker
-docker run --rm -v `pwd`/example:/example -e PROVIDER='gpkg' -e PATH_GPKG='/example/addresses.gpkg' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/goaf:latest
+docker run --rm -v `pwd`/example:/example -c /example/config-addresses-gpkg-minimal.yaml -p 8080:8080 pdok/goaf:latest
 ```
 
 ## PostGis
@@ -45,45 +45,28 @@ docker run --rm -v `pwd`/example:/example -e PROVIDER='gpkg' -e PATH_GPKG='/exam
 More elaborate config optimised performance for huge db (10M+ features/collection)
 
 ```docker
-docker run -v `pwd`/example:/example -e CONNECTION='postgres://{user}:{password}@{host}:{port}/{database}?sslmode=disable' -e PROVIDER='postgis' -e PATH_CONFIG='/example/config_postgis.yaml' -e ENDPOINT='http://localhost:8080' -p 8080:8080 pdok/goaf:latest
+docker run -v `pwd`/example:/example -c /example/config-addresses-postgis-localhost.yaml' -p 8080:8080 pdok/goaf:latest
 ```
 
-example table
+### Example table
 
 ```sql
-CREATE TABLE bgt_wfs3_v1.bak
+CREATE TABLE addresses.addresses
 (
-    _id text COLLATE pg_catalog."default" NOT NULL,
-    _version text COLLATE pg_catalog."default",
+    fid text COLLATE pg_catalog."default" NOT NULL,
+    offsetid bigint NOT NULL,
     properties jsonb,
-    _geom geometry,
-    _bbox geometry,
-    _offset_id bigint NOT NULL DEFAULT nextval('bgt_wfs3_v1.bak__offset_id_seq'::regclass),
-    _created timestamp without time zone,
-    CONSTRAINT bak_pkey PRIMARY KEY (_id)
+    geom geometry,
+    bbox geometry,
+      
+    CONSTRAINT addresses_addresses_pk PRIMARY KEY (fid)
 )
 WITH (
     OIDS = FALSE
 )
-```
 
-used parameters:
-
-```go
-bindHost := flag.String("s", envString("BIND_HOST", "0.0.0.0"), "server internal bind address, default; 0.0.0.0")
-bindPort := flag.Int("p", envInt("BIND_PORT",8080), "server internal bind address, default; 8080")
-
-serviceEndpoint := flag.String("endpoint", envString("ENDPOINT","http://localhost:8080"), "server endpoint for proxy reasons, default; http://localhost:8080")
-serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH","spec/oaf.yml"), "swagger openapi spec")
-defaultReturnLimit := flag.Int("limit", envInt("LIMIT",100), "limit, default: 100")
-maxReturnLimit := flag.Int("limitmax", envInt("LIMIT_MAX",500), "max limit, default: 1000")
-providerName := flag.String("provider", envString("PROVIDER",""), "postgis or gpkg")
-gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG",""), "geopackage path")
-crsMapFilePath := flag.String("crs", envString("PATH_CRS",""), "crs file path")
-configFilePath := flag.String("config", envString("PATH_CONFIG",""), "configfile path")
-connectionStr := flag.String("connection", envString("CONNECTION", ""), "configfile path")
-
-featureIdKey := flag.String("featureId", envString("FEATURE_ID",""), "Default feature identification or else first column definition (fid)") //optional for gpkg provider 
+CREATE INDEX addresses_geom_sidx ON addresses.addresses USING GIST (geom);
+CREATE INDEX addresses_offsetid_idx ON addresses.addresses(offsetid);
 ```
 
 ## Generate
