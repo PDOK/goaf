@@ -32,34 +32,6 @@ func main() {
 	config := &provider.Config{}
 	config.ReadConfig(*configfilepath)
 
-	// serviceEndpoint := flag.String("endpoint", envString("ENDPOINT", "http://localhost:8080"), "server endpoint for proxy reasons, default; http://localhost:8080")
-	// serviceSpecPath := flag.String("spec", envString("SERVICE_SPEC_PATH", "spec/oaf.json"), "swagger openapi spec")
-	// defaultReturnLimit := flag.Int("limit", envInt("LIMIT", 100), "limit, default: 100")
-	// maxReturnLimit := flag.Int("limitmax", envInt("LIMIT_MAX", 500), "max limit, default: 1000")
-	// providerName := flag.String("provider", envString("PROVIDER", ""), "postgis or gpkg")
-	// gpkgFilePath := flag.String("gpkg", envString("PATH_GPKG", ""), "geopackage path")
-	// crsMapFilePath := flag.String("crs", envString("PATH_CRS", ""), "crs file path")
-	// configFilePath := flag.String("config", envString("PATH_CONFIG", ""), "configfile path")
-	// connectionStr := flag.String("connection", envString("CONNECTION", ""), "connection string postgis")
-	// // alternative database configuration
-	// if *connectionStr == "" && *providerName == "postgis" {
-	// 	withDBHost := flag.String("db-host", envString("DB_HOST", "localhost"), "database host")
-	// 	withDBPort := flag.Int("db-port", envInt("DB_PORT", 5432), "database port number")
-	// 	WithDBName := flag.String("db-name", envString("DB_NAME", "pdok"), "database name")
-	// 	withDBSSL := flag.String("db-ssl-mode", envString("DB_SSL_MODE", "disable"), "ssl-mode")
-	// 	withDBUser := flag.String("db-user-name", envString("DB_USERNAME", "postgres"), "database username")
-	// 	withDBPassword := flag.String("db-password", envString("DB_PASSWORD", ""), "database password")
-
-	// 	connectionStrAlt := fmt.Sprintf("host=%s port=%d database=%s sslmode=%s user=%s password=%s",
-	// 		*withDBHost, *withDBPort, *WithDBName, *withDBSSL, *withDBUser, *withDBPassword)
-
-	// 	connectionStr = &connectionStrAlt
-	// }
-
-	// featureIdKey := flag.String("featureId", envString("FEATURE_ID", ""), "Default feature identification or else first column definition (fid)")
-
-	// flag.Parse()
-
 	// stage 1: create server with spec path and limits
 	apiServer, err := server.NewServer(config.Endpoint, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
 	if err != nil {
