@@ -48,6 +48,16 @@ func (pp *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (codegen.P
 		cihrefBase := fmt.Sprintf("%s/items", chrefBase)
 		ilinks, _ := provider.CreateLinks("items "+cn.Identifier, cihrefBase, "item", ct)
 		cInfo.Links = append(cInfo.Links, ilinks...)
+
+		for _, c := range pp.Config.Datasource.Collections {
+			if c.Identifier == cn.Identifier {
+				if len(c.Links) != 0 {
+					cInfo.Links = append(cInfo.Links, c.Links...)
+				}
+				break
+			}
+		}
+
 		csInfo.Collections = append(csInfo.Collections, cInfo)
 	}
 

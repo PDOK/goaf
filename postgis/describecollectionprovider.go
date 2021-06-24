@@ -44,6 +44,15 @@ func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codeg
 		ilinks, _ := provider.CreateLinks("items of "+collectionId, cihrefBase, "item", ct)
 		cInfo.Links = append(links, ilinks...)
 
+		for _, c := range pp.Config.Datasource.Collections {
+			if c.Identifier == cn.Identifier {
+				if len(c.Links) != 0 {
+					cInfo.Links = append(cInfo.Links, c.Links...)
+				}
+				break
+			}
+		}
+
 		p.data = cInfo
 		break
 	}

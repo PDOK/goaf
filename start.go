@@ -81,23 +81,13 @@ func main() {
 
 func getProvider(api *openapi3.T, commonProvider provider.CommonProvider, config provider.Config) codegen.Providers {
 	if config.Datasource.Geopackage != nil {
-		return addGeopackageProviders(api, commonProvider, "", config.Datasource.Geopackage.File, config.Datasource.Geopackage.Fid)
+		return addGeopackageProviders(api, commonProvider, "", config)
 	} else if config.Datasource.PostGIS != nil {
 		return postgis.NewPostgisWithCommonProvider(api, commonProvider, config)
 	}
 
 	return nil
 }
-
-// func getProvider(api *openapi3.T, providerName *string, commonProvider provider.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
-// 	if *providerName == "gpkg" {
-// 		return addGeopackageProviders(api, commonProvider, *crsMapFilePath, *gpkgFilePath, *featureIdKey)
-// 	}
-// 	if *providerName == "postgis" {
-// 		return postgis.NewPostgisWithCommonProvider(api, commonProvider, *configFilePath, *connectionStr)
-// 	}
-// 	return nil
-// }
 
 func addHealthHandler(router *server.RegexpHandler) {
 	router.HandleFunc(regexp.MustCompile("/health"), func(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +99,7 @@ func addHealthHandler(router *server.RegexpHandler) {
 	})
 }
 
-func addGeopackageProviders(api *openapi3.T, commonProvider provider.CommonProvider, crsMapFilePath string, gpkgFilePath string, featureIdKey string) *gpkg.GeoPackageProvider {
+func addGeopackageProviders(api *openapi3.T, commonProvider provider.CommonProvider, crsMapFilePath string, config provider.Config) *gpkg.GeoPackageProvider {
 	crsMap := make(map[string]string)
 	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
 	if err != nil {
@@ -126,7 +116,7 @@ func addGeopackageProviders(api *openapi3.T, commonProvider provider.CommonProvi
 		crsMap[`4326`] = `http://www.opengis.net/def/crs/OGC/1.3/CRS84`
 	}
 
-	return gpkg.NewGeopackageWithCommonProvider(api, commonProvider, gpkgFilePath, crsMap, featureIdKey)
+	return gpkg.NewGeopackageWithCommonProvider(api, commonProvider, crsMap, config)
 }
 
 func envString(key, defaultValue string) string {
