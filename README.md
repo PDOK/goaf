@@ -3,6 +3,7 @@
 [![GitHub license](https://img.shields.io/github/license/PDOK/goaf)](https://github.com/PDOK/goaf/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/PDOK/goaf.svg)](https://github.com/PDOK/goaf/releases)
 [![Go Report Card](https://goreportcard.com/badge/PDOK/goaf)](https://goreportcard.com/report/PDOK/goaf)
+[![Docker Pulls](https://img.shields.io/docker/pulls/pdok/goaf.svg)](https://hub.docker.com/r/pdok/goaf)
 
 Goaf is a [OGC API - Features](https://www.ogc.org/standards/ogcapi-features) implementation in golang.
 
