@@ -31,7 +31,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 		ct = provider.GEOJSONContentType
 	}
 
-	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.SrsId)}
+	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.Srid)}
 	p.contenttype = ct
 
 	for _, cn := range gp.GeoPackage.Collections {
@@ -81,9 +81,9 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 		fcGeoJSON.Links = links
 
-		crsUri, ok := gp.CrsMap[fmt.Sprintf("%d", cn.SrsId)]
+		crsUri, ok := gp.CrsMap[fmt.Sprintf("%d", cn.Srid)]
 		if !ok {
-			log.Printf("SRS ID: %s, not found", fmt.Sprintf("%d", cn.SrsId))
+			log.Printf("SRS ID: %s, not found", fmt.Sprintf("%d", cn.Srid))
 			crsUri = ""
 		}
 		fcGeoJSON.Crs = crsUri

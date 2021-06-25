@@ -20,7 +20,7 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 	featureIdParam := featureId
 	bboxParam := gp.GeoPackage.DefaultBBox
 
-	p := &GetFeatureProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.SrsId)}
+	p := &GetFeatureProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.Srid)}
 
 	path := r.URL.Path
 	ct := r.Header.Get("Content-Type")
