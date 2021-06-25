@@ -3,6 +3,7 @@ package postgis
 import (
 	"net/http"
 	"oaf-server/codegen"
+	"oaf-server/provider"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -14,7 +15,13 @@ type GetApiProvider struct {
 
 func (pp *PostgisProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {
 	p := &GetApiProvider{}
-	p.contenttype = r.Header.Get("Content-Type")
+
+	ct, err := provider.GetContentType(r, p.String())
+	if err != nil {
+		return nil, err
+	}
+
+	p.contenttype = ct
 
 	p.data = pp.ApiProcessed
 	return p, nil

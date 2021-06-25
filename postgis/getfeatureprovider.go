@@ -24,9 +24,10 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 	p := &GetFeatureProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.Srid)}
 
 	path := r.URL.Path
-	ct := r.Header.Get("Content-Type")
-	if ct == provider.JSONContentType {
-		ct = provider.GEOJSONContentType
+
+	ct, err := provider.GetContentType(r, p.String())
+	if err != nil {
+		return nil, err
 	}
 
 	p.contenttype = ct
@@ -58,7 +59,7 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 		if len(fcGeoJSON.Features) >= 1 {
 			feature := fcGeoJSON.Features[0]
 
-			hrefBase := fmt.Sprintf("%s%s", pp.CommonProvider.ServiceEndpoint, path) // /collections
+			hrefBase := fmt.Sprintf("%s%s", pp.Config.Service.Url, path) // /collections
 			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 

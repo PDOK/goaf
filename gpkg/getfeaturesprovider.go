@@ -26,12 +26,13 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 	}
 
 	path := r.URL.Path // collections/{{collectionId}}/items
-	ct := r.Header.Get("Content-Type")
-	if ct == provider.JSONContentType {
-		ct = provider.GEOJSONContentType
+	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.Srid)}
+
+	ct, err := provider.GetContentType(r, p.String())
+	if err != nil {
+		return nil, err
 	}
 
-	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.Srid)}
 	p.contenttype = ct
 
 	for _, cn := range gp.GeoPackage.Collections {
@@ -47,7 +48,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 		}
 
 		for _, feature := range fcGeoJSON.Features {
-			hrefBase := fmt.Sprintf("%s%s/%v", gp.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
+			hrefBase := fmt.Sprintf("%s%s/%v", gp.Config.Service.Url, path, feature.ID) // /collections
 			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
@@ -66,7 +67,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 		requestParams.Set("limit", fmt.Sprintf("%d", int64(limitParam)))
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", gp.CommonProvider.ServiceEndpoint, path) // /collections
+		hrefBase := fmt.Sprintf("%s%s", gp.Config.Service.Url, path) // /collections
 		links, _ := provider.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
 		_ = provider.ProcesLinksForParams(links, requestParams)
 

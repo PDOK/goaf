@@ -33,13 +33,13 @@ func main() {
 	config.ReadConfig(*configfilepath)
 
 	// stage 1: create server with spec path and limits
-	apiServer, err := server.NewServer(config.Endpoint, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+	apiServer, err := server.NewServer(config.Service.Url, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
 	if err != nil {
 		log.Fatal("Server initialisation error:", err)
 	}
 
 	// stage 2: Create providers based upon provider name
-	commonProvider := provider.NewCommonProvider(config.Endpoint, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+	commonProvider := provider.NewCommonProvider(config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
 	// providers := getProvider(apiServer.Openapi, providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
 
 	providers := getProvider(apiServer.Openapi, commonProvider, *config)

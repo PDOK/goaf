@@ -4,9 +4,6 @@ package codegen
 // DO NOT EDIT BY HAND!
 
 type Collection struct {
-	Links []Link `json:"links"`
-	/* human readable title of the collection	*/
-	Title string `json:"title,omitempty"`
 	/* the list of coordinate reference systems supported by the service	*/
 	Crs []string `json:"crs,omitempty"`
 	/* a description of the features in the collection	*/
@@ -19,11 +16,14 @@ type Collection struct {
 	Id string `json:"id"`
 	/* indicator about the type of the items in the collection (the default value is 'feature').	*/
 	ItemType string `json:"itemType,omitempty"`
+	Links    []Link `json:"links"`
+	/* human readable title of the collection	*/
+	Title string `json:"title,omitempty"`
 }
 
 type Collections struct {
-	Links       []Link       `json:"links"`
 	Collections []Collection `json:"collections"`
+	Links       []Link       `json:"links"`
 }
 
 type ConfClasses struct {
@@ -49,12 +49,12 @@ type LandingPage struct {
 }
 
 type Link struct {
+	Length   int64  `json:"length,omitempty"`
 	Rel      string `json:"rel,omitempty"`
 	Title    string `json:"title,omitempty"`
 	Type     string `json:"type,omitempty"`
 	Href     string `json:"href"`
 	Hreflang string `json:"hreflang,omitempty"`
-	Length   int64  `json:"length,omitempty"`
 }
 
 type Spatial struct {
@@ -72,16 +72,16 @@ type Spatial struct {
 }
 
 type Temporal struct {
-	/* One or more time intervals that describe the temporal extent of the dataset.
-	   The value `null` is supported and indicates an open time interval.
-	   In the Core only a single time interval is supported. Extensions may support
-	   multiple intervals. If multiple intervals are provided, the union of the
-	   intervals describes the temporal extent.	*/
-	Interval [][]string `json:"interval,omitempty"`
 	/* Coordinate reference system of the coordinates in the temporal extent
 	   (property `interval`). The default reference system is the Gregorian calendar.
 	   In the Core this is the only supported temporal coordinate reference system.
 	   Extensions may support additional temporal coordinate reference systems and add
 	   additional enum values.	*/
 	Trs string `json:"trs,omitempty"`
+	/* One or more time intervals that describe the temporal extent of the dataset.
+	   The value `null` is supported and indicates an open time interval.
+	   In the Core only a single time interval is supported. Extensions may support
+	   multiple intervals. If multiple intervals are provided, the union of the
+	   intervals describes the temporal extent.	*/
+	Interval [][]string `json:"interval,omitempty"`
 }

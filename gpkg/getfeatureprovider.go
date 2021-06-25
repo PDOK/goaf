@@ -23,10 +23,10 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 	p := &GetFeatureProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.Srid)}
 
 	path := r.URL.Path
-	ct := r.Header.Get("Content-Type")
 
-	if ct == provider.JSONContentType {
-		ct = provider.GEOJSONContentType
+	ct, err := provider.GetContentType(r, p.String())
+	if err != nil {
+		return nil, err
 	}
 
 	p.contenttype = ct
@@ -47,7 +47,7 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 
 			feature := fcGeoJSON.Features[0]
 
-			hrefBase := fmt.Sprintf("%s%s", gp.CommonProvider.ServiceEndpoint, path) // /collections
+			hrefBase := fmt.Sprintf("%s%s", gp.Config.Service.Url, path) // /collections
 			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 
