@@ -22,6 +22,16 @@ const (
 
 )
 
+var providerNameMap = map[string]string{
+	"describecollection":        CapabilitesProvider,
+	"getcollections":            CapabilitesProvider,
+	"getconformancedeclaration": CapabilitesProvider,
+	"getfeature":                DataProvider,
+	"getfeatures":               DataProvider,
+	"api":                       OASProvider,
+	"landingpage":               CapabilitesProvider,
+}
+
 type InvalidContentTypeError struct {
 	content_type string
 	err          string
@@ -40,7 +50,7 @@ func (e *InvalidFormatError) Error() string {
 	return fmt.Sprintf("invalid request query format %v", e.format)
 }
 
-func GetContentTypeMap(provider string) map[string]string {
+func GetContentTypeMapByProviderType(providerType string) map[string]string {
 	var m = map[string]map[string]string{
 		CapabilitesProvider: {
 			"json":   JSONContentType,
@@ -57,10 +67,15 @@ func GetContentTypeMap(provider string) map[string]string {
 			"html":   HTMLContentType,
 		},
 	}
-	return m[provider]
+	return m[providerType]
 }
 
-func GetContentFieldMap(provider string) map[string]string {
+func GetContentTypeMap(providerName string) map[string]string {
+	providerType := providerNameMap[providerName]
+	return GetContentTypeMapByProviderType(providerType)
+}
+
+func GetContentFieldMapByProviderType(providerType string) map[string]string {
 	var m = map[string]map[string]string{
 		CapabilitesProvider: {
 			JSONContentType:   "json",
@@ -77,24 +92,18 @@ func GetContentFieldMap(provider string) map[string]string {
 			HTMLContentType:    "html",
 		},
 	}
-	return m[provider]
-
+	return m[providerType]
 }
 
-func GetFeatureContentFields() map[string]string {
-	ct := make(map[string]string)
-
-	ct[GEOJSONContentType] = "json"
-	ct[LDJSONContentType] = "jsonld"
-	ct[HTMLContentType] = "html"
-
-	return ct
+func GetContentFieldMap(providerTitle string) map[string]string {
+	providerType := providerNameMap[providerTitle]
+	return GetContentFieldMapByProviderType(providerType)
 }
 
-func GetContentType(r *http.Request, providerType string) (string, error) {
+func GetContentType(r *http.Request, providerName string) (string, error) {
 
-	ctMap := GetContentTypeMap(providerType)
-	cfMap := GetContentFieldMap(providerType)
+	ctMap := GetContentTypeMap(providerName)
+	cfMap := GetContentFieldMap(providerName)
 
 	// check query string
 	queryFormat, ok := r.URL.Query()["f"]
@@ -129,20 +138,8 @@ func GetContentType(r *http.Request, providerType string) (string, error) {
 
 func GetRelationMap() map[string]string {
 	ct := make(map[string]string)
-
 	ct["alternate"] = "Alternative"
 	ct["self"] = "This"
-
-	return ct
-}
-
-func GetContentTypes() map[string]string {
-	ct := make(map[string]string)
-
-	ct["json"] = JSONContentType
-	ct["jsonld"] = LDJSONContentType
-	ct["html"] = HTMLContentType
-
 	return ct
 }
 
@@ -172,17 +169,17 @@ func CreateFeatureLinks(title, hrefPath, rel, ct string) ([]codegen.Link, error)
 
 	links := make([]codegen.Link, 0)
 
-	href, err := ctLink(hrefPath, GetFeatureContentFields()[ct])
+	href, err := ctLink(hrefPath, GetContentFieldMapByProviderType(DataProvider)[ct])
 	if err != nil {
 		return links, err
 	}
-	links = append(links, codegen.Link{Title: formatTitle(title, rel, GetFeatureContentFields()[ct]), Rel: rel, Href: href, Type: ct})
+	links = append(links, codegen.Link{Title: formatTitle(title, rel, GetContentFieldMapByProviderType(DataProvider)[ct]), Rel: rel, Href: href, Type: ct})
 
 	if rel == "self" {
 		rel = "alternate"
 	}
 
-	for k, sct := range GetContentTypeMap(DataProvider) {
+	for k, sct := range GetContentTypeMapByProviderType(DataProvider) {
 		if ct == sct {
 			continue
 		}
@@ -211,15 +208,15 @@ func GetApiLinks(hrefPath string) ([]codegen.Link, error) {
 	return links, nil
 }
 
-func CreateLinks(providerName, providerType, hrefPath, rel, ct string) ([]codegen.Link, error) {
+func CreateLinks(title, providerName, hrefPath, rel, ct string) ([]codegen.Link, error) {
 
 	links := make([]codegen.Link, 0)
 
-	href, err := ctLink(hrefPath, GetContentFieldMap(providerType)[ct])
+	href, err := ctLink(hrefPath, GetContentFieldMap(providerName)[ct])
 	if err != nil {
 		return links, err
 	}
-	links = append(links, codegen.Link{Title: formatTitle(providerName, rel, GetContentFieldMap(providerType)[ct]), Rel: rel, Href: href, Type: ct})
+	links = append(links, codegen.Link{Title: formatTitle(title, rel, GetContentFieldMap(providerName)[ct]), Rel: rel, Href: href, Type: ct})
 
 	if rel == "self" {
 		rel = "alternate"
@@ -229,7 +226,7 @@ func CreateLinks(providerName, providerType, hrefPath, rel, ct string) ([]codege
 	//	return links, nil
 	//}
 
-	for k, sct := range GetContentTypeMap(providerType) {
+	for k, sct := range GetContentTypeMap(providerName) {
 		if ct == sct {
 			continue
 		}
@@ -237,10 +234,10 @@ func CreateLinks(providerName, providerType, hrefPath, rel, ct string) ([]codege
 		if err != nil {
 			return links, err
 		}
-		links = append(links, codegen.Link{Title: formatTitle(providerName, rel, k), Rel: rel, Href: href, Type: sct})
+		links = append(links, codegen.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
 		if rel == "self" {
 			rel = "alternate"
-			links = append(links, codegen.Link{Title: formatTitle(providerName, rel, k), Rel: rel, Href: href, Type: sct})
+			links = append(links, codegen.Link{Title: formatTitle(title, rel, k), Rel: rel, Href: href, Type: sct})
 		}
 	}
 

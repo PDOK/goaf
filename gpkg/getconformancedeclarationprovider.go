@@ -22,7 +22,7 @@ func (gp *GeoPackageProvider) NewGetConformanceDeclarationProvider(r *http.Reque
 
 	p := &GetConformanceDeclarationProvider{}
 
-	ct, err := provider.GetContentType(r, p.ProviderType())
+	ct, err := provider.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +51,4 @@ func (gcdp *GetConformanceDeclarationProvider) String() string {
 
 func (gcdp *GetConformanceDeclarationProvider) SrsId() string {
 	return "n.a"
-}
-
-func (gcdp *GetConformanceDeclarationProvider) ProviderType() string {
-	return provider.CapabilitesProvider
 }

@@ -17,7 +17,7 @@ type GetApiProvider struct {
 func (gp *GeoPackageProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {
 	p := &GetApiProvider{}
 
-	ct, err := provider.GetContentType(r, p.ProviderType())
+	ct, err := provider.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -46,8 +46,4 @@ func (gap *GetApiProvider) String() string {
 
 func (gap *GetApiProvider) SrsId() string {
 	return "n.a"
-}
-
-func (gap *GetApiProvider) ProviderType() string {
-	return provider.OASProvider
 }

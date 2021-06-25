@@ -24,7 +24,7 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 
 	path := r.URL.Path
 
-	ct, err := provider.GetContentType(r, p.ProviderType())
+	ct, err := provider.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -74,8 +74,4 @@ func (gfp *GetFeatureProvider) String() string {
 
 func (gfp *GetFeatureProvider) SrsId() string {
 	return gfp.srsid
-}
-
-func (glp *GetFeatureProvider) ProviderType() string {
-	return provider.DataProvider
 }

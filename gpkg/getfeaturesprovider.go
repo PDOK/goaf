@@ -28,7 +28,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 	path := r.URL.Path // collections/{{collectionId}}/items
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.SrsId)}
 
-	ct, err := provider.GetContentType(r, p.ProviderType())
+	ct, err := provider.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -110,8 +110,4 @@ func (gfp *GetFeaturesProvider) String() string {
 
 func (gfp *GetFeaturesProvider) SrsId() string {
 	return gfp.srsid
-}
-
-func (glp *GetFeaturesProvider) ProviderType() string {
-	return provider.DataProvider
 }
