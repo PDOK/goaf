@@ -58,6 +58,16 @@ func (gp *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (codege
 		cihrefBase := fmt.Sprintf("%s/items", chrefBase)
 		ilinks, _ := provider.CreateLinks("items "+cn.Identifier, p.ProviderType(), cihrefBase, "item", ct)
 		cInfo.Links = append(cInfo.Links, ilinks...)
+
+		for _, c := range gp.Config.Datasource.Collections {
+			if c.Identifier == cn.Identifier {
+				if len(c.Links) != 0 {
+					cInfo.Links = append(cInfo.Links, c.Links...)
+				}
+				break
+			}
+		}
+
 		csInfo.Collections = append(csInfo.Collections, cInfo)
 	}
 

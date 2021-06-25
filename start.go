@@ -89,16 +89,6 @@ func getProvider(api *openapi3.T, commonProvider provider.CommonProvider, config
 	return nil
 }
 
-// func getProvider(api *openapi3.T, providerName *string, commonProvider provider.CommonProvider, crsMapFilePath *string, gpkgFilePath *string, featureIdKey *string, configFilePath *string, connectionStr *string) codegen.Providers {
-// 	if *providerName == "gpkg" {
-// 		return addGeopackageProviders(api, commonProvider, *crsMapFilePath, *gpkgFilePath, *featureIdKey)
-// 	}
-// 	if *providerName == "postgis" {
-// 		return postgis.NewPostgisWithCommonProvider(api, commonProvider, *configFilePath, *connectionStr)
-// 	}
-// 	return nil
-// }
-
 func addHealthHandler(router *server.RegexpHandler) {
 	router.HandleFunc(regexp.MustCompile("/health"), func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
@@ -110,7 +100,6 @@ func addHealthHandler(router *server.RegexpHandler) {
 }
 
 func addGeopackageProviders(api *openapi3.T, commonProvider provider.CommonProvider, crsMapFilePath string, config provider.Config) *gpkg.GeoPackageProvider {
-
 	crsMap := make(map[string]string)
 	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
 	if err != nil {

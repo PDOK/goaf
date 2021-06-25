@@ -3,8 +3,9 @@
 [![GitHub license](https://img.shields.io/github/license/PDOK/goaf)](https://github.com/PDOK/goaf/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/PDOK/goaf.svg)](https://github.com/PDOK/goaf/releases)
 [![Go Report Card](https://goreportcard.com/badge/PDOK/goaf)](https://goreportcard.com/report/PDOK/goaf)
+[![Docker Pulls](https://img.shields.io/docker/pulls/pdok/goaf.svg)](https://hub.docker.com/r/pdok/goaf)
 
-Goaf is a [OGC API - Features](https://www.ogc.org/standards/ogcapi-features) implementation in golang.
+GOAF is a [OGC API - Features](https://www.ogc.org/standards/ogcapi-features) implementation in golang.
 
 ## For who is it?
 
@@ -12,7 +13,7 @@ If you are looking for a very fast OGC API - Features application and are not af
 
 ## Datasources
 
-It supports the following datasources:
+GOAF supports the following datasources:
 
 * [OGC GeoPackage](https://www.geopackage.org/)
 * [Postgis](https://postgis.net/) (*Postgresql 9.4+)
@@ -23,7 +24,7 @@ A a GeoJSON implementation with a Geopackage as a data provider.
 
 The specification is a preliminary one, with `go generate` the routing based on api spec, provider interfaces en types structs and convenient parameter extractions are generated to stay easily up to date.
 
-* FeatureCollectionGeoJSON is overridden in the GeoPackage provider to use the [geojson](https://github.com/go-spatial/geom/tree/master/encoding/geojson) equivalent for decoding blobs
+* FeatureCollectionGeoJSON is overridden in the GeoPackage provider to use the [GeoJSON](https://github.com/go-spatial/geom/tree/master/encoding/geojson) equivalent for decoding blobs
 * <https://github.com/opengeospatial/ogcapi-features/blob/master/core/openapi/ogcapi-features-1.yaml>
 
 ## Build
@@ -34,7 +35,7 @@ docker build -t pdok/goaf:latest .
 
 ## GeoPackage
 
-The geopacakge provider is a minimal config for GeoPackages that tend to be relative small e.g. < 3 GB.
+The GeoPackage provider is a minimal config for GeoPackages that tend to be relative small e.g. < 3 GB.
 
 ```docker
 docker run --rm -v `pwd`/example:/example -c /example/config-addresses-gpkg-minimal.yaml -p 8080:8080 pdok/goaf:latest
@@ -99,7 +100,7 @@ Distributed under MIT License, please see license file within the code for more 
 
 ## Thanks
 
-Inspiration en code copied from:
+Inspiration and code copied from:
 
 * <https://github.com/go-spatial/jivan>
 * <https://github.com/go-spatial/tegola>

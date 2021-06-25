@@ -3,6 +3,7 @@ package provider
 import (
 	"io/ioutil"
 	"log"
+	"oaf-server/codegen"
 
 	"gopkg.in/yaml.v2"
 )
@@ -87,6 +88,8 @@ type Collection struct {
 	VendorSpecificParameters []string   `yaml:"vendorspecificparameters"`
 	Jsonb                    bool       `yaml:"jsonb"`
 	Properties               []string   `yaml:"properties"`
+
+	Links []codegen.Link `yaml:"links"`
 }
 
 type Columns struct {

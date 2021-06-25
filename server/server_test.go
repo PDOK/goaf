@@ -21,9 +21,8 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 
 	serverEndpoint := "http://testhost:1234"
 
-	commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
+	commonProvider := provider.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
 	config := provider.Config{Datasource: provider.Datasource{Geopackage: &provider.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
-
 	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, crsMap, config)
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
@@ -93,9 +92,14 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 
 	serverEndpoint := "http://testhost:1234"
 
+<<<<<<< HEAD
 	commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
 	config := provider.Config{Datasource: provider.Datasource{Geopackage: &provider.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
 
+=======
+	commonProvider := provider.NewCommonProvider(serverEndpoint, "../spec/oaf.json", 100, 500)
+	config := provider.Config{Datasource: provider.Datasource{Geopackage: &provider.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
+>>>>>>> master
 	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, crsMap, config)
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)

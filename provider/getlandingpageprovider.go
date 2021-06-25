@@ -26,10 +26,12 @@ func NewGetLandingPageProvider(serviceConfig Service) func(r *http.Request) (cod
 
 		p.contenttype = reqContentType
 		p.Service = &serviceConfig
+
 		links, _ := CreateLinks("landing page", CapabilitesProvider, serviceConfig.Url, "self", reqContentType)
-		apiLink, _ := CreateLinks("openapi3 specification", OASProvider, fmt.Sprintf("%s/api", serviceConfig.Url), "service", reqContentType)                   // /api, "service", ct)
+		apiLink, _ := GetApiLinks(fmt.Sprintf("%s/api", serviceConfig.Url))                                                                                     // /api, "service", ct)
 		conformanceLink, _ := CreateLinks("capabilities", CapabilitesProvider, fmt.Sprintf("%s/conformance", serviceConfig.Url), "conformance", reqContentType) // /conformance, "conformance", ct)
 		dataLink, _ := CreateLinks("collections", CapabilitesProvider, fmt.Sprintf("%s/collections", serviceConfig.Url), "data", reqContentType)                // /collections, "collections", ct)
+
 		p.Links = append(p.Links, links...)
 		p.Links = append(p.Links, apiLink...)
 		p.Links = append(p.Links, conformanceLink...)

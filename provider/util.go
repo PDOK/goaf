@@ -202,6 +202,15 @@ func CreateFeatureLinks(title, hrefPath, rel, ct string) ([]codegen.Link, error)
 	return links, nil
 }
 
+func GetApiLinks(hrefPath string) ([]codegen.Link, error) {
+
+	links := make([]codegen.Link, 0)
+	links = append(links, codegen.Link{Title: "Documentation of the API", Rel: "service-doc", Href: hrefPath + "?f=html", Type: "text/html"})
+	links = append(links, codegen.Link{Title: "Definition of the API in OpenAPI 3.0", Rel: "service-desc", Href: hrefPath + "?f=json", Type: "application/vnd.oai.openapi+json;version=3.0"})
+
+	return links, nil
+}
+
 func CreateLinks(providerName, providerType, hrefPath, rel, ct string) ([]codegen.Link, error) {
 
 	links := make([]codegen.Link, 0)

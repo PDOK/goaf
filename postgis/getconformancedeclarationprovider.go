@@ -7,8 +7,15 @@ import (
 	"oaf-server/provider"
 )
 
+const (
+	core  = "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core"
+	oas30 = "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30"
+	html  = "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/html"
+	gjson = "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson"
+)
+
 type GetConformanceDeclarationProvider struct {
-	data        []string
+	data        map[string][]string
 	contenttype string
 }
 
@@ -33,7 +40,11 @@ func (pp *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Request)
 			return p, errors.New("Invalid query parameter :" + k)
 		}
 	}
-	p.data = []string{"http://www.opengis.net/spec/wfs-1/3.0/req/core", "http://www.opengis.net/spec/wfs-1/3.0/req/geojson"}
+
+	d := make(map[string][]string)
+	d["conformsTo"] = []string{core, oas30, html, gjson}
+
+	p.data = d
 	return p, nil
 }
 
