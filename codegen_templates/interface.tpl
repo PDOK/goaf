@@ -13,6 +13,7 @@ type Provider interface {
 	String() string
 	Provide() (interface{}, error)
 	ContentType() string
+	ProviderType() string
 }
 
 type Providers interface {

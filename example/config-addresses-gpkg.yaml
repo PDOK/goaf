@@ -1,4 +1,28 @@
-endpoint: http://localhost:8080
+service:
+  name: goaf Demo instance - running latest GitHub version
+  description: goaf provides an API to geospatial data
+  url: http://localhost:8080
+  keywords:
+  - geospatial
+  - data
+  - api
+  - oaf
+  license: https://creativecommons.org/licenses/by/4.0/
+  licenseName: CC-BY 4.0 license 
+  provider:
+    name: PDOK
+    url: https://www.pdok.nl
+    contactPoint:
+      email: beheerPDOK@kadaster.nl
+      telephone: +3188-1834500
+      url: https://www.pdok.nl/contact
+      contactType: pointOfContact
+      description: PDOK Helpdesk
+    address:
+      streetAddress: Laan van Westenenk 701
+      postalCode: 7334 DP
+      addressLocality: Apeldoorn
+      addressCountry: Nederland
 openapi: spec/oaf.json
 defaultfeaturelimit: 100
 maxfeaturelimit: 500

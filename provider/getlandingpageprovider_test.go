@@ -8,7 +8,9 @@ import (
 
 func TestNewGetLandingPageProvider(t *testing.T) {
 
-	provider, err := NewGetLandingPageProvider("serviceEndpoint")(&http.Request{})
+	service := Service{}
+
+	provider, err := NewGetLandingPageProvider(service)(&http.Request{})
 	if err != nil {
 		t.Errorf("NewGetLandingPageProvider(serviceEndpoint) = %v, want %v", err, nil)
 	}

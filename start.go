@@ -33,13 +33,13 @@ func main() {
 	config.ReadConfig(*configfilepath)
 
 	// stage 1: create server with spec path and limits
-	apiServer, err := server.NewServer(config.Endpoint, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+	apiServer, err := server.NewServer(config.Service.Url, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
 	if err != nil {
 		log.Fatal("Server initialisation error:", err)
 	}
 
 	// stage 2: Create providers based upon provider name
-	commonProvider := provider.NewCommonProvider(config.Endpoint, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+	commonProvider := provider.NewCommonProvider(config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
 	// providers := getProvider(apiServer.Openapi, providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
 
 	providers := getProvider(apiServer.Openapi, commonProvider, *config)
@@ -81,7 +81,7 @@ func main() {
 
 func getProvider(api *openapi3.T, commonProvider provider.CommonProvider, config provider.Config) codegen.Providers {
 	if config.Datasource.Geopackage != nil {
-		return addGeopackageProviders(api, commonProvider, "", config.Datasource.Geopackage.File, config.Datasource.Geopackage.Fid)
+		return addGeopackageProviders(api, commonProvider, "", config)
 	} else if config.Datasource.PostGIS != nil {
 		return postgis.NewPostgisWithCommonProvider(api, commonProvider, config)
 	}
@@ -109,7 +109,8 @@ func addHealthHandler(router *server.RegexpHandler) {
 	})
 }
 
-func addGeopackageProviders(api *openapi3.T, commonProvider provider.CommonProvider, crsMapFilePath string, gpkgFilePath string, featureIdKey string) *gpkg.GeoPackageProvider {
+func addGeopackageProviders(api *openapi3.T, commonProvider provider.CommonProvider, crsMapFilePath string, config provider.Config) *gpkg.GeoPackageProvider {
+
 	crsMap := make(map[string]string)
 	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
 	if err != nil {
@@ -126,7 +127,7 @@ func addGeopackageProviders(api *openapi3.T, commonProvider provider.CommonProvi
 		crsMap[`4326`] = `http://www.opengis.net/def/crs/OGC/1.3/CRS84`
 	}
 
-	return gpkg.NewGeopackageWithCommonProvider(api, commonProvider, gpkgFilePath, crsMap, featureIdKey)
+	return gpkg.NewGeopackageWithCommonProvider(api, commonProvider, crsMap, config)
 }
 
 func envString(key, defaultValue string) string {

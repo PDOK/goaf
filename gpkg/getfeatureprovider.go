@@ -8,9 +8,10 @@ import (
 )
 
 type GetFeatureProvider struct {
-	data        *Feature
-	srsid       string
-	contenttype string
+	data                  *Feature
+	srsid                 string
+	contenttype           string
+	supportedContentTypes map[string]string
 }
 
 func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provider, error) {
@@ -23,10 +24,10 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 	p := &GetFeatureProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.SrsId)}
 
 	path := r.URL.Path
-	ct := r.Header.Get("Content-Type")
 
-	if ct == provider.JSONContentType {
-		ct = provider.GEOJSONContentType
+	ct, err := provider.GetContentType(r, p.ProviderType())
+	if err != nil {
+		return nil, err
 	}
 
 	p.contenttype = ct
@@ -74,4 +75,8 @@ func (gfp *GetFeatureProvider) String() string {
 
 func (gfp *GetFeatureProvider) SrsId() string {
 	return gfp.srsid
+}
+
+func (glp *GetFeatureProvider) ProviderType() string {
+	return provider.DataProvider
 }

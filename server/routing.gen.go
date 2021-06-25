@@ -53,17 +53,17 @@ func (s routes) Less(i, j int) bool {
 func (s *Server) Router() *RegexpHandler {
 	router := &RegexpHandler{}
 	router.HandleFunc(regexp.MustCompile("/api"), s.HandleForProvider(s.Providers.NewGetApiProvider))
-	// path: /
-	router.HandleFunc(regexp.MustCompile("/"), s.HandleForProvider(s.Providers.NewGetLandingPageProvider))
+    // path: /
+    router.HandleFunc(regexp.MustCompile("/"), s.HandleForProvider(s.Providers.NewGetLandingPageProvider))
 	// path: /collections
-	router.HandleFunc(regexp.MustCompile("/collections"), s.HandleForProvider(s.Providers.NewGetCollectionsProvider))
+    router.HandleFunc(regexp.MustCompile("/collections"), s.HandleForProvider(s.Providers.NewGetCollectionsProvider))
 	// path: /collections/{collectionId}
-	router.HandleFunc(regexp.MustCompile("/collections/.*"), s.HandleForProvider(s.Providers.NewDescribeCollectionProvider))
+    router.HandleFunc(regexp.MustCompile("/collections/.*"), s.HandleForProvider(s.Providers.NewDescribeCollectionProvider))
 	// path: /collections/{collectionId}/items
-	router.HandleFunc(regexp.MustCompile("/collections/.*/items"), s.HandleForProvider(s.Providers.NewGetFeaturesProvider))
+    router.HandleFunc(regexp.MustCompile("/collections/.*/items"), s.HandleForProvider(s.Providers.NewGetFeaturesProvider))
 	// path: /collections/{collectionId}/items/{featureId}
-	router.HandleFunc(regexp.MustCompile("/collections/.*/items/.*"), s.HandleForProvider(s.Providers.NewGetFeatureProvider))
+    router.HandleFunc(regexp.MustCompile("/collections/.*/items/.*"), s.HandleForProvider(s.Providers.NewGetFeatureProvider))
 	// path: /conformance
-	router.HandleFunc(regexp.MustCompile("/conformance"), s.HandleForProvider(s.Providers.NewGetConformanceDeclarationProvider))
+    router.HandleFunc(regexp.MustCompile("/conformance"), s.HandleForProvider(s.Providers.NewGetConformanceDeclarationProvider))
 	return router
 }

@@ -4,20 +4,26 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
+	"oaf-server/provider"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
 type GetApiProvider struct {
-	data        *openapi3.T
-	contenttype string
+	data                  *openapi3.T
+	contenttype           string
+	supportedContentTypes map[string]string
 }
 
 func (gp *GeoPackageProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {
 	p := &GetApiProvider{}
-	p.contenttype = r.Header.Get("Content-Type")
 
-	var err error
+	ct, err := provider.GetContentType(r, p.ProviderType())
+	if err != nil {
+		return nil, err
+	}
+	p.contenttype = ct
+
 	if gp.Api == nil {
 		log.Printf("Could not get Swagger Specification")
 		return p, err
@@ -41,4 +47,8 @@ func (gap *GetApiProvider) String() string {
 
 func (gap *GetApiProvider) SrsId() string {
 	return "n.a"
+}
+
+func (gap *GetApiProvider) ProviderType() string {
+	return provider.OASProvider
 }

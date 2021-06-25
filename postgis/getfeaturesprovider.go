@@ -28,12 +28,14 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 	}
 
 	path := r.URL.Path // collections/{collectionId}/items
-	ct := r.Header.Get("Content-Type")
 
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.Srid)}
-	if ct == provider.JSONContentType {
-		ct = provider.GEOJSONContentType
+	ct, err := provider.GetContentType(r, p.ProviderType())
+
+	if err != nil {
+		return nil, err
 	}
+
 	p.contenttype = ct
 
 	pathItem := pp.ApiProcessed.Paths.Find(path)
@@ -120,4 +122,8 @@ func (gfp *GetFeaturesProvider) String() string {
 
 func (gfp *GetFeaturesProvider) SrsId() string {
 	return gfp.srsid
+}
+
+func (glp *GetFeaturesProvider) ProviderType() string {
+	return provider.DataProvider
 }

@@ -14,11 +14,16 @@ type DescribeCollectionProvider struct {
 
 func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codegen.Provider, error) {
 	path := r.URL.Path // collections/{{collectionId}}
-	ct := r.Header.Get("Content-Type")
 
 	collectionId, _ := codegen.ParametersForDescribeCollection(r)
 
 	p := &DescribeCollectionProvider{}
+
+	ct, err := provider.GetContentType(r, p.ProviderType())
+	if err != nil {
+		return nil, err
+	}
+
 	p.contenttype = ct
 
 	for _, cn := range pp.PostGis.Collections {
@@ -38,10 +43,10 @@ func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codeg
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", pp.CommonProvider.ServiceEndpoint, path) // /collections
-		links, _ := provider.CreateLinks(collectionId, hrefBase, "self", ct)
+		links, _ := provider.CreateLinks(collectionId, p.ProviderType(), hrefBase, "self", ct)
 
 		cihrefBase := fmt.Sprintf("%s/items", hrefBase)
-		ilinks, _ := provider.CreateLinks("items of "+collectionId, cihrefBase, "item", ct)
+		ilinks, _ := provider.CreateLinks("items of "+collectionId, p.ProviderType(), cihrefBase, "item", ct)
 		cInfo.Links = append(links, ilinks...)
 
 		p.data = cInfo
@@ -65,4 +70,8 @@ func (dcp *DescribeCollectionProvider) String() string {
 
 func (dcp *DescribeCollectionProvider) SrsId() string {
 	return "n.a."
+}
+
+func (dcp *DescribeCollectionProvider) ProviderType() string {
+	return provider.CapabilitesProvider
 }

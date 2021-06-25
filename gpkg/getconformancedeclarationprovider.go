@@ -3,17 +3,25 @@ package gpkg
 import (
 	"net/http"
 	"oaf-server/codegen"
+	"oaf-server/provider"
 )
 
 type GetConformanceDeclarationProvider struct {
-	data        []string
-	contenttype string
+	data                  []string
+	contenttype           string
+	supportedContentTypes map[string]string
 }
 
 func (gp *GeoPackageProvider) NewGetConformanceDeclarationProvider(r *http.Request) (codegen.Provider, error) {
 
 	p := &GetConformanceDeclarationProvider{}
-	p.contenttype = r.Header.Get("Content-Type")
+
+	ct, err := provider.GetContentType(r, p.ProviderType())
+	if err != nil {
+		return nil, err
+	}
+
+	p.contenttype = ct
 
 	p.data = []string{"http://www.opengis.net/spec/wfs-1/3.0/req/core", "http://www.opengis.net/spec/wfs-1/3.0/req/geojson"}
 
@@ -34,4 +42,8 @@ func (gcdp *GetConformanceDeclarationProvider) String() string {
 
 func (gcdp *GetConformanceDeclarationProvider) SrsId() string {
 	return "n.a"
+}
+
+func (gcdp *GetConformanceDeclarationProvider) ProviderType() string {
+	return provider.CapabilitesProvider
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"oaf-server/codegen"
+	"oaf-server/provider"
 )
 
 type GetConformanceDeclarationProvider struct {
@@ -13,7 +14,14 @@ type GetConformanceDeclarationProvider struct {
 
 func (pp *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Request) (codegen.Provider, error) {
 	p := &GetConformanceDeclarationProvider{}
-	p.contenttype = r.Header.Get("Content-Type")
+
+	ct, err := provider.GetContentType(r, p.ProviderType())
+
+	if err != nil {
+		return nil, err
+	}
+
+	p.contenttype = ct
 	path := r.URL.Path
 	pathItem := pp.ApiProcessed.Paths.Find(path)
 	if pathItem == nil {
@@ -43,4 +51,8 @@ func (gcdp *GetConformanceDeclarationProvider) String() string {
 
 func (gcdp *GetConformanceDeclarationProvider) SrsId() string {
 	return "n.a."
+}
+
+func (gcdp *GetConformanceDeclarationProvider) ProviderType() string {
+	return provider.CapabilitesProvider
 }
