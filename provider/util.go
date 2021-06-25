@@ -345,6 +345,7 @@ func CreateProvidesSpecificParameters(api *openapi3.T, collections *[]Collection
 				copy.Paths[k] = v
 				copy.Paths[k].Get.Parameters = params
 				copy.Paths[k].Get.Extensions = nil
+				copy.Paths[k].Get.Tags = []string{collection.Identifier}
 
 			}
 		}
