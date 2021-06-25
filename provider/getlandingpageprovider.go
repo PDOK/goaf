@@ -18,7 +18,7 @@ func NewGetLandingPageProvider(serviceConfig Service) func(r *http.Request) (cod
 
 	return func(r *http.Request) (codegen.Provider, error) {
 		p := &GetLandingPageProvider{}
-		reqContentType, err := GetContentType(r, p.ProviderType())
+		reqContentType, err := GetContentType(r, p.String())
 
 		if err != nil {
 			return nil, err
@@ -27,10 +27,10 @@ func NewGetLandingPageProvider(serviceConfig Service) func(r *http.Request) (cod
 		p.contenttype = reqContentType
 		p.Service = &serviceConfig
 
-		links, _ := CreateLinks("landing page", CapabilitesProvider, serviceConfig.Url, "self", reqContentType)
-		apiLink, _ := GetApiLinks(fmt.Sprintf("%s/api", serviceConfig.Url))                                                                                     // /api, "service", ct)
-		conformanceLink, _ := CreateLinks("capabilities", CapabilitesProvider, fmt.Sprintf("%s/conformance", serviceConfig.Url), "conformance", reqContentType) // /conformance, "conformance", ct)
-		dataLink, _ := CreateLinks("collections", CapabilitesProvider, fmt.Sprintf("%s/collections", serviceConfig.Url), "data", reqContentType)                // /collections, "collections", ct)
+		links, _ := CreateLinks("landing page", p.String(), serviceConfig.Url, "self", reqContentType)
+		apiLink, _ := GetApiLinks(fmt.Sprintf("%s/api", serviceConfig.Url))                                                                            // /api, "service", ct)
+		conformanceLink, _ := CreateLinks("capabilities", p.String(), fmt.Sprintf("%s/conformance", serviceConfig.Url), "conformance", reqContentType) // /conformance, "conformance", ct)
+		dataLink, _ := CreateLinks("collections", p.String(), fmt.Sprintf("%s/collections", serviceConfig.Url), "data", reqContentType)                // /collections, "collections", ct)
 
 		p.Links = append(p.Links, links...)
 		p.Links = append(p.Links, apiLink...)
@@ -62,8 +62,4 @@ func (glp *GetLandingPageProvider) String() string {
 
 func (glp *GetLandingPageProvider) SrsId() string {
 	return "n.a"
-}
-
-func (glp *GetLandingPageProvider) ProviderType() string {
-	return CapabilitesProvider
 }

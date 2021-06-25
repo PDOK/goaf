@@ -18,7 +18,7 @@ func (pp *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (codegen.P
 
 	p := &GetCollectionsProvider{}
 
-	ct, err := provider.GetContentType(r, p.ProviderType())
+	ct, err := provider.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -28,10 +28,10 @@ func (pp *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (codegen.P
 	csInfo := codegen.Collections{Links: []codegen.Link{}, Collections: []codegen.Collection{}}
 	// create Links
 	hrefBase := fmt.Sprintf("%s%s", pp.Config.Service.Url, path) // /collections
-	links, _ := provider.CreateLinks("collections ", p.ProviderType(), hrefBase, "self", ct)
+	links, _ := provider.CreateLinks("collections ", p.String(), hrefBase, "self", ct)
 	csInfo.Links = append(csInfo.Links, links...)
 	for _, cn := range pp.PostGis.Collections {
-		clinks, _ := provider.CreateLinks("collection "+cn.Identifier, p.ProviderType(), fmt.Sprintf("%s/%s", hrefBase, cn.Identifier), "item", ct)
+		clinks, _ := provider.CreateLinks("collection "+cn.Identifier, p.String(), fmt.Sprintf("%s/%s", hrefBase, cn.Identifier), "item", ct)
 		csInfo.Links = append(csInfo.Links, clinks...)
 	}
 
@@ -47,11 +47,11 @@ func (pp *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (codegen.P
 
 		chrefBase := fmt.Sprintf("%s/%s", hrefBase, cn.Identifier)
 
-		clinks, _ := provider.CreateLinks("collection "+cn.Identifier, p.ProviderType(), chrefBase, "self", ct)
+		clinks, _ := provider.CreateLinks("collection "+cn.Identifier, p.String(), chrefBase, "self", ct)
 		cInfo.Links = append(cInfo.Links, clinks...)
 
 		cihrefBase := fmt.Sprintf("%s/items", chrefBase)
-		ilinks, _ := provider.CreateLinks("items "+cn.Identifier, p.ProviderType(), cihrefBase, "item", ct)
+		ilinks, _ := provider.CreateLinks("items "+cn.Identifier, p.String(), cihrefBase, "item", ct)
 		cInfo.Links = append(cInfo.Links, ilinks...)
 
 		for _, c := range pp.Config.Datasource.Collections {
@@ -85,8 +85,4 @@ func (gcp *GetCollectionsProvider) String() string {
 
 func (gcp *GetCollectionsProvider) SrsId() string {
 	return "n.a."
-}
-
-func (gcp *GetCollectionsProvider) ProviderType() string {
-	return provider.CapabilitesProvider
 }

@@ -19,7 +19,7 @@ func (gp *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Request) (co
 
 	p := &DescribeCollectionProvider{}
 
-	ct, err := provider.GetContentType(r, p.ProviderType())
+	ct, err := provider.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -46,10 +46,10 @@ func (gp *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Request) (co
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", gp.Config.Service.Url, path) // /collections
-		links, _ := provider.CreateLinks("collection "+cn.Identifier, p.ProviderType(), hrefBase, "self", ct)
+		links, _ := provider.CreateLinks("collection "+cn.Identifier, p.String(), hrefBase, "self", ct)
 
 		cihrefBase := fmt.Sprintf("%s/items", hrefBase)
-		ilinks, _ := provider.CreateLinks("items "+cn.Identifier, p.ProviderType(), cihrefBase, "item", ct)
+		ilinks, _ := provider.CreateLinks("items "+cn.Identifier, p.String(), cihrefBase, "item", ct)
 		cInfo.Links = append(links, ilinks...)
 
 		for _, c := range gp.Config.Datasource.Collections {
@@ -82,8 +82,4 @@ func (dcp *DescribeCollectionProvider) String() string {
 
 func (dcp *DescribeCollectionProvider) SrsId() string {
 	return "n.a"
-}
-
-func (dcp *DescribeCollectionProvider) ProviderType() string {
-	return provider.CapabilitesProvider
 }

@@ -19,7 +19,7 @@ func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codeg
 
 	p := &DescribeCollectionProvider{}
 
-	ct, err := provider.GetContentType(r, p.ProviderType())
+	ct, err := provider.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +43,10 @@ func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codeg
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", pp.Config.Service.Url, path) // /collections
-		links, _ := provider.CreateLinks(collectionId, p.ProviderType(), hrefBase, "self", ct)
+		links, _ := provider.CreateLinks(collectionId, p.String(), hrefBase, "self", ct)
 
 		cihrefBase := fmt.Sprintf("%s/items", hrefBase)
-		ilinks, _ := provider.CreateLinks("items of "+collectionId, p.ProviderType(), cihrefBase, "item", ct)
+		ilinks, _ := provider.CreateLinks("items of "+collectionId, p.String(), cihrefBase, "item", ct)
 		cInfo.Links = append(links, ilinks...)
 
 		for _, c := range pp.Config.Datasource.Collections {
@@ -79,8 +79,4 @@ func (dcp *DescribeCollectionProvider) String() string {
 
 func (dcp *DescribeCollectionProvider) SrsId() string {
 	return "n.a."
-}
-
-func (dcp *DescribeCollectionProvider) ProviderType() string {
-	return provider.CapabilitesProvider
 }
