@@ -48,10 +48,12 @@
     </thead>
 
     <tbody>
-    {{range  $i, $link := $result}}
+    {{range $index, $element := $result}}
+    {{range  $i, $link := $element}}
         <tr {{if isOdd $i}}class="pure-table-odd" {{end}}>
             <td>{{$link}}</td>
-        </tr>
+        </tr>    
+    {{end}}
     {{end}}
     </tbody>
 
