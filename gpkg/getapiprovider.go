@@ -1,7 +1,6 @@
 package gpkg
 
 import (
-	"log"
 	"net/http"
 	"oaf-server/codegen"
 
@@ -17,13 +16,7 @@ func (gp *GeoPackageProvider) NewGetApiProvider(r *http.Request) (codegen.Provid
 	p := &GetApiProvider{}
 	p.contenttype = r.Header.Get("Content-Type")
 
-	var err error
-	if gp.Api == nil {
-		log.Printf("Could not get Swagger Specification")
-		return p, err
-	}
-
-	p.data = gp.Api
+	p.data = gp.ApiProcessed
 	return p, nil
 }
 

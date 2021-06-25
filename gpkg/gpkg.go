@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"oaf-server/provider"
 	pc "oaf-server/provider"
 	"os"
 	"regexp"
@@ -38,9 +39,9 @@ type GeoPackage struct {
 	UserVersion   int64
 	DB            *sqlx.DB
 	FeatureIdKey  string
-	Collections   []GeoPackageLayer
+	Collections   []provider.Collection
 	DefaultBBox   [4]float64
-	SrsId         int64
+	Srid          int64
 }
 
 func NewGeoPackage(filepath string, featureIdKey string) (GeoPackage, error) {
@@ -69,37 +70,25 @@ func NewGeoPackage(filepath string, featureIdKey string) (GeoPackage, error) {
 	applicationId, _ := gpkg.GetApplicationID(ctx, db)
 	version, _ := gpkg.GetVersion(ctx, db)
 
-	layers, _ := gpkg.GetLayers(ctx, db)
+	collections, _ := gpkg.GetCollections(ctx, db)
 
 	log.Printf("| GEOPACKAGE DETAILS \n")
 	log.Printf("|\n")
 	log.Printf("| 	FILE: %s, APPLICATION: %s, VERSION: %d", filepath, applicationId, version)
 	log.Printf("|\n")
-	log.Printf("| 	NUMBER OF LAYERS: %d", len(layers))
+	log.Printf("| 	NUMBER OF LAYERS: %d", len(collections))
 	log.Printf("|\n")
 	// determine query bbox
-	for i, layer := range layers {
-		log.Printf("| 	LAYER: %d. ID: %s, SRS_ID: %d, TABLE: %s PK: %s, FEATURES : %v\n", i+1, layer.Identifier, layer.SrsId, layer.Features[0], layer.Features[1], layer.Features[2:])
+	for i, collection := range collections {
+		log.Printf("| 	LAYER: %d. ID: %s, SRID: %d, TABLE: %s PK: %s, FEATURES : %v\n", i+1, collection.Identifier, collection.Srid, collection.Properties[0], collection.Properties[1], collection.Properties[2:])
 
 		if i == 0 {
-			gpkg.DefaultBBox = [4]float64{layer.MinX, layer.MinY, layer.MaxX, layer.MaxY}
-			gpkg.SrsId = layer.SrsId
-		}
-		if layer.MinX < gpkg.DefaultBBox[0] {
-			gpkg.DefaultBBox[0] = layer.MinX
-		}
-		if layer.MinY < gpkg.DefaultBBox[1] {
-			gpkg.DefaultBBox[1] = layer.MinY
-		}
-		if layer.MaxX > gpkg.DefaultBBox[2] {
-			gpkg.DefaultBBox[2] = layer.MaxX
-		}
-		if layer.MaxY > gpkg.DefaultBBox[3] {
-			gpkg.DefaultBBox[3] = layer.MaxY
+			gpkg.DefaultBBox = collection.BBox
+			gpkg.Srid = int64(collection.Srid)
 		}
 	}
 	log.Printf("| \n")
-	log.Printf("| 	BBOX: [%f,%f,%f,%f], SRS_ID:%d", gpkg.DefaultBBox[0], gpkg.DefaultBBox[1], gpkg.DefaultBBox[2], gpkg.DefaultBBox[3], gpkg.SrsId)
+	log.Printf("| 	BBOX: [%f,%f,%f,%f], SRS_ID:%d", gpkg.DefaultBBox[0], gpkg.DefaultBBox[1], gpkg.DefaultBBox[2], gpkg.DefaultBBox[3], gpkg.Srid)
 
 	return *gpkg, nil
 }
@@ -108,7 +97,7 @@ func (gpkg *GeoPackage) Close() error {
 	return gpkg.DB.Close()
 }
 
-func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []GeoPackageLayer, err error) {
+func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result []provider.Collection, err error) {
 
 	if gpkg.Collections != nil {
 		result = gpkg.Collections
@@ -132,7 +121,7 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 	}
 	defer rowsClose(query, rows)
 
-	gpkg.Collections = make([]GeoPackageLayer, 0)
+	gpkg.Collections = make([]provider.Collection, 0)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -150,7 +139,18 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 			row.Features = append(row.Features, match[1])
 		}
 
-		gpkg.Collections = append(gpkg.Collections, row)
+		collection := provider.Collection{
+			Tablename:    row.TableName,
+			Identifier:   row.Identifier,
+			Description:  row.Description,
+			Columns:      &provider.Columns{Geometry: row.ColumnName},
+			Geometrytype: row.GeometryType,
+			BBox:         [4]float64{row.MinX, row.MinY, row.MaxX, row.MaxY},
+			Srid:         int(row.SrsId),
+			Properties:   row.Features,
+		}
+
+		gpkg.Collections = append(gpkg.Collections, collection)
 	}
 
 	result = gpkg.Collections
@@ -158,7 +158,7 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 	return
 }
 
-func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPackageLayer, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *FeatureCollectionGeoJSON, err error) {
+func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection provider.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *FeatureCollectionGeoJSON, err error) {
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
 	result = &FeatureCollectionGeoJSON{}
 	if len(bbox) > 4 {
@@ -169,16 +169,16 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	var featureIdKey string
 
 	if gpkg.FeatureIdKey == "" {
-		featureIdKey = layer.Features[1]
+		featureIdKey = collection.Properties[1]
 	} else {
 		featureIdKey = gpkg.FeatureIdKey
 	}
 
-	rtreeTablenName := fmt.Sprintf("rtree_%s_%s", layer.TableName, layer.ColumnName)
-	selectClause := fmt.Sprintf("l.`%s`, l.`%s`", featureIdKey, layer.ColumnName)
+	rtreeTablenName := fmt.Sprintf("rtree_%s_%s", collection.Tablename, collection.Columns.Geometry)
+	selectClause := fmt.Sprintf("l.`%s`, l.`%s`", featureIdKey, collection.Columns.Geometry)
 
-	for _, tf := range layer.Features[1:] { // [2:] skip tablename and PK
-		if tf == layer.ColumnName || tf == featureIdKey {
+	for _, tf := range collection.Properties[1:] { // [2:] skip tablename and PK
+		if tf == collection.Columns.Geometry || tf == featureIdKey {
 			continue
 		}
 		selectClause += fmt.Sprintf(", l.`%v`", tf)
@@ -191,7 +191,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 	}
 
 	query := fmt.Sprintf("SELECT %s FROM `%s` l INNER JOIN `%s` g ON g.`id` = l.`fid` WHERE %s minx <= $2 AND maxx >= $3 AND miny <= $4 AND maxy >= $5 ORDER BY l.`%s` LIMIT $6 OFFSET $7;",
-		selectClause, layer.TableName, rtreeTablenName, additionalWhere, featureIdKey)
+		selectClause, collection.Tablename, rtreeTablenName, additionalWhere, featureIdKey)
 
 	var rows *sqlx.Rows
 	if featureId != nil {
@@ -260,7 +260,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, layer GeoPa
 					feature.ID = identifier
 				}
 
-			case layer.ColumnName:
+			case collection.Columns.Geometry:
 
 				geomData, ok := vals[i].([]byte)
 				if !ok {

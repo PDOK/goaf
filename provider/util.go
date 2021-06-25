@@ -276,7 +276,7 @@ func UpperFirst(title string) string {
 	return strings.Title(title)
 }
 
-func CreateProvidesSpecificParameters(api *openapi3.T, collections []Collection) *openapi3.T {
+func CreateProvidesSpecificParameters(api *openapi3.T, collections *[]Collection) *openapi3.T {
 
 	copy := &openapi3.T{
 		OpenAPI:      api.OpenAPI,
@@ -300,10 +300,10 @@ func CreateProvidesSpecificParameters(api *openapi3.T, collections []Collection)
 	}
 
 	// adjust swagger to accommodate individual parameters
-	for _, collection := range collections {
+	for _, collection := range *collections {
 		for k, v := range api.Paths {
 			if strings.Contains(k, "{collectionId}") {
-				k := strings.Replace(k, "{collectionId}", strings.ToLower(collection.Tablename), 1)
+				k := strings.Replace(k, "{collectionId}", strings.ToLower(collection.Identifier), 1)
 				params := openapi3.NewParameters()
 				paramsQueryExists := false
 
