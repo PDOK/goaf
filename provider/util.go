@@ -130,7 +130,7 @@ func GetContentType(r *http.Request, providerName string) (string, error) {
 
 	// if no Content-Type header set, default to text/html
 	if reqContentType == "" {
-		reqContentType = HTMLContentType
+		reqContentType = JSONContentType
 	}
 
 	return reqContentType, nil
