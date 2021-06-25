@@ -22,8 +22,8 @@ type Collection struct {
 }
 
 type Collections struct {
-	Links []Link `json:"links"`
 	Collections []Collection `json:"collections"`
+	Links []Link `json:"links"`
 }
 
 type ConfClasses struct {
@@ -31,8 +31,8 @@ type ConfClasses struct {
 }
 
 type Exception struct {
-	Description string `json:"description,omitempty"`
 	Code string `json:"code"`
+	Description string `json:"description,omitempty"`
 }
 
 type Extent struct {
@@ -49,12 +49,12 @@ type LandingPage struct {
 }
 
 type Link struct {
-	Href string `json:"href"`
-	Hreflang string `json:"hreflang,omitempty"`
 	Length int64 `json:"length,omitempty"`
 	Rel string `json:"rel,omitempty"`
 	Title string `json:"title,omitempty"`
 	Type string `json:"type,omitempty"`
+	Href string `json:"href"`
+	Hreflang string `json:"hreflang,omitempty"`
 }
 
 type Spatial struct {

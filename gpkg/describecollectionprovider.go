@@ -23,6 +23,7 @@ func (gp *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Request) (co
 	if err != nil {
 		return nil, err
 	}
+	p.contenttype = ct
 
 	for _, cn := range gp.GeoPackage.Layers {
 		// maybe convert to map, but not thread safe!
