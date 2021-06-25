@@ -4,8 +4,8 @@ package codegen
 // DO NOT EDIT BY HAND!
 
 import (
-   	"net/http"
-   	"strings"
+	"net/http"
+	"strings"
 )
 
 type Provider interface {
@@ -17,137 +17,136 @@ type Provider interface {
 }
 
 type Providers interface {
-    Init() error
-    NewGetApiProvider(r *http.Request) (Provider, error)
+	Init() error
+	NewGetApiProvider(r *http.Request) (Provider, error)
 
-/*
-The landing page provides links to the API definition, the conformance
-statements and to the feature collections in this dataset.
-*/
-    NewGetLandingPageProvider(r *http.Request) (Provider, error)
+	/*
+	   The landing page provides links to the API definition, the conformance
+	   statements and to the feature collections in this dataset.
+	*/
+	NewGetLandingPageProvider(r *http.Request) (Provider, error)
 
-/*
+	/*
 
-*/
-    NewGetCollectionsProvider(r *http.Request) (Provider, error)
+	 */
+	NewGetCollectionsProvider(r *http.Request) (Provider, error)
 
-/*
+	/*
 
-*/
-    NewDescribeCollectionProvider(r *http.Request) (Provider, error)
+	 */
+	NewDescribeCollectionProvider(r *http.Request) (Provider, error)
 
-/*
-Fetch features of the feature collection with id `collectionId`.
+	/*
+	   Fetch features of the feature collection with id `collectionId`.
 
-Every feature in a dataset belongs to a collection. A dataset may
-consist of multiple feature collections. A feature collection is often a
-collection of features of a similar type, based on a common schema.
+	   Every feature in a dataset belongs to a collection. A dataset may
+	   consist of multiple feature collections. A feature collection is often a
+	   collection of features of a similar type, based on a common schema.
 
-Use content negotiation to request HTML or GeoJSON.
-*/
-    NewGetFeaturesProvider(r *http.Request) (Provider, error)
+	   Use content negotiation to request HTML or GeoJSON.
+	*/
+	NewGetFeaturesProvider(r *http.Request) (Provider, error)
 
-/*
-Fetch the feature with id `featureId` in the feature collection
-with id `collectionId`.
+	/*
+	   Fetch the feature with id `featureId` in the feature collection
+	   with id `collectionId`.
 
-Use content negotiation to request HTML or GeoJSON.
-*/
-    NewGetFeatureProvider(r *http.Request) (Provider, error)
+	   Use content negotiation to request HTML or GeoJSON.
+	*/
+	NewGetFeatureProvider(r *http.Request) (Provider, error)
 
-/*
-A list of all conformance classes specified in a standard that the
-server conforms to.
-*/
-    NewGetConformanceDeclarationProvider(r *http.Request) (Provider, error)
+	/*
+	   A list of all conformance classes specified in a standard that the
+	   server conforms to.
+	*/
+	NewGetConformanceDeclarationProvider(r *http.Request) (Provider, error)
 }
 
 // generate convenient functions to retrieve path params
 
 // GetLandingPage
 func ParametersForGetLandingPage(r *http.Request) (f string) {
-    fArray, ok := r.URL.Query()["f"]
-    if ok {
-        f= fArray[0]
-          }
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
 
-    return 
+	return
 }
 
 // GetCollections
 func ParametersForGetCollections(r *http.Request) (f string) {
-    fArray, ok := r.URL.Query()["f"]
-    if ok {
-        f= fArray[0]
-          }
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
 
-    return 
+	return
 }
 
 // DescribeCollection
 func ParametersForDescribeCollection(r *http.Request) (collectionId string, f string) {
-    pathSplit:=strings.Split(r.URL.Path, "/") 
-    collectionId=pathSplit[2]
-    fArray, ok := r.URL.Query()["f"]
-    if ok {
-        f= fArray[0]
-          }
+	pathSplit := strings.Split(r.URL.Path, "/")
+	collectionId = pathSplit[2]
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
 
-    return 
+	return
 }
 
 // GetFeatures
 func ParametersForGetFeatures(r *http.Request) (collectionId string, limit string, offset string, f string, bbox string, datetime string) {
-    pathSplit:=strings.Split(r.URL.Path, "/") 
-    collectionId=pathSplit[2]
-    limitArray, ok := r.URL.Query()["limit"]
-    if ok {
-        limit= limitArray[0]
-          }
+	pathSplit := strings.Split(r.URL.Path, "/")
+	collectionId = pathSplit[2]
+	limitArray, ok := r.URL.Query()["limit"]
+	if ok {
+		limit = limitArray[0]
+	}
 
-    offsetArray, ok := r.URL.Query()["offset"]
-    if ok {
-        offset= offsetArray[0]
-          }
+	offsetArray, ok := r.URL.Query()["offset"]
+	if ok {
+		offset = offsetArray[0]
+	}
 
-    fArray, ok := r.URL.Query()["f"]
-    if ok {
-        f= fArray[0]
-          }
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
 
-    bboxArray, ok := r.URL.Query()["bbox"]
-    if ok {
-        bbox= bboxArray[0]
-          }
+	bboxArray, ok := r.URL.Query()["bbox"]
+	if ok {
+		bbox = bboxArray[0]
+	}
 
-    datetimeArray, ok := r.URL.Query()["datetime"]
-    if ok {
-        datetime= datetimeArray[0]
-          }
+	datetimeArray, ok := r.URL.Query()["datetime"]
+	if ok {
+		datetime = datetimeArray[0]
+	}
 
-    return 
+	return
 }
 
 // GetFeature
 func ParametersForGetFeature(r *http.Request) (collectionId string, featureId string, f string) {
-    pathSplit:=strings.Split(r.URL.Path, "/") 
-    collectionId=pathSplit[2]
-    featureId=pathSplit[4]
-    fArray, ok := r.URL.Query()["f"]
-    if ok {
-        f= fArray[0]
-          }
+	pathSplit := strings.Split(r.URL.Path, "/")
+	collectionId = pathSplit[2]
+	featureId = pathSplit[4]
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
 
-    return 
+	return
 }
 
 // GetConformanceDeclaration
 func ParametersForGetConformanceDeclaration(r *http.Request) (f string) {
-    fArray, ok := r.URL.Query()["f"]
-    if ok {
-        f= fArray[0]
-          }
+	fArray, ok := r.URL.Query()["f"]
+	if ok {
+		f = fArray[0]
+	}
 
-    return 
+	return
 }
-
