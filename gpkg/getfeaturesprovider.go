@@ -9,10 +9,9 @@ import (
 )
 
 type GetFeaturesProvider struct {
-	data                  FeatureCollectionGeoJSON
-	srsid                 string
-	contenttype           string
-	supportedContentTypes map[string]string
+	data        FeatureCollectionGeoJSON
+	srsid       string
+	contenttype string
 }
 
 func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {

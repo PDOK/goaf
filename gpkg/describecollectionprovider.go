@@ -8,9 +8,8 @@ import (
 )
 
 type DescribeCollectionProvider struct {
-	data                  codegen.Collection
-	contenttype           string
-	supportedContentTypes map[string]string
+	data        codegen.Collection
+	contenttype string
 }
 
 func (gp *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Request) (codegen.Provider, error) {

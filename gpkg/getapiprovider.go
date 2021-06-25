@@ -10,9 +10,8 @@ import (
 )
 
 type GetApiProvider struct {
-	data                  *openapi3.T
-	contenttype           string
-	supportedContentTypes map[string]string
+	data        *openapi3.T
+	contenttype string
 }
 
 func (gp *GeoPackageProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {
