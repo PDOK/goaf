@@ -17,7 +17,6 @@ import (
 )
 
 type Server struct {
-	ContentTypes       map[string]string
 	ServiceEndpoint    string
 	ServiceSpecPath    string
 	MaxReturnLimit     uint64
@@ -62,7 +61,6 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 			//}).ParseGlob("/templates/*")) // prod
 		}).ParseGlob("templates/*")) // IDE
 
-	server.ContentTypes = provider.GetContentTypes()
 	return server, nil
 }
 
@@ -81,28 +79,23 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		contentResponse := r.Header.Get("Content-Type")
-
-		format, ok := r.URL.Query()["f"]
-		if ok && len(format) > 0 {
-			contentField, ok := s.ContentTypes[format[0]]
-			if ok {
-				contentResponse = contentField
-			}
-		}
-
-		if contentResponse == "" {
-			contentResponse = s.ContentTypes["json"]
-		}
-
-		r.Header.Set("Content-Type", contentResponse)
-
 		p, err := providerFunc(r)
 
-		// todo  error based on content type
+		// TODO: improve formatting errors (spec might require specific json schema in response)
+		// TODO: return error based on requested format (COntent)
 		if err != nil {
-			jsonError(w, "PROVIDER CREATION", err.Error(), http.StatusNotFound)
-			return
+
+			switch v := err.(type) {
+			default:
+				jsonError(w, "PROVIDER CREATION", v.Error(), http.StatusNotFound)
+				return
+			case *provider.InvalidContentTypeError:
+				jsonError(w, "CLIENT ERROR", v.Error(), http.StatusBadRequest)
+				return
+			case *provider.InvalidFormatError:
+				jsonError(w, "CLIENT ERROR", v.Error(), http.StatusBadRequest)
+				return
+			}
 		}
 
 		if p == nil {
@@ -120,14 +113,13 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 		var encodedContent []byte
 
-		if contentResponse == provider.JSONContentType {
+		if p.ContentType() == provider.JSONContentType || p.ContentType() == provider.LDJSONContentType || p.ContentType() == provider.GEOJSONContentType {
 			encodedContent, err = json.Marshal(result)
 			if err != nil {
 				jsonError(w, "JSON MARSHALLER", err.Error(), http.StatusInternalServerError)
 				return
 			}
-
-		} else if contentResponse == provider.HTMLContentType {
+		} else if p.ContentType() == provider.HTMLContentType {
 			providerID := p.String()
 
 			rmap := make(map[string]interface{})
@@ -144,7 +136,7 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 			}
 
 		} else {
-			jsonError(w, "Invalid Content Type", "Content-Type: ''"+contentResponse+"'' not supported.", http.StatusInternalServerError)
+			jsonError(w, "Invalid Content Type", "Content-Type: ''"+p.ContentType()+"'' not supported.", http.StatusInternalServerError)
 			return
 		}
 
@@ -155,6 +147,7 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 }
 
 func jsonError(w http.ResponseWriter, code string, msg string, status int) {
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 
 	result, err := json.Marshal(&codegen.Exception{

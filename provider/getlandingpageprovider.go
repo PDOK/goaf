@@ -7,29 +7,43 @@ import (
 )
 
 type GetLandingPageProvider struct {
-	Links       []codegen.Link `json:"links"`
+	Links       []codegen.Link `json:"links,omitempty"`
 	contenttype string
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	*Service
 }
 
-func NewGetLandingPageProvider(serviceEndpoint string) func(r *http.Request) (codegen.Provider, error) {
+func NewGetLandingPageProvider(serviceConfig Service) func(r *http.Request) (codegen.Provider, error) {
 
 	return func(r *http.Request) (codegen.Provider, error) {
-
-		ct := r.Header.Get("Content-Type")
-
 		p := &GetLandingPageProvider{}
-		p.contenttype = ct
+		reqContentType, err := GetContentType(r, p.ProviderType())
 
-		links, _ := CreateLinks("landing page", serviceEndpoint, "self", ct)
-		apiLink, _ := GetApiLinks(fmt.Sprintf("%s/api", serviceEndpoint))                                                    // /api, "service", ct)
-		conformanceLink, _ := CreateLinks("capabilities", fmt.Sprintf("%s/conformance", serviceEndpoint), "conformance", ct) // /conformance, "conformance", ct)
-		dataLink, _ := CreateLinks("collections", fmt.Sprintf("%s/collections", serviceEndpoint), "data", ct)                // /collections, "collections", ct)
+		if err != nil {
+			return nil, err
+		}
+
+		p.contenttype = reqContentType
+		p.Service = &serviceConfig
+
+		links, _ := CreateLinks("landing page", CapabilitesProvider, serviceConfig.Url, "self", reqContentType)
+		apiLink, _ := GetApiLinks(fmt.Sprintf("%s/api", serviceConfig.Url))                                                                                     // /api, "service", ct)
+		conformanceLink, _ := CreateLinks("capabilities", CapabilitesProvider, fmt.Sprintf("%s/conformance", serviceConfig.Url), "conformance", reqContentType) // /conformance, "conformance", ct)
+		dataLink, _ := CreateLinks("collections", CapabilitesProvider, fmt.Sprintf("%s/collections", serviceConfig.Url), "data", reqContentType)                // /collections, "collections", ct)
 
 		p.Links = append(p.Links, links...)
 		p.Links = append(p.Links, apiLink...)
 		p.Links = append(p.Links, conformanceLink...)
 		p.Links = append(p.Links, dataLink...)
 
+		if p.contenttype == "application/json" {
+			p.Title = p.Service.Name
+			p.Description = p.Service.Description
+			p.Service = nil
+		} else if p.contenttype == "application/ld+json" {
+			p.Links = nil
+		}
 		return p, nil
 	}
 }
@@ -48,4 +62,8 @@ func (glp *GetLandingPageProvider) String() string {
 
 func (glp *GetLandingPageProvider) SrsId() string {
 	return "n.a"
+}
+
+func (glp *GetLandingPageProvider) ProviderType() string {
+	return CapabilitesProvider
 }

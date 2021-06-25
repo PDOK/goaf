@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <title>Landingpage</title>
     <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css"
           integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
@@ -16,6 +15,10 @@
     <!--<![endif]-->
 
     <style>
+        :root {
+        --mark-back-color:#0277bd;
+        --mark-fore-color:#fafafa
+        }
         html {
             box-sizing: border-box;
             overflow: -moz-scrollbars-vertical;
@@ -32,12 +35,54 @@
             margin: 20px;
             background: #fafafa;
         }
+        mark {
+            background: var(--mark-back-color);
+            color: var(--mark-fore-color);
+            font-size: .95em;
+            line-height: 1em;
+            border-radius: var(--universal-border-radius);
+            padding: calc(var(--universal-padding) / 4) calc(var(--universal-padding) / 2);
+        }
     </style>
+    <script type="application/ld+json">
+        
+    </script>
 
 </head>
 <body>
 
-<h3>Landingpage</h3>
+<h3>{{$result.Service.Name}}</h3>
+<p>{{$result.Service.Description}}</p>
+<p>
+{{range  $i, $kw := $result.Service.Keywords}}
+<mark class="tag">{{$kw}}</mark>
+{{end}}
+</p>
+<div class="card large">
+      <div class="section">
+        
+          <div class="row">
+              <div class="col-sm-4">
+                Terms of service
+              </div>
+              <div class="col-sm-8">
+                <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">https://creativecommons.org/licenses/by/4.0/</a>
+              </div>
+          </div>
+        
+        
+          <div class="row">
+              <div class="col-sm-4">
+                License
+              </div>
+              <div class="col-sm-8">
+                  <a href="{{$result.Service.License}}">
+                    {{$result.Service.LicenseName}}</a>
+              </div>
+          </div>
+        
+      </div>
+    </div>
 
 <table class="pure-table pure-table-bordered">
     <thead>

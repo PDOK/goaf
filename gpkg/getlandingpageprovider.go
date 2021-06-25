@@ -7,5 +7,5 @@ import (
 )
 
 func (gp *GeoPackageProvider) NewGetLandingPageProvider(r *http.Request) (codegen.Provider, error) {
-	return pc.NewGetLandingPageProvider(gp.CommonProvider.ServiceEndpoint)(r)
+	return pc.NewGetLandingPageProvider(gp.Config.Service)(r)
 }

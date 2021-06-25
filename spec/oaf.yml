@@ -1,11 +1,11 @@
 openapi: 3.0.2
 info:
-  title: "Kadaster - PDOK API conforming to the draft standard OGC API - Features - Part 1: Core"
+  title: "Kadaster - PDOK API conforming to the standard OGC API - Features - Part 1: Core"
   version: '1.0.0'
   description: |-
     This is a Kadaster - PDOK OpenAPI definition that conforms to the conformance
-    classes "Core", "GeoJSON", "HTML" and "OpenAPI 3.0" of the draft
-    standard "OGC API - Features - Part 1: Core".
+    classes "Core", "GeoJSON", "HTML" and "OpenAPI 3.0" of the
+    standard <a href="http://docs.ogc.org/is/17-069r3/17-069r3.html">"OGC API - Features - Part 1: Core"</a>.
 
     This is a generic OGC API Features definition that uses path
     parameters to describe all feature collections and all features.

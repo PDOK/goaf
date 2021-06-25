@@ -28,12 +28,14 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 	}
 
 	path := r.URL.Path // collections/{collectionId}/items
-	ct := r.Header.Get("Content-Type")
 
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.Srid)}
-	if ct == provider.JSONContentType {
-		ct = provider.GEOJSONContentType
+	ct, err := provider.GetContentType(r, p.ProviderType())
+
+	if err != nil {
+		return nil, err
 	}
+
 	p.contenttype = ct
 
 	pathItem := pp.ApiProcessed.Paths.Find(path)
@@ -67,7 +69,7 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 		}
 
 		for _, feature := range fcGeoJSON.Features {
-			hrefBase := fmt.Sprintf("%s%s/%v", pp.CommonProvider.ServiceEndpoint, path, feature.ID) // /collections
+			hrefBase := fmt.Sprintf("%s%s/%v", pp.Config.Service.Url, path, feature.ID) // /collections
 			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
@@ -82,7 +84,7 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 		requestParams.Set("limit", fmt.Sprintf("%d", int64(limitParam)))
 
 		// create links
-		hrefBase := fmt.Sprintf("%s%s", pp.CommonProvider.ServiceEndpoint, path) // /collections
+		hrefBase := fmt.Sprintf("%s%s", pp.Config.Service.Url, path) // /collections
 
 		links, _ := provider.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
 		_ = provider.ProcesLinksForParams(links, requestParams)
@@ -120,4 +122,8 @@ func (gfp *GetFeaturesProvider) String() string {
 
 func (gfp *GetFeaturesProvider) SrsId() string {
 	return gfp.srsid
+}
+
+func (glp *GetFeaturesProvider) ProviderType() string {
+	return provider.DataProvider
 }

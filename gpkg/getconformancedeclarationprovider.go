@@ -3,6 +3,7 @@ package gpkg
 import (
 	"net/http"
 	"oaf-server/codegen"
+	"oaf-server/provider"
 )
 
 const (
@@ -20,7 +21,13 @@ type GetConformanceDeclarationProvider struct {
 func (gp *GeoPackageProvider) NewGetConformanceDeclarationProvider(r *http.Request) (codegen.Provider, error) {
 
 	p := &GetConformanceDeclarationProvider{}
-	p.contenttype = r.Header.Get("Content-Type")
+
+	ct, err := provider.GetContentType(r, p.ProviderType())
+	if err != nil {
+		return nil, err
+	}
+
+	p.contenttype = ct
 
 	d := make(map[string][]string)
 	d["conformsTo"] = []string{core, oas30, html, gjson}
@@ -44,4 +51,8 @@ func (gcdp *GetConformanceDeclarationProvider) String() string {
 
 func (gcdp *GetConformanceDeclarationProvider) SrsId() string {
 	return "n.a"
+}
+
+func (gcdp *GetConformanceDeclarationProvider) ProviderType() string {
+	return provider.CapabilitesProvider
 }
