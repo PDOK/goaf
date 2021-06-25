@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"oaf-server/provider"
-	pc "oaf-server/provider"
 	"os"
 	"regexp"
 	"time"
@@ -249,7 +248,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 
 			switch colName {
 			case featureIdKey:
-				ID, err := pc.ConvertFeatureID(vals[i])
+				ID, err := provider.ConvertFeatureID(vals[i])
 				if err != nil {
 					return result, err
 				}
