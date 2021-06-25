@@ -47,6 +47,15 @@ func (gp *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Request) (co
 		ilinks, _ := provider.CreateLinks("items "+cn.Identifier, cihrefBase, "item", ct)
 		cInfo.Links = append(links, ilinks...)
 
+		for _, c := range gp.Config.Datasource.Collections {
+			if c.Identifier == cn.Identifier {
+				if len(c.Links) != 0 {
+					cInfo.Links = append(cInfo.Links, c.Links...)
+				}
+				break
+			}
+		}
+
 		p.data = cInfo
 		break
 	}

@@ -23,5 +23,20 @@ datasource:
     jsonb: true
     properties:
       - properties
+    links:     
+    - href: https://geodata.nationaalgeoregister.nl/inspireadressen/extract/inspireadressen.zip
+      hreflang: nl
+      length: 1911454553
+      rel: enclosure
+      type: application/x-compressed
+      title: INSPIRE harmonized Addresses
+    - href: https://geodata.nationaalgeoregister.nl/inspireadressen/extract/inspireadressen.gpkg
+      rel: enclosure
+      type: application/geopackage+sqlite3
+      title: Addresses Geopackage
+    - href: https://www.nationaalgeoregister.nl/geonetwork/srv/dut/xml.metadata.get?uuid=a5f961e9-ebdd-41e2-b8e8-ab33ed340a83
+      rel: describedby
+      type: application/xml
+      title: Dataset metadata record
   bbox: [4.709923493810017,53.00079137013467,4.897723983538761,53.18212166845569]
   srid: 4326

@@ -4,5 +4,23 @@ defaultfeaturelimit: 100
 maxfeaturelimit: 500
 datasource:
   gpkg:
-    file: example/addresses.gpkg     
+    file: example/addresses.gpkg
     fid: fid
+  collections:
+  - identifier: addresses
+    description: INSPIRE Alternative Encoding Addresses
+    links:     
+    - href: https://geodata.nationaalgeoregister.nl/inspireadressen/extract/inspireadressen.zip
+      hreflang: nl
+      length: 1911454553
+      rel: enclosure
+      type: application/x-compressed
+      title: INSPIRE harmonized Addresses
+    - href: https://geodata.nationaalgeoregister.nl/inspireadressen/extract/inspireadressen.gpkg
+      rel: enclosure
+      type: application/geopackage+sqlite3
+      title: Addresses Geopackage
+    - href: https://www.nationaalgeoregister.nl/geonetwork/srv/dut/xml.metadata.get?uuid=a5f961e9-ebdd-41e2-b8e8-ab33ed340a83
+      rel: describedby
+      type: application/xml
+      title: Dataset metadata record
