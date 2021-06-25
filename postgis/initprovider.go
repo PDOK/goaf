@@ -26,8 +26,8 @@ func NewPostgisWithCommonProvider(api *openapi3.T, commonProvider provider.Commo
 	return p
 }
 
-func (provider *PostgisProvider) Init() (err error) {
-	provider.PostGis, err = NewPostgis(provider.Config)
-	provider.ApiProcessed = CreateProvidesSpecificParameters(provider)
+func (pg *PostgisProvider) Init() (err error) {
+	pg.PostGis, err = NewPostgis(pg.Config)
+	pg.ApiProcessed = provider.CreateProvidesSpecificParameters(pg.Api, &pg.PostGis.Collections)
 	return
 }

@@ -28,7 +28,7 @@ func (gp *GeoPackageProvider) NewGetApiProvider(r *http.Request) (codegen.Provid
 		return p, err
 	}
 
-	p.data = gp.Api
+	p.data = gp.ApiProcessed
 	return p, nil
 }
 
