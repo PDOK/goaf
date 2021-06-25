@@ -27,7 +27,7 @@ func (pp *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (codegen.P
 
 	csInfo := codegen.Collections{Links: []codegen.Link{}, Collections: []codegen.Collection{}}
 	// create Links
-	hrefBase := fmt.Sprintf("%s%s", pp.CommonProvider.ServiceEndpoint, path) // /collections
+	hrefBase := fmt.Sprintf("%s%s", pp.Config.Service.Url, path) // /collections
 	links, _ := provider.CreateLinks("collections ", p.ProviderType(), hrefBase, "self", ct)
 	csInfo.Links = append(csInfo.Links, links...)
 	for _, cn := range pp.PostGis.Collections {

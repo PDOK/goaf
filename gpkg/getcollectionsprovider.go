@@ -26,7 +26,7 @@ func (gp *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (codege
 
 	csInfo := codegen.Collections{Links: []codegen.Link{}, Collections: []codegen.Collection{}}
 	// create Links
-	hrefBase := fmt.Sprintf("%s%s", gp.CommonProvider.ServiceEndpoint, path) // /collections
+	hrefBase := fmt.Sprintf("%s%s", gp.Config.Service.Url, path) // /collections
 	links, _ := provider.CreateLinks("collections", p.ProviderType(), hrefBase, "self", ct)
 	csInfo.Links = append(csInfo.Links, links...)
 	for _, cn := range gp.GeoPackage.Layers {

@@ -82,8 +82,9 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 		p, err := providerFunc(r)
 
 		// TODO: improve formatting errors (spec might require specific json schema in response)
+		// TODO: return error based on requested format (COntent)
 		if err != nil {
-			w.Header().Add("Content-Type", "application/json")
+
 			switch v := err.(type) {
 			default:
 				jsonError(w, "PROVIDER CREATION", v.Error(), http.StatusNotFound)
@@ -146,6 +147,7 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 }
 
 func jsonError(w http.ResponseWriter, code string, msg string, status int) {
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 
 	result, err := json.Marshal(&codegen.Exception{
