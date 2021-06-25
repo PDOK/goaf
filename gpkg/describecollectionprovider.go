@@ -20,7 +20,7 @@ func (gp *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Request) (co
 
 	p := &DescribeCollectionProvider{}
 
-	for _, cn := range gp.GeoPackage.Layers {
+	for _, cn := range gp.GeoPackage.Collections {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
 			continue

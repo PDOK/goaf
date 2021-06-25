@@ -34,7 +34,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.SrsId)}
 	p.contenttype = ct
 
-	for _, cn := range gp.GeoPackage.Layers {
+	for _, cn := range gp.GeoPackage.Collections {
 		// maybe convert to map, but not thread safe!
 		if cn.Identifier != collectionId {
 			continue

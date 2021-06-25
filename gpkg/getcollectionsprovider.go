@@ -25,12 +25,12 @@ func (gp *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (codege
 	hrefBase := fmt.Sprintf("%s%s", gp.CommonProvider.ServiceEndpoint, path) // /collections
 	links, _ := provider.CreateLinks("collections", hrefBase, "self", ct)
 	csInfo.Links = append(csInfo.Links, links...)
-	for _, cn := range gp.GeoPackage.Layers {
+	for _, cn := range gp.GeoPackage.Collections {
 		clinks, _ := provider.CreateLinks("collection "+cn.Identifier, fmt.Sprintf("%s/%s", hrefBase, cn.Identifier), "item", ct)
 		csInfo.Links = append(csInfo.Links, clinks...)
 	}
 
-	for _, cn := range gp.GeoPackage.Layers {
+	for _, cn := range gp.GeoPackage.Collections {
 
 		crss := make([]string, 0)
 		for _, v := range gp.CrsMap {

@@ -38,7 +38,7 @@ type GeoPackage struct {
 	UserVersion   int64
 	DB            *sqlx.DB
 	FeatureIdKey  string
-	Layers        []GeoPackageLayer
+	Collections   []GeoPackageLayer
 	DefaultBBox   [4]float64
 	SrsId         int64
 }
@@ -110,8 +110,8 @@ func (gpkg *GeoPackage) Close() error {
 
 func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []GeoPackageLayer, err error) {
 
-	if gpkg.Layers != nil {
-		result = gpkg.Layers
+	if gpkg.Collections != nil {
+		result = gpkg.Collections
 		err = nil
 		return
 	}
@@ -132,7 +132,7 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 	}
 	defer rowsClose(query, rows)
 
-	gpkg.Layers = make([]GeoPackageLayer, 0)
+	gpkg.Collections = make([]GeoPackageLayer, 0)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -150,10 +150,10 @@ func (gpkg *GeoPackage) GetLayers(ctx context.Context, db *sqlx.DB) (result []Ge
 			row.Features = append(row.Features, match[1])
 		}
 
-		gpkg.Layers = append(gpkg.Layers, row)
+		gpkg.Collections = append(gpkg.Collections, row)
 	}
 
-	result = gpkg.Layers
+	result = gpkg.Collections
 
 	return
 }
