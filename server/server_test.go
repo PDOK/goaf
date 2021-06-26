@@ -16,6 +16,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+func init() {
+	isTesting = true
+}
+
 func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 

@@ -15,6 +15,8 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
+var isTesting = false
+
 type Server struct {
 	ServiceEndpoint    string
 	ServiceSpecPath    string
@@ -37,6 +39,12 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 
 	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnLimit, Openapi: openapi}
 
+	templates := `templates/*`
+
+	if isTesting {
+		templates = `../templates/*`
+	}
+
 	// add templates to server
 	server.Templates = template.Must(template.New("templates").Funcs(
 		template.FuncMap{
@@ -57,8 +65,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 				}
 				return dict, nil
 			},
-			//}).ParseGlob("/templates/*")) // prod
-		}).ParseGlob("templates/*")) // IDE
+		}).ParseGlob(templates)) // TODO: for testing this needs to be "../templates/*"
 
 	return server, nil
 }
