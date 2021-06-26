@@ -9,7 +9,8 @@ import (
 	"net/http/httptest"
 	"oaf-server/codegen"
 	"oaf-server/core"
-	"oaf-server/gpkg"
+	"oaf-server/geopackage"
+	"oaf-server/spec"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -18,10 +19,10 @@ import (
 func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
-	// commonProvider := core.NewCommonProvider("../spec/oaf.json", 100, 500)
+	api, _ := spec.GetOpenAPI("../spec/oaf.json")
 	config := core.Config{Datasource: core.Datasource{Geopackage: &core.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
 
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, config)
+	gpkgp := geopackage.NewGeopackageWithCommonProvider(api, config)
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -40,19 +41,31 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	}{
 		{"root call", "", core.GetLandingPageProvider{}, func(want core.GetLandingPageProvider) error {
 
-			if len(want.Links) != 8 {
+			if len(want.Links) != 11 {
 				return errors.New("error invalid number of links")
 			}
 
-			rels := []string{"self", "alternate", "service", "service", "conformance", "conformance", "data", "data"}
-			paths := []string{"?f=json", "?f=html", "/api?f=json", "/api?f=html", "/conformance?f=json", "/conformance?f=html", "/collections?f=json", "/collections?f=html"}
+			rps := map[string][]string{
+				"self":         {"?f=json"},
+				"alternate":    {"?f=html", "?f=jsonld"},
+				"service-doc":  {"/api?f=html"},
+				"service-desc": {"/api?f=json"},
+				"conformance":  {"/conformance?f=json", "/conformance?f=html", "/conformance?f=jsonld"},
+				"data":         {"/collections?f=json", "/collections?f=html", "/collections?f=jsonld"},
+			}
 
-			for i, v := range want.Links {
-				if v.Rel != rels[i] {
-					return fmt.Errorf("Error invalid link rel: %s", v.Rel)
+			found := false
+			for _, v := range want.Links {
+
+				hrefs := rps[v.Rel]
+				found = false
+				for _, href := range hrefs {
+
+					if v.Href == fmt.Sprintf("%s%s", ts.URL, href) {
+						found = true
+					}
 				}
-
-				if v.Href != fmt.Sprintf("%s%s", ts.URL, paths[i]) {
+				if !found {
 					return fmt.Errorf("Error invalid path rel: %s", v.Href)
 				}
 			}
@@ -87,10 +100,10 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
-	// commonProvider := core.NewCommonProvider("../spec/oaf.json", 100, 500)
+	api, _ := spec.GetOpenAPI("../spec/oaf.json")
 	config := core.Config{Datasource: core.Datasource{Geopackage: &core.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
 
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, config)
+	gpkgp := geopackage.NewGeopackageWithCommonProvider(api, config)
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)

@@ -38,10 +38,11 @@ func (gp *GeoPackageProvider) Init() (err error) {
 				}
 			}
 		}
+		gp.Config.Datasource.Collections = collections
 	} else {
-		collections = gp.GeoPackage.Collections
+		gp.Config.Datasource.Collections = gp.GeoPackage.Collections
 	}
 
-	gp.ApiProcessed = core.CreateProvidesSpecificParameters(gp.Api, &collections)
+	gp.ApiProcessed = core.CreateProvidesSpecificParameters(gp.Api, &gp.Config.Datasource.Collections)
 	return
 }
