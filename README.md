@@ -16,7 +16,7 @@ If you are looking for a very fast OGC API - Features application and are not af
 GOAF supports the following datasources:
 
 * [OGC GeoPackage](https://www.geopackage.org/)
-* [Postgis](https://postgis.net/) (*Postgresql 9.4+)
+* [PostGIS](https://postgis.net/) (*Postgresql 9.4+)
 
 ## PDOK server implementation of [OGCAPI-FEATURES](https://github.com/opengeospatial/ogcapi-features/blob/master/core/examples/openapi/ogcapi-features-1-example1.yaml)
 
@@ -41,7 +41,7 @@ The GeoPackage provider is a minimal config for GeoPackages that tend to be rela
 docker run --rm -v `pwd`/example:/example -c /example/config-addresses-gpkg-minimal.yaml -p 8080:8080 pdok/goaf:latest
 ```
 
-## PostGis
+## PostGIS
 
 More elaborate config optimised performance for huge db (10M+ features/collection)
 
