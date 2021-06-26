@@ -10,7 +10,7 @@ import (
 )
 
 type GetFeaturesProvider struct {
-	data        FeatureCollectionGeoJSON
+	data        provider.FeatureCollectionGeoJSON
 	srsid       string
 	contenttype string
 }

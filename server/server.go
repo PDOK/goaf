@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/gpkg"
 	"oaf-server/provider"
 	"oaf-server/spec"
 
@@ -42,7 +41,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 	server.Templates = template.Must(template.New("templates").Funcs(
 		template.FuncMap{
 			"isOdd":       func(i int) bool { return i%2 != 0 },
-			"hasFeatures": func(i []gpkg.Feature) bool { return len(i) > 0 },
+			"hasFeatures": func(i []provider.Feature) bool { return len(i) > 0 },
 			"upperFirst":  provider.UpperFirst,
 			"dict": func(values ...interface{}) (map[string]interface{}, error) {
 				if len(values)%2 != 0 {

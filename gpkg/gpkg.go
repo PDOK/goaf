@@ -157,9 +157,9 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 	return
 }
 
-func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection provider.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *FeatureCollectionGeoJSON, err error) {
+func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection provider.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *provider.FeatureCollectionGeoJSON, err error) {
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
-	result = &FeatureCollectionGeoJSON{}
+	result = &provider.FeatureCollectionGeoJSON{}
 	if len(bbox) > 4 {
 		err = errors.New("bbox with 6 elements not supported")
 		return
@@ -213,7 +213,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 
 	result.NumberReturned = 0
 	result.Type = "FeatureCollection"
-	result.Features = make([]*Feature, 0)
+	result.Features = make([]*provider.Feature, 0)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -233,7 +233,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 			return
 		}
 
-		feature := &Feature{Type: "Feature", Properties: make(map[string]interface{})}
+		feature := &provider.Feature{Feature: geojson.Feature{Properties: make(map[string]interface{})}}
 
 		for i, colName := range cols {
 			// check if the context cancelled or timed out

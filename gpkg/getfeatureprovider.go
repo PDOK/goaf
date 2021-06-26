@@ -8,7 +8,7 @@ import (
 )
 
 type GetFeatureProvider struct {
-	data        *Feature
+	data        *provider.Feature
 	srsid       string
 	contenttype string
 }
