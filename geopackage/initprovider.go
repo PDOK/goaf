@@ -2,7 +2,7 @@ package geopackage
 
 import (
 	"log"
-	"oaf-server/provider"
+	"oaf-server/core"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/imdario/mergo"
@@ -10,12 +10,12 @@ import (
 
 type GeoPackageProvider struct {
 	GeoPackage   GeoPackage
-	Config       provider.Config
+	Config       core.Config
 	Api          *openapi3.T
 	ApiProcessed *openapi3.T
 }
 
-func NewGeopackageWithCommonProvider(api *openapi3.T, config provider.Config) *GeoPackageProvider {
+func NewGeopackageWithCommonProvider(api *openapi3.T, config core.Config) *GeoPackageProvider {
 	return &GeoPackageProvider{
 		Api:    api,
 		Config: config,
@@ -42,6 +42,6 @@ func (gp *GeoPackageProvider) Init() (err error) {
 		collections = gp.GeoPackage.Collections
 	}
 
-	gp.ApiProcessed = provider.CreateProvidesSpecificParameters(gp.Api, &collections)
+	gp.ApiProcessed = core.CreateProvidesSpecificParameters(gp.Api, &collections)
 	return
 }

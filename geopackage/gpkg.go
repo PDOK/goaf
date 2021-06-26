@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"oaf-server/provider"
+	"oaf-server/core"
 	"os"
 	"regexp"
 	"time"
@@ -40,7 +40,7 @@ type GeoPackage struct {
 	UserVersion   int64
 	DB            *sqlx.DB
 	FeatureIdKey  string
-	Collections   []provider.Collection
+	Collections   []core.Collection
 	DefaultBBox   [4]float64
 	Srid          int64
 }
@@ -98,7 +98,7 @@ func (gpkg *GeoPackage) Close() error {
 	return gpkg.DB.Close()
 }
 
-func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result []provider.Collection, err error) {
+func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result []core.Collection, err error) {
 
 	if gpkg.Collections != nil {
 		result = gpkg.Collections
@@ -122,7 +122,7 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 	}
 	defer rowsClose(query, rows)
 
-	gpkg.Collections = make([]provider.Collection, 0)
+	gpkg.Collections = make([]core.Collection, 0)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -140,11 +140,11 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 			row.Features = append(row.Features, match[1])
 		}
 
-		collection := provider.Collection{
+		collection := core.Collection{
 			Tablename:    row.TableName,
 			Identifier:   row.Identifier,
 			Description:  row.Description,
-			Columns:      &provider.Columns{Geometry: row.ColumnName},
+			Columns:      &core.Columns{Geometry: row.ColumnName},
 			Geometrytype: row.GeometryType,
 			BBox:         [4]float64{row.MinX, row.MinY, row.MaxX, row.MaxY},
 			Srid:         int(row.SrsId),
@@ -159,9 +159,9 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 	return
 }
 
-func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection provider.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *provider.FeatureCollectionGeoJSON, err error) {
+func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *core.FeatureCollectionGeoJSON, err error) {
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
-	result = &provider.FeatureCollectionGeoJSON{}
+	result = &core.FeatureCollectionGeoJSON{}
 	if len(bbox) > 4 {
 		err = errors.New("bbox with 6 elements not supported")
 		return
@@ -215,7 +215,7 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 
 	result.NumberReturned = 0
 	result.Type = "FeatureCollection"
-	result.Features = make([]*provider.Feature, 0)
+	result.Features = make([]*core.Feature, 0)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -235,7 +235,7 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 			return
 		}
 
-		feature := &provider.Feature{Feature: geojson.Feature{Properties: make(map[string]interface{})}}
+		feature := &core.Feature{Feature: geojson.Feature{Properties: make(map[string]interface{})}}
 
 		for i, colName := range cols {
 			// check if the context cancelled or timed out
@@ -250,7 +250,7 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 
 			switch colName {
 			case featureIdKey:
-				ID, err := provider.ConvertFeatureID(vals[i])
+				ID, err := core.ConvertFeatureID(vals[i])
 				if err != nil {
 					return result, err
 				}

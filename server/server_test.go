@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"oaf-server/codegen"
-	gpkg "oaf-server/gpkg"
-	"oaf-server/provider"
+	"oaf-server/core"
+	"oaf-server/gpkg"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -18,8 +18,8 @@ import (
 func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
-	// commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
-	config := provider.Config{Datasource: provider.Datasource{Geopackage: &provider.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
+	// commonProvider := core.NewCommonProvider("../spec/oaf.json", 100, 500)
+	config := core.Config{Datasource: core.Datasource{Geopackage: &core.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
 
 	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, config)
 
@@ -35,10 +35,10 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	tests := []struct {
 		name  string
 		path  string
-		want  provider.GetLandingPageProvider
-		check func(want provider.GetLandingPageProvider) error
+		want  core.GetLandingPageProvider
+		check func(want core.GetLandingPageProvider) error
 	}{
-		{"root call", "", provider.GetLandingPageProvider{}, func(want provider.GetLandingPageProvider) error {
+		{"root call", "", core.GetLandingPageProvider{}, func(want core.GetLandingPageProvider) error {
 
 			if len(want.Links) != 8 {
 				return errors.New("error invalid number of links")
@@ -87,8 +87,8 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
-	// commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
-	config := provider.Config{Datasource: provider.Datasource{Geopackage: &provider.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
+	// commonProvider := core.NewCommonProvider("../spec/oaf.json", 100, 500)
+	config := core.Config{Datasource: core.Datasource{Geopackage: &core.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
 
 	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, config)
 

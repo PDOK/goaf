@@ -9,7 +9,7 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/provider"
+	"oaf-server/core"
 	"oaf-server/spec"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -41,8 +41,8 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 	server.Templates = template.Must(template.New("templates").Funcs(
 		template.FuncMap{
 			"isOdd":       func(i int) bool { return i%2 != 0 },
-			"hasFeatures": func(i []provider.Feature) bool { return len(i) > 0 },
-			"upperFirst":  provider.UpperFirst,
+			"hasFeatures": func(i []core.Feature) bool { return len(i) > 0 },
+			"upperFirst":  core.UpperFirst,
 			"dict": func(values ...interface{}) (map[string]interface{}, error) {
 				if len(values)%2 != 0 {
 					return nil, errors.New("invalid dict call")
@@ -88,10 +88,10 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 			default:
 				jsonError(w, "PROVIDER CREATION", v.Error(), http.StatusNotFound)
 				return
-			case *provider.InvalidContentTypeError:
+			case *core.InvalidContentTypeError:
 				jsonError(w, "CLIENT ERROR", v.Error(), http.StatusBadRequest)
 				return
-			case *provider.InvalidFormatError:
+			case *core.InvalidFormatError:
 				jsonError(w, "CLIENT ERROR", v.Error(), http.StatusBadRequest)
 				return
 			}
@@ -112,13 +112,13 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 		var encodedContent []byte
 
-		if p.ContentType() == provider.JSONContentType || p.ContentType() == provider.LDJSONContentType || p.ContentType() == provider.GEOJSONContentType {
+		if p.ContentType() == core.JSONContentType || p.ContentType() == core.LDJSONContentType || p.ContentType() == core.GEOJSONContentType {
 			encodedContent, err = json.Marshal(result)
 			if err != nil {
 				jsonError(w, "JSON MARSHALLER", err.Error(), http.StatusInternalServerError)
 				return
 			}
-		} else if p.ContentType() == provider.HTMLContentType {
+		} else if p.ContentType() == core.HTMLContentType {
 			providerID := p.String()
 
 			rmap := make(map[string]interface{})

@@ -3,25 +3,25 @@ package geopackage
 import (
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/provider"
+	"oaf-server/core"
 )
 
 func (gp *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Request) (codegen.Provider, error) {
-	return provider.NewDescribeCollectionProvider(gp.Config)(r)
+	return core.NewDescribeCollectionProvider(gp.Config)(r)
 }
 
 func (gp *GeoPackageProvider) NewGetApiProvider(r *http.Request) (codegen.Provider, error) {
-	return provider.NewGetApiProvider(gp.ApiProcessed)(r)
+	return core.NewGetApiProvider(gp.ApiProcessed)(r)
 }
 
 func (gp *GeoPackageProvider) NewGetConformanceDeclarationProvider(r *http.Request) (codegen.Provider, error) {
-	return provider.NewGetConformanceDeclarationProvider(gp.ApiProcessed)(r)
+	return core.NewGetConformanceDeclarationProvider(gp.ApiProcessed)(r)
 }
 
 func (gp *GeoPackageProvider) NewGetLandingPageProvider(r *http.Request) (codegen.Provider, error) {
-	return provider.NewGetLandingPageProvider(gp.Config.Service)(r)
+	return core.NewGetLandingPageProvider(gp.Config.Service)(r)
 }
 
 func (gp *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (codegen.Provider, error) {
-	return provider.NewGetCollectionsProvider(gp.Config)(r)
+	return core.NewGetCollectionsProvider(gp.Config)(r)
 }

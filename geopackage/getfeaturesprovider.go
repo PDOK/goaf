@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/provider"
+	"oaf-server/core"
 )
 
 type GetFeaturesProvider struct {
-	data        provider.FeatureCollectionGeoJSON
+	data        core.FeatureCollectionGeoJSON
 	srsid       string
 	contenttype string
 }
@@ -17,9 +17,9 @@ type GetFeaturesProvider struct {
 func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
 	collectionId, limit, offset, _, bbox, time := codegen.ParametersForGetFeatures(r)
 
-	limitParam := provider.ParseLimit(limit, uint64(gp.Config.DefaultFeatureLimit), uint64(gp.Config.MaxFeatureLimit))
-	offsetParam := provider.ParseUint(offset, 0)
-	bboxParam := provider.ParseBBox(bbox, gp.GeoPackage.DefaultBBox)
+	limitParam := core.ParseLimit(limit, uint64(gp.Config.DefaultFeatureLimit), uint64(gp.Config.MaxFeatureLimit))
+	offsetParam := core.ParseUint(offset, 0)
+	bboxParam := core.ParseBBox(bbox, gp.GeoPackage.DefaultBBox)
 
 	if time != "" {
 		log.Println("Time selection currently not implemented")
@@ -28,7 +28,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 	path := r.URL.Path // collections/{{collectionId}}/items
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.GeoPackage.Srid)}
 
-	ct, err := provider.GetContentType(r, p.String())
+	ct, err := core.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 		for _, feature := range fcGeoJSON.Features {
 			hrefBase := fmt.Sprintf("%s%s/%v", gp.Config.Service.Url, path, feature.ID) // /collections
-			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
+			links, _ := core.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
 
@@ -68,14 +68,14 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", gp.Config.Service.Url, path) // /collections
-		links, _ := provider.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
-		_ = provider.ProcesLinksForParams(links, requestParams)
+		links, _ := core.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
+		_ = core.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
-			ilinks, _ := provider.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "next", ct)
+			ilinks, _ := core.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)+int64(limitParam)))
-			_ = provider.ProcesLinksForParams(ilinks, requestParams)
+			_ = core.ProcesLinksForParams(ilinks, requestParams)
 
 			links = append(links, ilinks...)
 		}

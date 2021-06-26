@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
+	"oaf-server/core"
 	"oaf-server/geopackage"
 	"oaf-server/postgis"
-	"oaf-server/provider"
 	"oaf-server/server"
 	"os"
 	"regexp"
@@ -27,7 +27,7 @@ func main() {
 	configfilepath := flag.String("c", envString("CONFIG", ""), "configfile path")
 	flag.Parse()
 
-	config := &provider.Config{}
+	config := &core.Config{}
 	config.ReadConfig(*configfilepath)
 
 	// stage 1: create server with spec path and limits
@@ -37,7 +37,7 @@ func main() {
 	}
 
 	// stage 2: Create providers based upon provider name
-	// commonProvider := provider.NewCommonProvider(config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+	// commonProvider := core.NewCommonProvider(config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
 	providers := getProvider(apiServer.Openapi, *config)
 
 	if providers == nil {
@@ -75,7 +75,7 @@ func main() {
 
 }
 
-func getProvider(api *openapi3.T, config provider.Config) codegen.Providers {
+func getProvider(api *openapi3.T, config core.Config) codegen.Providers {
 	if config.Datasource.Geopackage != nil {
 		return geopackage.NewGeopackageWithCommonProvider(api, config)
 	} else if config.Datasource.PostGIS != nil {

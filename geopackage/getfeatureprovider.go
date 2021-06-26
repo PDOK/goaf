@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/provider"
+	"oaf-server/core"
 )
 
 type GetFeatureProvider struct {
-	data        *provider.Feature
+	data        *core.Feature
 	srsid       string
 	contenttype string
 }
@@ -24,7 +24,7 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 
 	path := r.URL.Path
 
-	ct, err := provider.GetContentType(r, p.String())
+	ct, err := core.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 			feature := fcGeoJSON.Features[0]
 
 			hrefBase := fmt.Sprintf("%s%s", gp.Config.Service.Url, path) // /collections
-			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
+			links, _ := core.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 
 			p.data = feature
