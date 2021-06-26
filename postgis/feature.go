@@ -66,7 +66,7 @@ func (pp *PostgisProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provi
 			p.data = feature
 
 		} else {
-			return p, fmt.Errorf("Feature with id: %s not found", string(featureId))
+			return p, fmt.Errorf("feature with id: %s not found", string(featureId))
 		}
 
 		return p, nil
@@ -84,7 +84,7 @@ func (gfp *GetFeatureProvider) ContentType() string {
 }
 
 func (gfp *GetFeatureProvider) String() string {
-	return "getfeature"
+	return "feature"
 }
 
 func (gfp *GetFeatureProvider) SrsId() string {

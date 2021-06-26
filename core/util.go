@@ -25,13 +25,13 @@ const (
 )
 
 var providerNameMap = map[string]string{
-	"describecollection":        CapabilitesProvider,
-	"getcollections":            CapabilitesProvider,
-	"getconformancedeclaration": CapabilitesProvider,
-	"getfeature":                DataProvider,
-	"getfeatures":               DataProvider,
-	"api":                       OASProvider,
-	"landingpage":               CapabilitesProvider,
+	"collection":  CapabilitesProvider,
+	"collections": CapabilitesProvider,
+	"conformance": CapabilitesProvider,
+	"feature":     DataProvider,
+	"features":    DataProvider,
+	"api":         OASProvider,
+	"landingpage": CapabilitesProvider,
 }
 
 type InvalidContentTypeError struct {

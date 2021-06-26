@@ -14,10 +14,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type IdNotFoundError struct {
-	err string
-}
-
 type Postgis struct {
 	ApplicationId string
 	UserVersion   string

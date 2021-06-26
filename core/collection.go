@@ -75,7 +75,7 @@ func (dcp *DescribeCollectionProvider) ContentType() string {
 }
 
 func (dcp *DescribeCollectionProvider) String() string {
-	return "describecollection"
+	return "collection"
 }
 
 func (dcp *DescribeCollectionProvider) SrsId() string {

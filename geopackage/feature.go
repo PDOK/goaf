@@ -69,7 +69,7 @@ func (gfp *GetFeatureProvider) ContentType() string {
 }
 
 func (gfp *GetFeatureProvider) String() string {
-	return "getfeature"
+	return "feature"
 }
 
 func (gfp *GetFeatureProvider) SrsId() string {

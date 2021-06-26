@@ -61,7 +61,7 @@ func (gcdp *GetConformanceDeclarationProvider) ContentType() string {
 }
 
 func (gcdp *GetConformanceDeclarationProvider) String() string {
-	return "getconformancedeclaration"
+	return "conformance"
 }
 
 func (gcdp *GetConformanceDeclarationProvider) SrsId() string {

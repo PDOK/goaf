@@ -81,7 +81,7 @@ func (gcp *GetCollectionsProvider) ContentType() string {
 }
 
 func (gcp *GetCollectionsProvider) String() string {
-	return "getcollections"
+	return "collections"
 }
 
 func (gcp *GetCollectionsProvider) SrsId() string {
