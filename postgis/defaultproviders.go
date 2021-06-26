@@ -21,3 +21,7 @@ func (pp *PostgisProvider) NewGetConformanceDeclarationProvider(r *http.Request)
 func (pp *PostgisProvider) NewGetLandingPageProvider(r *http.Request) (codegen.Provider, error) {
 	return provider.NewGetLandingPageProvider(pp.Config.Service)(r)
 }
+
+func (pp *PostgisProvider) NewGetCollectionsProvider(r *http.Request) (codegen.Provider, error) {
+	return provider.NewGetCollectionsProvider(pp.Config)(r)
+}

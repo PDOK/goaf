@@ -21,3 +21,7 @@ func (gp *GeoPackageProvider) NewGetConformanceDeclarationProvider(r *http.Reque
 func (gp *GeoPackageProvider) NewGetLandingPageProvider(r *http.Request) (codegen.Provider, error) {
 	return provider.NewGetLandingPageProvider(gp.Config.Service)(r)
 }
+
+func (gp *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (codegen.Provider, error) {
+	return provider.NewGetCollectionsProvider(gp.Config)(r)
+}
