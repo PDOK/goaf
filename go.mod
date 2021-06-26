@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.7
 	github.com/rs/cors v1.7.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
 
 go 1.16
