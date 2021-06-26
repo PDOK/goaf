@@ -17,6 +17,8 @@ import (
 	"github.com/go-spatial/geom/encoding/gpkg"
 )
 
+// GeoPackageLayer used for reading the given GeoPackage
+// This will later be translated to Collections
 type GeoPackageLayer struct {
 	TableName    string    `db:"table_name"`
 	DataType     string    `db:"data_type"`
@@ -35,6 +37,7 @@ type GeoPackageLayer struct {
 	Features []string // first table, second PK, rest features
 }
 
+// Geopackage configuration
 type GeoPackage struct {
 	ApplicationId string
 	UserVersion   int64
@@ -159,9 +162,10 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 	return
 }
 
-func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *core.FeatureCollectionGeoJSON, err error) {
+// GetFeatures return the FeatureCollection
+func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *core.FeatureCollection, err error) {
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
-	result = &core.FeatureCollectionGeoJSON{}
+	result = &core.FeatureCollection{}
 	if len(bbox) > 4 {
 		err = errors.New("bbox with 6 elements not supported")
 		return
@@ -309,6 +313,7 @@ func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, colle
 	return
 }
 
+// GetApplicationID returns a string containing the GeoPackage application_id
 func (gpkg *GeoPackage) GetApplicationID(ctx context.Context, db *sqlx.DB) (string, error) {
 
 	if gpkg.ApplicationId != "" {
@@ -339,6 +344,7 @@ func (gpkg *GeoPackage) GetApplicationID(ctx context.Context, db *sqlx.DB) (stri
 
 }
 
+// GetVersion returns a string containing the GeoPackage version
 func (gpkg *GeoPackage) GetVersion(ctx context.Context, db *sqlx.DB) (int64, error) {
 
 	if gpkg.UserVersion != 0 {

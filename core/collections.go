@@ -6,11 +6,14 @@ import (
 	"oaf-server/codegen"
 )
 
+// GetCollectionsProvider is returned by the NewGetCollectionsProvider
+// containing the data and contenttype for the response
 type GetCollectionsProvider struct {
 	data        codegen.Collections
 	contenttype string
 }
 
+// NewGetCollectionsProvider handles the request and return the GetCollectionsProvider
 func NewGetCollectionsProvider(config Config) func(r *http.Request) (codegen.Provider, error) {
 
 	return func(r *http.Request) (codegen.Provider, error) {
@@ -72,18 +75,22 @@ func NewGetCollectionsProvider(config Config) func(r *http.Request) (codegen.Pro
 	}
 }
 
+// Provide provides the data
 func (gcp *GetCollectionsProvider) Provide() (interface{}, error) {
 	return gcp.data, nil
 }
 
+// ContentType returns the ContentType
 func (gcp *GetCollectionsProvider) ContentType() string {
 	return gcp.contenttype
 }
 
+// String returns the provider name
 func (gcp *GetCollectionsProvider) String() string {
 	return "collections"
 }
 
+// SrsId returns the srsid
 func (gcp *GetCollectionsProvider) SrsId() string {
 	return "n.a."
 }

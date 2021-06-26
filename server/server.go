@@ -17,6 +17,7 @@ import (
 
 var isTesting = false
 
+// Server
 type Server struct {
 	ServiceEndpoint    string
 	ServiceSpecPath    string
@@ -27,6 +28,11 @@ type Server struct {
 	Templates          *template.Template
 }
 
+// NewServer returns a initialized Server
+// The returned Server contains:
+// - openapi3.T
+// - templates
+// - set Max and Default feature limits
 func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxReturnLimit uint64) (*Server, error) {
 	openapi, err := spec.GetOpenAPI(serviceSpecPath)
 
@@ -70,6 +76,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 	return server, nil
 }
 
+// SetProviders calls the Init() for the configured Provider
 func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
 	err := providers.Init()
 
@@ -81,6 +88,8 @@ func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
 	return s, nil
 }
 
+// HandleForProvider process the given Provider
+// And does post-processing regarding the reponse like setting the Content-Type
 func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {

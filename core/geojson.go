@@ -6,7 +6,7 @@ import (
 	"github.com/go-spatial/geom/encoding/geojson"
 )
 
-type FeatureCollectionGeoJSON struct {
+type FeatureCollection struct {
 	NumberReturned int64          `json:"numberReturned,omitempty"`
 	TimeStamp      string         `json:"timeStamp,omitempty"`
 	Type           string         `json:"type"`

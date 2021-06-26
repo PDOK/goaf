@@ -8,12 +8,15 @@ import (
 	"oaf-server/core"
 )
 
+// GetFeaturesProvider is returned by the NewGetFeaturesProvider
+// containing the data, srsid and contenttype for the response
 type GetFeaturesProvider struct {
-	data        core.FeatureCollectionGeoJSON
+	data        core.FeatureCollection
 	srsid       string
 	contenttype string
 }
 
+// NewGetFeaturesProvider handles the request and return the GetFeaturesProvider
 func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
 	collectionId, limit, offset, _, bbox, time := codegen.ParametersForGetFeatures(r)
 
@@ -90,18 +93,22 @@ func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.P
 	return p, nil
 }
 
+// Provide provides the data
 func (gfp *GetFeaturesProvider) Provide() (interface{}, error) {
 	return gfp.data, nil
 }
 
+// ContentType returns the ContentType
 func (gfp *GetFeaturesProvider) ContentType() string {
 	return gfp.contenttype
 }
 
+// String returns the provider name
 func (gfp *GetFeaturesProvider) String() string {
 	return "features"
 }
 
+// SrsId returns the srsid
 func (gfp *GetFeaturesProvider) SrsId() string {
 	return gfp.srsid
 }

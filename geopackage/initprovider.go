@@ -8,6 +8,7 @@ import (
 	"github.com/imdario/mergo"
 )
 
+// GeoPackageProvider
 type GeoPackageProvider struct {
 	GeoPackage   GeoPackage
 	Config       core.Config
@@ -15,6 +16,8 @@ type GeoPackageProvider struct {
 	ApiProcessed *openapi3.T
 }
 
+// NewGeopackageWithCommonProvider returns a new GeoPackageProvider set with the
+// given config and OAS3 spec
 func NewGeopackageWithCommonProvider(api *openapi3.T, config core.Config) *GeoPackageProvider {
 	return &GeoPackageProvider{
 		Api:    api,
@@ -22,6 +25,8 @@ func NewGeopackageWithCommonProvider(api *openapi3.T, config core.Config) *GeoPa
 	}
 }
 
+// Init initialize the *GeoPackag
+// and processed the OAS3 spec with the available collections
 func (gp *GeoPackageProvider) Init() (err error) {
 	gp.GeoPackage, err = NewGeoPackage(gp.Config.Datasource.Geopackage.File, gp.Config.Datasource.Geopackage.Fid)
 

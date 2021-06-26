@@ -6,6 +6,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
+// GetOpenAPI reads a file containing the OAS3 spec and return the openapi3.T struct
 func GetOpenAPI(serviceSpecPath string) (*openapi3.T, error) {
 
 	loader := openapi3.NewLoader()

@@ -6,11 +6,14 @@ import (
 	"oaf-server/codegen"
 )
 
+// DescribeCollectionProvider is returned by the NewDescribeCollectionProvider
+// containing the data and contenttype for the response
 type DescribeCollectionProvider struct {
 	data        codegen.Collection
 	contenttype string
 }
 
+// NewDescribeCollectionProvider handles the request and return the DescribeCollectionProvider
 func NewDescribeCollectionProvider(config Config) func(r *http.Request) (codegen.Provider, error) {
 
 	return func(r *http.Request) (codegen.Provider, error) {
@@ -66,18 +69,22 @@ func NewDescribeCollectionProvider(config Config) func(r *http.Request) (codegen
 
 }
 
+// Provide returns the srsid
 func (dcp *DescribeCollectionProvider) Provide() (interface{}, error) {
 	return dcp.data, nil
 }
 
+// ContentType returns the srsid
 func (dcp *DescribeCollectionProvider) ContentType() string {
 	return dcp.contenttype
 }
 
+// SrsStringId returns the provider name
 func (dcp *DescribeCollectionProvider) String() string {
 	return "collection"
 }
 
+// SrsId returns the srsid
 func (dcp *DescribeCollectionProvider) SrsId() string {
 	return "n.a."
 }

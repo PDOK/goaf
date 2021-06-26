@@ -14,6 +14,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Postgis configuration
 type Postgis struct {
 	ApplicationId string
 	UserVersion   string
@@ -23,6 +24,7 @@ type Postgis struct {
 	Srid          int64
 }
 
+// NewPostgis returns the Postgis build on the given Config
 func NewPostgis(config core.Config) (Postgis, error) {
 
 	postgis := Postgis{}
@@ -51,12 +53,14 @@ func NewPostgis(config core.Config) (Postgis, error) {
 	return postgis, nil
 }
 
+// Close closes the postgis database
 func (postgis Postgis) Close() error {
 	return postgis.db.Close()
 }
 
-func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, whereMap map[string]string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result core.FeatureCollectionGeoJSON, err error) {
-	result = core.FeatureCollectionGeoJSON{}
+// GetFeatures return the FeatureCollection
+func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, whereMap map[string]string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result core.FeatureCollection, err error) {
+	result = core.FeatureCollection{}
 	if len(bbox) > 4 {
 		err = errors.New("bbox with 6 elements not supported")
 		return
@@ -253,6 +257,7 @@ func (postgis Postgis) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 	return
 }
 
+// GetVersion returns a string containing the PostGIS version
 func (postgis *Postgis) GetVersion(ctx context.Context, db *sqlx.DB) (string, error) {
 
 	if postgis.UserVersion != "" {
