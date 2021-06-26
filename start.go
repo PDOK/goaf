@@ -40,8 +40,6 @@ func main() {
 
 	// stage 2: Create providers based upon provider name
 	commonProvider := provider.NewCommonProvider(config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
-	// providers := getProvider(apiServer.Openapi, providerName, commonProvider, crsMapFilePath, gpkgFilePath, featureIdKey, configFilePath, connectionStr)
-
 	providers := getProvider(apiServer.Openapi, commonProvider, *config)
 
 	if providers == nil {
