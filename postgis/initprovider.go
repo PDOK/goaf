@@ -8,18 +8,16 @@ import (
 )
 
 type PostgisProvider struct {
-	CommonProvider provider.CommonProvider
-	PostGis        Postgis
-	Config         provider.Config
-	Api            *openapi3.T
-	ApiProcessed   *openapi3.T
+	PostGis      Postgis
+	Config       provider.Config
+	Api          *openapi3.T
+	ApiProcessed *openapi3.T
 }
 
-func NewPostgisWithCommonProvider(api *openapi3.T, commonProvider provider.CommonProvider, config provider.Config) *PostgisProvider {
+func NewPostgisWithCommonProvider(api *openapi3.T, config provider.Config) *PostgisProvider {
 	p := &PostgisProvider{
-		Config:         config,
-		CommonProvider: commonProvider,
-		Api:            api,
+		Config: config,
+		Api:    api,
 	}
 	return p
 }

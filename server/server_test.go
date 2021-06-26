@@ -18,10 +18,10 @@ import (
 func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
-	commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
+	// commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
 	config := provider.Config{Datasource: provider.Datasource{Geopackage: &provider.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
 
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, config)
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, config)
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -30,7 +30,7 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	defer ts.Close()
 
 	// replace with test endpoint
-	gpkgp.CommonProvider.ServiceEndpoint = ts.URL
+	gpkgp.Config.Service.Url = ts.URL
 
 	tests := []struct {
 		name  string
@@ -87,10 +87,10 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	serverEndpoint := "http://testhost:1234"
 
-	commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
+	// commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
 	config := provider.Config{Datasource: provider.Datasource{Geopackage: &provider.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
 
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, config)
+	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, config)
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -99,7 +99,7 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	defer ts.Close()
 
 	// replace with test endpoint
-	gpkgp.CommonProvider.ServiceEndpoint = ts.URL
+	gpkgp.Config.Service.Url = ts.URL
 
 	tests := []struct {
 		name  string

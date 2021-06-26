@@ -19,7 +19,7 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 
 	collectionId, limit, offset, _, bbox, time := codegen.ParametersForGetFeatures(r)
 
-	limitParam := provider.ParseLimit(limit, pp.CommonProvider.DefaultReturnLimit, pp.CommonProvider.MaxReturnLimit)
+	limitParam := provider.ParseLimit(limit, uint64(pp.Config.DefaultFeatureLimit), uint64(pp.Config.MaxFeatureLimit))
 	offsetParam := provider.ParseUint(offset, 0)
 	bboxParam := provider.ParseBBox(bbox, pp.PostGis.BBox)
 

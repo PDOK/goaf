@@ -9,18 +9,16 @@ import (
 )
 
 type GeoPackageProvider struct {
-	CommonProvider provider.CommonProvider
-	GeoPackage     GeoPackage
-	Config         provider.Config
-	Api            *openapi3.T
-	ApiProcessed   *openapi3.T
+	GeoPackage   GeoPackage
+	Config       provider.Config
+	Api          *openapi3.T
+	ApiProcessed *openapi3.T
 }
 
-func NewGeopackageWithCommonProvider(api *openapi3.T, commonProvider provider.CommonProvider, config provider.Config) *GeoPackageProvider {
+func NewGeopackageWithCommonProvider(api *openapi3.T, config provider.Config) *GeoPackageProvider {
 	return &GeoPackageProvider{
-		CommonProvider: commonProvider,
-		Api:            api,
-		Config:         config,
+		Api:    api,
+		Config: config,
 	}
 }
 

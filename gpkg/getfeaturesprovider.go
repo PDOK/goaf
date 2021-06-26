@@ -17,7 +17,7 @@ type GetFeaturesProvider struct {
 func (gp *GeoPackageProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
 	collectionId, limit, offset, _, bbox, time := codegen.ParametersForGetFeatures(r)
 
-	limitParam := provider.ParseLimit(limit, gp.CommonProvider.DefaultReturnLimit, gp.CommonProvider.MaxReturnLimit)
+	limitParam := provider.ParseLimit(limit, uint64(gp.Config.DefaultFeatureLimit), uint64(gp.Config.MaxFeatureLimit))
 	offsetParam := provider.ParseUint(offset, 0)
 	bboxParam := provider.ParseBBox(bbox, gp.GeoPackage.DefaultBBox)
 

@@ -37,8 +37,8 @@ func main() {
 	}
 
 	// stage 2: Create providers based upon provider name
-	commonProvider := provider.NewCommonProvider(config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
-	providers := getProvider(apiServer.Openapi, commonProvider, *config)
+	// commonProvider := provider.NewCommonProvider(config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+	providers := getProvider(apiServer.Openapi, *config)
 
 	if providers == nil {
 		log.Fatal("Incorrect provider provided valid names are: gpkg, postgis")
@@ -75,11 +75,11 @@ func main() {
 
 }
 
-func getProvider(api *openapi3.T, commonProvider provider.CommonProvider, config provider.Config) codegen.Providers {
+func getProvider(api *openapi3.T, config provider.Config) codegen.Providers {
 	if config.Datasource.Geopackage != nil {
-		return gpkg.NewGeopackageWithCommonProvider(api, commonProvider, config)
+		return gpkg.NewGeopackageWithCommonProvider(api, config)
 	} else if config.Datasource.PostGIS != nil {
-		return postgis.NewPostgisWithCommonProvider(api, commonProvider, config)
+		return postgis.NewPostgisWithCommonProvider(api, config)
 	}
 
 	return nil
