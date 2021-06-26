@@ -1,4 +1,4 @@
-package gpkg
+package geopackage
 
 import (
 	"log"

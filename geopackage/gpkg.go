@@ -1,4 +1,4 @@
-package gpkg
+package geopackage
 
 import (
 	"context"
@@ -13,6 +13,8 @@ import (
 
 	"github.com/go-spatial/geom/encoding/geojson"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/go-spatial/geom/encoding/gpkg"
 )
 
 type GeoPackageLayer struct {
@@ -157,7 +159,7 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 	return
 }
 
-func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection provider.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *provider.FeatureCollectionGeoJSON, err error) {
+func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection provider.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *provider.FeatureCollectionGeoJSON, err error) {
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
 	result = &provider.FeatureCollectionGeoJSON{}
 	if len(bbox) > 4 {
@@ -167,10 +169,10 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 
 	var featureIdKey string
 
-	if gpkg.FeatureIdKey == "" {
+	if geopackage.FeatureIdKey == "" {
 		featureIdKey = collection.Properties[1]
 	} else {
-		featureIdKey = gpkg.FeatureIdKey
+		featureIdKey = geopackage.FeatureIdKey
 	}
 
 	rtreeTablenName := fmt.Sprintf("rtree_%s_%s", collection.Tablename, collection.Columns.Geometry)
@@ -267,11 +269,11 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 					return result, errors.New("unexpected column type for geom field. expected blob")
 				}
 
-				_, geo, err := DecodeGeometry(geomData)
+				geo, err := gpkg.DecodeGeometry(geomData)
 				if err != nil {
 					return result, err
 				}
-				feature.Geometry = geojson.Geometry{Geometry: geo}
+				feature.Geometry = geojson.Geometry{Geometry: geo.Geometry}
 
 			case "minx", "miny", "maxx", "maxy", "min_zoom", "max_zoom":
 				// Skip these columns used for bounding box and zoom filtering

@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/gpkg"
+	"oaf-server/geopackage"
 	"oaf-server/postgis"
 	"oaf-server/provider"
 	"oaf-server/server"
@@ -77,7 +77,7 @@ func main() {
 
 func getProvider(api *openapi3.T, config provider.Config) codegen.Providers {
 	if config.Datasource.Geopackage != nil {
-		return gpkg.NewGeopackageWithCommonProvider(api, config)
+		return geopackage.NewGeopackageWithCommonProvider(api, config)
 	} else if config.Datasource.PostGIS != nil {
 		return postgis.NewPostgisWithCommonProvider(api, config)
 	}
