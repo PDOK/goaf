@@ -36,16 +36,11 @@ func (gp *GeoPackageProvider) NewGetCollectionsProvider(r *http.Request) (codege
 
 	for _, cn := range gp.GeoPackage.Collections {
 
-		crss := make([]string, 0)
-		for _, v := range gp.CrsMap {
-			crss = append(crss, v)
-		}
-
 		cInfo := codegen.Collection{
 			Id:          cn.Identifier,
 			Title:       cn.Identifier,
 			Description: cn.Description,
-			Crs:         crss,
+			Crs:         []string{gp.Config.Crs[fmt.Sprintf("%d", cn.Srid)]},
 			Links:       []codegen.Link{},
 		}
 

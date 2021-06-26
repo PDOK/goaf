@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"oaf-server/codegen"
@@ -16,7 +15,6 @@ import (
 	"strconv"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"gopkg.in/yaml.v2"
 
 	"github.com/rs/cors"
 )
@@ -79,7 +77,7 @@ func main() {
 
 func getProvider(api *openapi3.T, commonProvider provider.CommonProvider, config provider.Config) codegen.Providers {
 	if config.Datasource.Geopackage != nil {
-		return addGeopackageProviders(api, commonProvider, "", config)
+		return gpkg.NewGeopackageWithCommonProvider(api, commonProvider, config)
 	} else if config.Datasource.PostGIS != nil {
 		return postgis.NewPostgisWithCommonProvider(api, commonProvider, config)
 	}
@@ -95,26 +93,6 @@ func addHealthHandler(router *server.RegexpHandler) {
 			log.Printf("Could not write ok")
 		}
 	})
-}
-
-func addGeopackageProviders(api *openapi3.T, commonProvider provider.CommonProvider, crsMapFilePath string, config provider.Config) *gpkg.GeoPackageProvider {
-	crsMap := make(map[string]string)
-	csrMapFile, err := ioutil.ReadFile(crsMapFilePath)
-	if err != nil {
-		log.Printf("Could not read crsmap file: %s, using default CRS Map", crsMapFilePath)
-	} else {
-		err := yaml.Unmarshal(csrMapFile, &crsMap)
-		log.Print(crsMap)
-		if err != nil {
-			log.Printf("Could not unmarshal crsmap file: %s, using default CRS Map", crsMapFilePath)
-		}
-	}
-
-	if crsMap[`4326`] == `` {
-		crsMap[`4326`] = `http://www.opengis.net/def/crs/OGC/1.3/CRS84`
-	}
-
-	return gpkg.NewGeopackageWithCommonProvider(api, commonProvider, crsMap, config)
 }
 
 func envString(key, defaultValue string) string {

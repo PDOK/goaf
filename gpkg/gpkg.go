@@ -87,7 +87,7 @@ func NewGeoPackage(filepath string, featureIdKey string) (GeoPackage, error) {
 		}
 	}
 	log.Printf("| \n")
-	log.Printf("| 	BBOX: [%f,%f,%f,%f], SRS_ID:%d", gpkg.DefaultBBox[0], gpkg.DefaultBBox[1], gpkg.DefaultBBox[2], gpkg.DefaultBBox[3], gpkg.Srid)
+	log.Printf("| 	BBOX: [%f,%f,%f,%f], SRID: %d", gpkg.DefaultBBox[0], gpkg.DefaultBBox[1], gpkg.DefaultBBox[2], gpkg.DefaultBBox[3], gpkg.Srid)
 
 	return *gpkg, nil
 }

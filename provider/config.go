@@ -12,9 +12,10 @@ type Config struct {
 	ApplicationId string `yaml:"applicationid,omitempty"`
 	UserVersion   string `yaml:"userversion,omitempty"`
 
-	Openapi             string `yaml:"openapi"`
-	DefaultFeatureLimit int    `yaml:"defaultfeaturelimit"`
-	MaxFeatureLimit     int    `yaml:"maxfeaturelimit"`
+	Openapi             string            `yaml:"openapi"`
+	DefaultFeatureLimit int               `yaml:"defaultfeaturelimit"`
+	MaxFeatureLimit     int               `yaml:"maxfeaturelimit"`
+	Crs                 map[string]string `yaml:"crs"`
 	Datasource          Datasource
 	Service             Service `yaml:"service" json:"service"`
 }
@@ -151,6 +152,11 @@ func (c *Config) ReadConfig(path string) {
 
 	if c.MaxFeatureLimit < 1 {
 		c.MaxFeatureLimit = 500
+	}
+
+	if len(c.Crs) == 0 {
+		crs := map[string]string{`4326`: `http://www.opengis.net/def/crs/EPSG/0/4326`}
+		c.Crs = crs
 	}
 
 	if c.Openapi == "" {

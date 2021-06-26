@@ -36,7 +36,7 @@ func (pp *PostgisProvider) NewDescribeCollectionProvider(r *http.Request) (codeg
 			Id:          cn.Identifier,
 			Title:       cn.Identifier,
 			Description: cn.Description,
-			Crs:         []string{},
+			Crs:         []string{pp.Config.Crs[fmt.Sprintf("%d", cn.Srid)]},
 
 			Links: []codegen.Link{},
 		}

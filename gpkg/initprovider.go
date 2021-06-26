@@ -11,16 +11,14 @@ import (
 type GeoPackageProvider struct {
 	CommonProvider provider.CommonProvider
 	GeoPackage     GeoPackage
-	CrsMap         map[string]string
 	Config         provider.Config
 	Api            *openapi3.T
 	ApiProcessed   *openapi3.T
 }
 
-func NewGeopackageWithCommonProvider(api *openapi3.T, commonProvider provider.CommonProvider, crsMap map[string]string, config provider.Config) *GeoPackageProvider {
+func NewGeopackageWithCommonProvider(api *openapi3.T, commonProvider provider.CommonProvider, config provider.Config) *GeoPackageProvider {
 	return &GeoPackageProvider{
 		CommonProvider: commonProvider,
-		CrsMap:         crsMap,
 		Api:            api,
 		Config:         config,
 	}

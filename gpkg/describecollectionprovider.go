@@ -31,16 +31,11 @@ func (gp *GeoPackageProvider) NewDescribeCollectionProvider(r *http.Request) (co
 			continue
 		}
 
-		crss := make([]string, 0)
-		for _, v := range gp.CrsMap {
-			crss = append(crss, v)
-		}
-
 		cInfo := codegen.Collection{
 			Id:          cn.Identifier,
 			Title:       cn.Identifier,
 			Description: cn.Description,
-			Crs:         crss,
+			Crs:         []string{gp.Config.Crs[fmt.Sprintf("%d", cn.Srid)]},
 			Links:       []codegen.Link{},
 		}
 
