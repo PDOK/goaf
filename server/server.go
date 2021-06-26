@@ -65,7 +65,7 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 				}
 				return dict, nil
 			},
-		}).ParseGlob(templates)) // TODO: for testing this needs to be "../templates/*"
+		}).ParseGlob(templates))
 
 	return server, nil
 }
