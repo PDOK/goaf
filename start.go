@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,67 +11,105 @@ import (
 	"oaf-server/server"
 	"os"
 	"regexp"
-	"strconv"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/urfave/cli/v2"
 
 	"github.com/rs/cors"
 )
 
 func main() {
 
-	bindHost := flag.String("s", envString("BIND_HOST", "0.0.0.0"), "server internal bind address, default; 0.0.0.0")
-	bindPort := flag.Int("p", envInt("BIND_PORT", 8080), "server internal bind address, default; 8080")
+	app := cli.NewApp()
+	app.Name = "GOAF"
+	app.Usage = "A Golang OGC API Features implementation"
+	app.HideVersion = true
+	app.HideHelp = true
 
-	configfilepath := flag.String("c", envString("CONFIG", ""), "configfile path")
-	flag.Parse()
+	app.Flags = []cli.Flag{
+		&cli.StringFlag{
+			Name:        "host",
+			Aliases:     []string{"h"},
+			Usage:       "server internal bind host address",
+			DefaultText: "0.0.0.0",
+			Required:    false,
+			EnvVars:     []string{"HOST"},
+		},
+		&cli.StringFlag{
+			Name:        "port",
+			Aliases:     []string{"p"},
+			Usage:       "server internal bind port",
+			DefaultText: "8080",
+			Required:    false,
+			EnvVars:     []string{"PORT"},
+		},
+		&cli.StringFlag{
+			Name:     "config",
+			Aliases:  []string{"c"},
+			Usage:    "Path to the configuration",
+			Required: true,
+			EnvVars:  []string{"CONFIG"},
+		},
+	}
 
-	config := &core.Config{}
-	config.ReadConfig(*configfilepath)
+	app.Action = func(c *cli.Context) error {
 
-	// stage 1: create server with spec path and limits
-	apiServer, err := server.NewServer(config.Service.Url, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+		configfilepath := c.String("config")
+		config := &core.Config{}
+		config.ReadConfig(configfilepath)
+
+		// stage 1: create server with spec path and limits
+		apiServer, err := server.NewServer(config.Service.Url, config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+		if err != nil {
+			log.Fatal("Server initialisation error:", err)
+		}
+
+		// stage 2: Create providers based upon provider name
+		// commonProvider := core.NewCommonProvider(config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
+		providers := getProvider(apiServer.Openapi, *config)
+
+		if providers == nil {
+			log.Fatal("Incorrect provider provided valid names are: gpkg, postgis")
+		}
+
+		// stage 3: Add providers, also initialises them
+		apiServer, err = apiServer.SetProviders(providers)
+		if err != nil {
+			log.Fatal("Server initialisation error:", err)
+		}
+
+		// stage 4: Prepare routing
+		router := apiServer.Router()
+
+		// extra routing for healthcheck
+		addHealthHandler(router)
+
+		fs := http.FileServer(http.Dir("swagger-ui"))
+		router.Handler(regexp.MustCompile("/swagger-ui"), http.StripPrefix("/swagger-ui/", fs))
+
+		// cors handler
+		handler := cors.Default().Handler(router)
+
+		host := c.String("host")
+		port := c.String("port")
+
+		bindAddress := "0.0.0.0:8080"
+		if host != "" && port != "" {
+			bindAddress = fmt.Sprintf("%v:%v", host, port)
+		}
+
+		// ServerEndpoint can be different from bind address due to routing externally
+		log.Print("|\n")
+		log.Printf("| SERVING ON: %s \n", apiServer.ServiceEndpoint)
+
+		// stage 5: Start server
+		return http.ListenAndServe(bindAddress, handler)
+	}
+
+	err := app.Run(os.Args)
 	if err != nil {
-		log.Fatal("Server initialisation error:", err)
+		log.Fatal(err)
 	}
-
-	// stage 2: Create providers based upon provider name
-	// commonProvider := core.NewCommonProvider(config.Openapi, uint64(config.DefaultFeatureLimit), uint64(config.MaxFeatureLimit))
-	providers := getProvider(apiServer.Openapi, *config)
-
-	if providers == nil {
-		log.Fatal("Incorrect provider provided valid names are: gpkg, postgis")
-	}
-
-	// stage 3: Add providers, also initialises them
-	apiServer, err = apiServer.SetProviders(providers)
-	if err != nil {
-		log.Fatal("Server initialisation error:", err)
-	}
-
-	// stage 4: Prepare routing
-	router := apiServer.Router()
-
-	// extra routing for healthcheck
-	addHealthHandler(router)
-
-	fs := http.FileServer(http.Dir("swagger-ui"))
-	router.Handler(regexp.MustCompile("/swagger-ui"), http.StripPrefix("/swagger-ui/", fs))
-
-	// cors handler
-	handler := cors.Default().Handler(router)
-
-	// ServerEndpoint can be different from bind address due to routing externally
-	bindAddress := fmt.Sprintf("%v:%v", *bindHost, *bindPort)
-
-	log.Print("|\n")
-	log.Printf("| SERVING ON: %s \n", apiServer.ServiceEndpoint)
-
-	// stage 5: Start server
-	if err := http.ListenAndServe(bindAddress, handler); err != nil {
-		log.Fatal("ListenAndServe:", err)
-	}
-
 }
 
 func getProvider(api *openapi3.T, config core.Config) codegen.Providers {
@@ -93,26 +130,4 @@ func addHealthHandler(router *server.RegexpHandler) {
 			log.Printf("Could not write ok")
 		}
 	})
-}
-
-func envString(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value != "" {
-		return value
-	}
-
-	return defaultValue
-}
-
-func envInt(key string, defaultValue int) int {
-	value := os.Getenv(key)
-	if value != "" {
-		i, e := strconv.ParseInt(value, 10, 32)
-		if e != nil {
-			return defaultValue
-		}
-		return int(i)
-	}
-
-	return defaultValue
 }
