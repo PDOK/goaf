@@ -89,7 +89,7 @@ func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
 }
 
 // HandleForProvider process the given Provider
-// And does post-processing regarding the reponse like setting the Content-Type
+// And does post-processing regarding the response like setting the Content-Type
 func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
