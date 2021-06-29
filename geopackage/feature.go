@@ -1,18 +1,21 @@
-package gpkg
+package geopackage
 
 import (
 	"fmt"
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/provider"
+	"oaf-server/core"
 )
 
+// GetFeatureProvider is returned by the NewGetFeatureProvider
+// containing the data, srsid and contenttype for the response
 type GetFeatureProvider struct {
-	data        *Feature
+	data        *core.Feature
 	srsid       string
 	contenttype string
 }
 
+// NewGetFeatureProvider handles the request and return the GetFeatureProvider
 func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Provider, error) {
 
 	collectionId, featureId, _ := codegen.ParametersForGetFeature(r)
@@ -24,7 +27,7 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 
 	path := r.URL.Path
 
-	ct, err := provider.GetContentType(r, p.String())
+	ct, err := core.GetContentType(r, p.String())
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +51,7 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 			feature := fcGeoJSON.Features[0]
 
 			hrefBase := fmt.Sprintf("%s%s", gp.Config.Service.Url, path) // /collections
-			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
+			links, _ := core.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 
 			p.data = feature
@@ -60,18 +63,22 @@ func (gp *GeoPackageProvider) NewGetFeatureProvider(r *http.Request) (codegen.Pr
 	return p, nil
 }
 
+// Provide provides the data
 func (gfp *GetFeatureProvider) Provide() (interface{}, error) {
 	return gfp.data, nil
 }
 
+// ContentType returns the ContentType
 func (gfp *GetFeatureProvider) ContentType() string {
 	return gfp.contenttype
 }
 
+// String returns the provider name
 func (gfp *GetFeatureProvider) String() string {
-	return "getfeature"
+	return "feature"
 }
 
+// SrsId returns the srsid
 func (gfp *GetFeatureProvider) SrsId() string {
 	return gfp.srsid
 }

@@ -1,4 +1,4 @@
-package gpkg
+package geopackage
 
 import (
 	"context"
@@ -6,15 +6,19 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"oaf-server/provider"
+	"oaf-server/core"
 	"os"
 	"regexp"
 	"time"
 
 	"github.com/go-spatial/geom/encoding/geojson"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/go-spatial/geom/encoding/gpkg"
 )
 
+// GeoPackageLayer used for reading the given GeoPackage
+// This will later be translated to Collections
 type GeoPackageLayer struct {
 	TableName    string    `db:"table_name"`
 	DataType     string    `db:"data_type"`
@@ -33,12 +37,13 @@ type GeoPackageLayer struct {
 	Features []string // first table, second PK, rest features
 }
 
+// Geopackage configuration
 type GeoPackage struct {
 	ApplicationId string
 	UserVersion   int64
 	DB            *sqlx.DB
 	FeatureIdKey  string
-	Collections   []provider.Collection
+	Collections   []core.Collection
 	DefaultBBox   [4]float64
 	Srid          int64
 }
@@ -87,7 +92,7 @@ func NewGeoPackage(filepath string, featureIdKey string) (GeoPackage, error) {
 		}
 	}
 	log.Printf("| \n")
-	log.Printf("| 	BBOX: [%f,%f,%f,%f], SRS_ID:%d", gpkg.DefaultBBox[0], gpkg.DefaultBBox[1], gpkg.DefaultBBox[2], gpkg.DefaultBBox[3], gpkg.Srid)
+	log.Printf("| 	BBOX: [%f,%f,%f,%f], SRID: %d", gpkg.DefaultBBox[0], gpkg.DefaultBBox[1], gpkg.DefaultBBox[2], gpkg.DefaultBBox[3], gpkg.Srid)
 
 	return *gpkg, nil
 }
@@ -96,7 +101,7 @@ func (gpkg *GeoPackage) Close() error {
 	return gpkg.DB.Close()
 }
 
-func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result []provider.Collection, err error) {
+func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result []core.Collection, err error) {
 
 	if gpkg.Collections != nil {
 		result = gpkg.Collections
@@ -120,7 +125,7 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 	}
 	defer rowsClose(query, rows)
 
-	gpkg.Collections = make([]provider.Collection, 0)
+	gpkg.Collections = make([]core.Collection, 0)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -138,11 +143,11 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 			row.Features = append(row.Features, match[1])
 		}
 
-		collection := provider.Collection{
+		collection := core.Collection{
 			Tablename:    row.TableName,
 			Identifier:   row.Identifier,
 			Description:  row.Description,
-			Columns:      &provider.Columns{Geometry: row.ColumnName},
+			Columns:      &core.Columns{Geometry: row.ColumnName},
 			Geometrytype: row.GeometryType,
 			BBox:         [4]float64{row.MinX, row.MinY, row.MaxX, row.MaxY},
 			Srid:         int(row.SrsId),
@@ -157,9 +162,10 @@ func (gpkg *GeoPackage) GetCollections(ctx context.Context, db *sqlx.DB) (result
 	return
 }
 
-func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection provider.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *FeatureCollectionGeoJSON, err error) {
+// GetFeatures return the FeatureCollection
+func (geopackage GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection core.Collection, collectionId string, offset uint64, limit uint64, featureId interface{}, bbox [4]float64) (result *core.FeatureCollection, err error) {
 	// Features bit of a hack // layer.Features => tablename, PK, ...FEATURES, assuming create table in sql statement first is PK
-	result = &FeatureCollectionGeoJSON{}
+	result = &core.FeatureCollection{}
 	if len(bbox) > 4 {
 		err = errors.New("bbox with 6 elements not supported")
 		return
@@ -167,10 +173,10 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 
 	var featureIdKey string
 
-	if gpkg.FeatureIdKey == "" {
+	if geopackage.FeatureIdKey == "" {
 		featureIdKey = collection.Properties[1]
 	} else {
-		featureIdKey = gpkg.FeatureIdKey
+		featureIdKey = geopackage.FeatureIdKey
 	}
 
 	rtreeTablenName := fmt.Sprintf("rtree_%s_%s", collection.Tablename, collection.Columns.Geometry)
@@ -213,7 +219,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 
 	result.NumberReturned = 0
 	result.Type = "FeatureCollection"
-	result.Features = make([]*Feature, 0)
+	result.Features = make([]*core.Feature, 0)
 
 	for rows.Next() {
 		if err = ctx.Err(); err != nil {
@@ -233,7 +239,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 			return
 		}
 
-		feature := &Feature{Type: "Feature", Properties: make(map[string]interface{})}
+		feature := &core.Feature{Feature: geojson.Feature{Properties: make(map[string]interface{})}}
 
 		for i, colName := range cols {
 			// check if the context cancelled or timed out
@@ -248,7 +254,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 
 			switch colName {
 			case featureIdKey:
-				ID, err := provider.ConvertFeatureID(vals[i])
+				ID, err := core.ConvertFeatureID(vals[i])
 				if err != nil {
 					return result, err
 				}
@@ -267,11 +273,11 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 					return result, errors.New("unexpected column type for geom field. expected blob")
 				}
 
-				_, geo, err := DecodeGeometry(geomData)
+				geo, err := gpkg.DecodeGeometry(geomData)
 				if err != nil {
 					return result, err
 				}
-				feature.Geometry = geojson.Geometry{Geometry: geo}
+				feature.Geometry = geojson.Geometry{Geometry: geo.Geometry}
 
 			case "minx", "miny", "maxx", "maxy", "min_zoom", "max_zoom":
 				// Skip these columns used for bounding box and zoom filtering
@@ -307,6 +313,7 @@ func (gpkg GeoPackage) GetFeatures(ctx context.Context, db *sqlx.DB, collection 
 	return
 }
 
+// GetApplicationID returns a string containing the GeoPackage application_id
 func (gpkg *GeoPackage) GetApplicationID(ctx context.Context, db *sqlx.DB) (string, error) {
 
 	if gpkg.ApplicationId != "" {
@@ -337,6 +344,7 @@ func (gpkg *GeoPackage) GetApplicationID(ctx context.Context, db *sqlx.DB) (stri
 
 }
 
+// GetVersion returns a string containing the GeoPackage version
 func (gpkg *GeoPackage) GetVersion(ctx context.Context, db *sqlx.DB) (int64, error) {
 
 	if gpkg.UserVersion != 0 {

@@ -24,7 +24,7 @@ A a GeoJSON implementation with a Geopackage as a data provider.
 
 The specification is a preliminary one, with `go generate` the routing based on api spec, provider interfaces en types structs and convenient parameter extractions are generated to stay easily up to date.
 
-* FeatureCollectionGeoJSON is overridden in the GeoPackage provider to use the [GeoJSON](https://github.com/go-spatial/geom/tree/master/encoding/geojson) equivalent for decoding blobs
+* FeatureCollection is overridden in the GeoPackage provider to use the [GeoJSON](https://github.com/go-spatial/geom/tree/master/encoding/geojson) equivalent for decoding blobs
 * <https://github.com/opengeospatial/ogcapi-features/blob/master/core/openapi/ogcapi-features-1.yaml>
 
 ## Build

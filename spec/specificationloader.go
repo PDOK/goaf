@@ -6,6 +6,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
+// GetOpenAPI reads a file containing the OAS3 spec and return the openapi3.T struct
 func GetOpenAPI(serviceSpecPath string) (*openapi3.T, error) {
 
 	loader := openapi3.NewLoader()
@@ -15,8 +16,6 @@ func GetOpenAPI(serviceSpecPath string) (*openapi3.T, error) {
 	if err != nil {
 		log.Printf("Cannot Loadswagger from file :%s", serviceSpecPath)
 	}
-	// tweak for missing schemaś reference to geojson
-	//swagger.Components.Schemas["geometryGeoJSON"] = &openapi3.SchemaRef{Ref: "http://geojson.org/schema/Geometry.json"}
-	//swagger.Components.Schemas["featureGeoJSON"] = &openapi3.SchemaRef{Ref: "http://geojson.org/schema/Feature.json"}
+
 	return openapi, err
 }

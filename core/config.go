@@ -1,24 +1,27 @@
-package provider
+package core
 
 import (
 	"io/ioutil"
 	"log"
 	"oaf-server/codegen"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
+// Config wrappes all the available configuration
 type Config struct {
 	ApplicationId string `yaml:"applicationid,omitempty"`
 	UserVersion   string `yaml:"userversion,omitempty"`
 
-	Openapi             string `yaml:"openapi"`
-	DefaultFeatureLimit int    `yaml:"defaultfeaturelimit"`
-	MaxFeatureLimit     int    `yaml:"maxfeaturelimit"`
+	Openapi             string            `yaml:"openapi"`
+	DefaultFeatureLimit int               `yaml:"defaultfeaturelimit"`
+	MaxFeatureLimit     int               `yaml:"maxfeaturelimit"`
+	Crs                 map[string]string `yaml:"crs"`
 	Datasource          Datasource
 	Service             Service `yaml:"service" json:"service"`
 }
 
+// ContactPoint needed for the ld+json
 type ContactPoint struct {
 	Type        string `yaml:"@type" json:"@type,omitempty"`
 	Email       string `yaml:"email" json:"email,omitempty"`
@@ -27,6 +30,8 @@ type ContactPoint struct {
 	ContactType string `yaml:"contactType" json:"contactType,omitempty"`
 	Description string `yaml:"description" json:"description,omitempty"`
 }
+
+// Address needed for the ld+json
 type Address struct {
 	Type            string `yaml:"@type" json:"@type,omitempty"`
 	StreetAddress   string `yaml:"streetAddress" json:"streetAddress,omitempty"`
@@ -36,6 +41,7 @@ type Address struct {
 	AddressCountry  string `yaml:"addressCountry" json:"addressCountry,omitempty"`
 }
 
+// Provider needed for the ld+json
 type Provider struct {
 	Type         string        `yaml:"@type" json:"@type"`
 	Name         string        `yaml:"name" json:"name"`
@@ -44,6 +50,7 @@ type Provider struct {
 	ContactPoint *ContactPoint `yaml:"contactPoint" json:"contactPoint,omitempty"` // pointer, omitting when empty
 }
 
+// Service contains the necessary information for building the right ld+json objects
 type Service struct {
 	Context     string   `yaml:"@context" json:"@context"`
 	Type        string   `yaml:"@type" json:"@type"`
@@ -57,6 +64,7 @@ type Service struct {
 	Provider    Provider `yaml:"provider" json:"provider"`
 }
 
+// Datasource wrappes the datasources, collections, dataset boundingbox and SRID
 type Datasource struct {
 	Geopackage  *Geopackage  `yaml:"gpkg"`
 	PostGIS     *PostGIS     `yaml:"postgis"`
@@ -65,15 +73,18 @@ type Datasource struct {
 	Srid        int          `yaml:"srid"`
 }
 
+// Geopackage contains the Geopackage file locations and a alternative Fid column
 type Geopackage struct {
 	File string `yaml:"file"`
 	Fid  string `yaml:"fid"`
 }
 
+// PostGIS contains the PostGIS connection string
 type PostGIS struct {
 	Connection string `yaml:"connection"`
 }
 
+// Collection contains all the needed information for a collections
 type Collection struct {
 	Schemaname  string `yaml:"schemaname"`
 	Tablename   string `yaml:"tablename"`
@@ -92,6 +103,7 @@ type Collection struct {
 	Links []codegen.Link `yaml:"links"`
 }
 
+// Columns stores the Fid, Offset, BoundingBox and Geometry columns from the datasources
 type Columns struct {
 	Fid      string `yaml:"fid"`
 	Offset   string `yaml:"offset"`
@@ -99,6 +111,7 @@ type Columns struct {
 	Geometry string `yaml:"geometry"`
 }
 
+// NewService initializes a Service
 func NewService() Service {
 	address := Address{
 		Type: "PostalAddress",
@@ -119,6 +132,7 @@ func NewService() Service {
 	return service
 }
 
+// ReadConfig reads the from the given path the configuration
 func (c *Config) ReadConfig(path string) {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -151,6 +165,11 @@ func (c *Config) ReadConfig(path string) {
 
 	if c.MaxFeatureLimit < 1 {
 		c.MaxFeatureLimit = 500
+	}
+
+	if len(c.Crs) == 0 {
+		crs := map[string]string{`4326`: `http://www.opengis.net/def/crs/EPSG/0/4326`}
+		c.Crs = crs
 	}
 
 	if c.Openapi == "" {

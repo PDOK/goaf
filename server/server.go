@@ -9,13 +9,15 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/gpkg"
-	"oaf-server/provider"
+	"oaf-server/core"
 	"oaf-server/spec"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
+var isTesting = false
+
+// Server
 type Server struct {
 	ServiceEndpoint    string
 	ServiceSpecPath    string
@@ -26,6 +28,11 @@ type Server struct {
 	Templates          *template.Template
 }
 
+// NewServer returns a initialized Server
+// The returned Server contains:
+// - openapi3.T
+// - templates
+// - set Max and Default feature limits
 func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxReturnLimit uint64) (*Server, error) {
 	openapi, err := spec.GetOpenAPI(serviceSpecPath)
 
@@ -38,12 +45,18 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 
 	server := &Server{ServiceEndpoint: serviceEndpoint, ServiceSpecPath: serviceSpecPath, MaxReturnLimit: maxReturnLimit, DefaultReturnLimit: defaultReturnLimit, Openapi: openapi}
 
+	templates := `templates/*`
+
+	if isTesting {
+		templates = `../templates/*`
+	}
+
 	// add templates to server
 	server.Templates = template.Must(template.New("templates").Funcs(
 		template.FuncMap{
 			"isOdd":       func(i int) bool { return i%2 != 0 },
-			"hasFeatures": func(i []gpkg.Feature) bool { return len(i) > 0 },
-			"upperFirst":  provider.UpperFirst,
+			"hasFeatures": func(i []core.Feature) bool { return len(i) > 0 },
+			"upperFirst":  core.UpperFirst,
 			"dict": func(values ...interface{}) (map[string]interface{}, error) {
 				if len(values)%2 != 0 {
 					return nil, errors.New("invalid dict call")
@@ -58,12 +71,12 @@ func NewServer(serviceEndpoint, serviceSpecPath string, defaultReturnLimit, maxR
 				}
 				return dict, nil
 			},
-			//}).ParseGlob("/templates/*")) // prod
-		}).ParseGlob("templates/*")) // IDE
+		}).ParseGlob(templates))
 
 	return server, nil
 }
 
+// SetProviders calls the Init() for the configured Provider
 func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
 	err := providers.Init()
 
@@ -75,6 +88,8 @@ func (s *Server) SetProviders(providers codegen.Providers) (*Server, error) {
 	return s, nil
 }
 
+// HandleForProvider process the given Provider
+// And does post-processing regarding the reponse like setting the Content-Type
 func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.Provider, error)) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -89,10 +104,10 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 			default:
 				jsonError(w, "PROVIDER CREATION", v.Error(), http.StatusNotFound)
 				return
-			case *provider.InvalidContentTypeError:
+			case *core.InvalidContentTypeError:
 				jsonError(w, "CLIENT ERROR", v.Error(), http.StatusBadRequest)
 				return
-			case *provider.InvalidFormatError:
+			case *core.InvalidFormatError:
 				jsonError(w, "CLIENT ERROR", v.Error(), http.StatusBadRequest)
 				return
 			}
@@ -113,13 +128,13 @@ func (s *Server) HandleForProvider(providerFunc func(r *http.Request) (codegen.P
 
 		var encodedContent []byte
 
-		if p.ContentType() == provider.JSONContentType || p.ContentType() == provider.LDJSONContentType || p.ContentType() == provider.GEOJSONContentType {
+		if p.ContentType() == core.JSONContentType || p.ContentType() == core.LDJSONContentType || p.ContentType() == core.GEOJSONContentType {
 			encodedContent, err = json.Marshal(result)
 			if err != nil {
 				jsonError(w, "JSON MARSHALLER", err.Error(), http.StatusInternalServerError)
 				return
 			}
-		} else if p.ContentType() == provider.HTMLContentType {
+		} else if p.ContentType() == core.HTMLContentType {
 			providerID := p.String()
 
 			rmap := make(map[string]interface{})

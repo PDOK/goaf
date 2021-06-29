@@ -1,7 +1,8 @@
-package provider
+package core
 
 import (
 	"net/http"
+	"net/url"
 	"reflect"
 	"testing"
 )
@@ -10,7 +11,7 @@ func TestNewGetLandingPageProvider(t *testing.T) {
 
 	service := Service{}
 
-	provider, err := NewGetLandingPageProvider(service)(&http.Request{})
+	provider, err := NewGetLandingPageProvider(service)(&http.Request{URL: &url.URL{RawQuery: ""}, Header: map[string][]string{}})
 	if err != nil {
 		t.Errorf("NewGetLandingPageProvider(serviceEndpoint) = %v, want %v", err, nil)
 	}
@@ -26,7 +27,7 @@ func TestNewGetLandingPageProvider(t *testing.T) {
 
 	links := provided.(*GetLandingPageProvider).Links
 
-	if len(links) != 12 {
-		t.Errorf("GetLandingPageProvider.Provide() has incorrect number of links = %v, want %v", len(links), 12)
+	if len(links) != 11 {
+		t.Errorf("GetLandingPageProvider.Provide() has incorrect number of links = %v, want %v", len(links), 11)
 	}
 }

@@ -6,22 +6,25 @@ import (
 	"log"
 	"net/http"
 	"oaf-server/codegen"
-	"oaf-server/provider"
+	"oaf-server/core"
 )
 
+// GetFeaturesProvider is returned by the NewGetFeaturesProvider
+// containing the data, srsid and contenttype for the response
 type GetFeaturesProvider struct {
-	data        FeatureCollectionGeoJSON
+	data        core.FeatureCollection
 	srsid       string
 	contenttype string
 }
 
+// NewGetFeaturesProvider handles the request and return the GetFeaturesProvider
 func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
 
 	collectionId, limit, offset, _, bbox, time := codegen.ParametersForGetFeatures(r)
 
-	limitParam := provider.ParseLimit(limit, pp.CommonProvider.DefaultReturnLimit, pp.CommonProvider.MaxReturnLimit)
-	offsetParam := provider.ParseUint(offset, 0)
-	bboxParam := provider.ParseBBox(bbox, pp.PostGis.BBox)
+	limitParam := core.ParseLimit(limit, uint64(pp.Config.DefaultFeatureLimit), uint64(pp.Config.MaxFeatureLimit))
+	offsetParam := core.ParseUint(offset, 0)
+	bboxParam := core.ParseBBox(bbox, pp.PostGis.BBox)
 
 	if time != "" {
 		log.Println("Time selection currently not implemented")
@@ -30,7 +33,7 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 	path := r.URL.Path // collections/{collectionId}/items
 
 	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", pp.PostGis.Srid)}
-	ct, err := provider.GetContentType(r, p.String())
+	ct, err := core.GetContentType(r, p.String())
 
 	if err != nil {
 		return nil, err
@@ -70,7 +73,7 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 
 		for _, feature := range fcGeoJSON.Features {
 			hrefBase := fmt.Sprintf("%s%s/%v", pp.Config.Service.Url, path, feature.ID) // /collections
-			links, _ := provider.CreateFeatureLinks("feature", hrefBase, "self", ct)
+			links, _ := core.CreateFeatureLinks("feature", hrefBase, "self", ct)
 			feature.Links = links
 		}
 
@@ -86,15 +89,15 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 		// create links
 		hrefBase := fmt.Sprintf("%s%s", pp.Config.Service.Url, path) // /collections
 
-		links, _ := provider.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
-		_ = provider.ProcesLinksForParams(links, requestParams)
+		links, _ := core.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
+		_ = core.ProcesLinksForParams(links, requestParams)
 
 		// next => offsetParam + limitParam < numbersMatched
 		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
 
-			ilinks, _ := provider.CreateFeatureLinks("next features "+cn.Identifier, hrefBase, "next", ct)
+			ilinks, _ := core.CreateFeatureLinks("next features "+cn.Identifier, hrefBase, "next", ct)
 			requestParams.Set("offset", fmt.Sprintf("%d", fcGeoJSON.Offset))
-			_ = provider.ProcesLinksForParams(ilinks, requestParams)
+			_ = core.ProcesLinksForParams(ilinks, requestParams)
 
 			links = append(links, ilinks...)
 		}
@@ -108,18 +111,22 @@ func (pp *PostgisProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Prov
 	return p, nil
 }
 
+// Provide provides the data
 func (gfp *GetFeaturesProvider) Provide() (interface{}, error) {
 	return gfp.data, nil
 }
 
+// ContentType returns the ContentType
 func (gfp *GetFeaturesProvider) ContentType() string {
 	return gfp.contenttype
 }
 
+// String returns the provider name
 func (gfp *GetFeaturesProvider) String() string {
-	return "getfeatures"
+	return "features"
 }
 
+// SrsId returns the srsid
 func (gfp *GetFeaturesProvider) SrsId() string {
 	return gfp.srsid
 }

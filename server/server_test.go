@@ -8,23 +8,25 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"oaf-server/codegen"
-	gpkg "oaf-server/gpkg"
-	"oaf-server/provider"
+	"oaf-server/core"
+	"oaf-server/geopackage"
+	"oaf-server/spec"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
+func init() {
+	isTesting = true
+}
+
 func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
-
-	crsMap := make(map[string]string)
-
 	serverEndpoint := "http://testhost:1234"
 
-	commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
-	config := provider.Config{Datasource: provider.Datasource{Geopackage: &provider.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
+	api, _ := spec.GetOpenAPI("../spec/oaf.json")
+	config := core.Config{Datasource: core.Datasource{Geopackage: &core.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
 
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, crsMap, config)
+	gpkgp := geopackage.NewGeopackageWithCommonProvider(api, config)
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -33,29 +35,41 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 	defer ts.Close()
 
 	// replace with test endpoint
-	gpkgp.CommonProvider.ServiceEndpoint = ts.URL
+	gpkgp.Config.Service.Url = ts.URL
 
 	tests := []struct {
 		name  string
 		path  string
-		want  provider.GetLandingPageProvider
-		check func(want provider.GetLandingPageProvider) error
+		want  core.GetLandingPageProvider
+		check func(want core.GetLandingPageProvider) error
 	}{
-		{"root call", "", provider.GetLandingPageProvider{}, func(want provider.GetLandingPageProvider) error {
+		{"root call", "", core.GetLandingPageProvider{}, func(want core.GetLandingPageProvider) error {
 
-			if len(want.Links) != 8 {
+			if len(want.Links) != 11 {
 				return errors.New("error invalid number of links")
 			}
 
-			rels := []string{"self", "alternate", "service", "service", "conformance", "conformance", "data", "data"}
-			paths := []string{"?f=json", "?f=html", "/api?f=json", "/api?f=html", "/conformance?f=json", "/conformance?f=html", "/collections?f=json", "/collections?f=html"}
+			rps := map[string][]string{
+				"self":         {"?f=json"},
+				"alternate":    {"?f=html", "?f=jsonld"},
+				"service-doc":  {"/api?f=html"},
+				"service-desc": {"/api?f=json"},
+				"conformance":  {"/conformance?f=json", "/conformance?f=html", "/conformance?f=jsonld"},
+				"data":         {"/collections?f=json", "/collections?f=html", "/collections?f=jsonld"},
+			}
 
-			for i, v := range want.Links {
-				if v.Rel != rels[i] {
-					return fmt.Errorf("Error invalid link rel: %s", v.Rel)
+			found := false
+			for _, v := range want.Links {
+
+				hrefs := rps[v.Rel]
+				found = false
+				for _, href := range hrefs {
+
+					if v.Href == fmt.Sprintf("%s%s", ts.URL, href) {
+						found = true
+					}
 				}
-
-				if v.Href != fmt.Sprintf("%s%s", ts.URL, paths[i]) {
+				if !found {
 					return fmt.Errorf("Error invalid path rel: %s", v.Href)
 				}
 			}
@@ -88,15 +102,12 @@ func TestNewServerWithGeopackageProviderForRoot(t *testing.T) {
 }
 
 func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
-
-	crsMap := make(map[string]string)
-
 	serverEndpoint := "http://testhost:1234"
 
-	commonProvider := provider.NewCommonProvider("../spec/oaf.json", 100, 500)
-	config := provider.Config{Datasource: provider.Datasource{Geopackage: &provider.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
+	api, _ := spec.GetOpenAPI("../spec/oaf.json")
+	config := core.Config{Datasource: core.Datasource{Geopackage: &core.Geopackage{File: "../example/addresses.gpkg", Fid: "fid"}}}
 
-	gpkgp := gpkg.NewGeopackageWithCommonProvider(nil, commonProvider, crsMap, config)
+	gpkgp := geopackage.NewGeopackageWithCommonProvider(api, config)
 
 	server, _ := NewServer(serverEndpoint, "../spec/oaf.json", 100, 500)
 	server, _ = server.SetProviders(gpkgp)
@@ -105,7 +116,7 @@ func TestNewServerWithGeopackageProviderForCollection(t *testing.T) {
 	defer ts.Close()
 
 	// replace with test endpoint
-	gpkgp.CommonProvider.ServiceEndpoint = ts.URL
+	gpkgp.Config.Service.Url = ts.URL
 
 	tests := []struct {
 		name  string
