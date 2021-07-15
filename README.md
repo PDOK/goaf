@@ -9,7 +9,7 @@ GOAF is a [OGC API - Features](https://www.ogc.org/standards/ogcapi-features) im
 
 ## For who is it?
 
-If you are looking for a very fast OGC API - Features application and are not afraid for some data tuning, this could be the application for you!
+If you are looking for a very fast OGC API - Features application and are not afraid of some data tuning, this could be the application for you!
 
 ## Datasources
 
