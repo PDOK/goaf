@@ -38,7 +38,7 @@ docker build -t pdok/goaf:latest .
 The GeoPackage provider is a minimal config for GeoPackages that tend to be relative small e.g. < 3 GB.
 
 ```docker
-docker run --rm -v `pwd`/example:/example -c /example/config-addresses-gpkg-minimal.yaml -p 8080:8080 pdok/goaf:latest
+docker run --rm -v `pwd`/example:/example -e CONFIG=/example/config-addresses-gpkg-minimal.yaml -p 8080:8080 pdok/goaf:latest
 ```
 
 ## PostGIS
@@ -46,7 +46,7 @@ docker run --rm -v `pwd`/example:/example -c /example/config-addresses-gpkg-mini
 More elaborate config optimised performance for huge db (10M+ features/collection)
 
 ```docker
-docker run -v `pwd`/example:/example -c /example/config-addresses-postgis-localhost.yaml' -p 8080:8080 pdok/goaf:latest
+docker run -v `pwd`/example:/example -e CONFIG=/example/config-addresses-postgis-localhost.yaml' -p 8080:8080 pdok/goaf:latest
 ```
 
 ### Example table
