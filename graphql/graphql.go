@@ -109,6 +109,16 @@ func getfeature(url, featureId string) (result *core.FeatureCollection, err erro
 	return mapresponseonfeatures(body)
 }
 
+func bboxwkt(bbox [4]float64) string {
+	str := fmt.Sprintf(`POLYGON ((%v %v, %v %v, %v %v, %v %v, %v %v))`,
+		bbox[0], bbox[1],
+		bbox[2], bbox[1],
+		bbox[2], bbox[3],
+		bbox[0], bbox[3],
+		bbox[0], bbox[1])
+	return str
+}
+
 func getfeatures(url string, offset, limit uint64, bbox [4]float64) (result *core.FeatureCollection, err error) {
 
 	type graphqlreq struct {
@@ -116,21 +126,30 @@ func getfeatures(url string, offset, limit uint64, bbox [4]float64) (result *cor
 		Variables interface{} `json:"variables"`
 	}
 
+	var filter string
+
+	if len(bbox) == 4 {
+		filter = fmt.Sprintf(`gebouwCollectie(first: %d, offset: %d, filter: { geometrie: { srid: 9067, intersects: { fromWKT: "%s" }}})`, limit, offset, bboxwkt(bbox))
+
+	} else {
+		filter = fmt.Sprintf(`gebouwCollectie(first: %d, offset: %d)`, limit, offset)
+	}
+
 	query := fmt.Sprintf(`{
-		    gebouwCollectie(first: %d, offset: %d) {
-              nodes {
-                identificatie
-                status
-                oorspronkelijkBouwjaar
-                geometrie (srid: 9067) {
-                    asWKT
-                }
-                geregistreerdMet{
-                    beginGeldigheid
-                }
-			  }
-            }
-         }`, limit, offset)
+		%s {
+		  nodes {
+			identificatie
+			status
+			oorspronkelijkBouwjaar
+			geometrie (srid: 9067) {
+				asWKT
+			}
+			geregistreerdMet{
+				beginGeldigheid
+			}
+		  }
+		}
+	 }`, filter)
 
 	req := graphqlreq{Query: query, Variables: nil}
 
@@ -151,8 +170,6 @@ func getfeatures(url string, offset, limit uint64, bbox [4]float64) (result *cor
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Print(string(body))
 
 	return mapresponseonfeatures(body)
 }
