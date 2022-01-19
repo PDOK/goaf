@@ -1,14 +1,17 @@
 package graphql
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"oaf-server/core"
 	"strings"
+
+	"github.com/go-spatial/geom/encoding/geojson"
+	"github.com/go-spatial/geom/encoding/wkt"
 )
 
 // Graphql configuration
@@ -64,46 +67,104 @@ func (graphql Graphql) GetFeatures(ctx context.Context, url string, collection c
 
 func getfeature(url, featureId string) (result *core.FeatureCollection, err error) {
 
-	body := strings.NewReader(
-		fmt.Sprintf(
-			`{
-				gebouw(identificatie: "%s") {
-					identificatie
-					status
-					oorspronkelijkBouwjaar
-					geometrie (srid: 9067){
-						asWKB
-					}
-					geregistreerdMet{
-						beginGeldigheid
-					}
-				}
-			 }`, featureId),
-	)
+	type graphqlreq struct {
+		Query     string      `json:"query"`
+		Variables interface{} `json:"variables"`
+	}
 
-	resp, err := http.Post(url, `application/json`, body)
+	query := fmt.Sprintf(`{
+            gebouw(identificatie: "%s") {
+                identificatie
+                status
+                oorspronkelijkBouwjaar
+                geometrie (srid: 9067) {
+                    asWKT
+                }
+                geregistreerdMet{
+                    beginGeldigheid
+                }
+            }
+         }`, featureId)
+
+	req := graphqlreq{Query: query, Variables: nil}
+
+	b, err := json.Marshal(req)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return
+	}
+
+	resp, err := http.Post(url, `application/json`, bytes.NewReader(b))
+
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	mapresponseonfeatures(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, err
+	return mapresponseonfeatures(body)
 }
 
 func getfeatures(url string, offset, limit uint64, bbox [4]float64) (result *core.FeatureCollection, err error) {
-	return nil, nil
+
+	type graphqlreq struct {
+		Query     string      `json:"query"`
+		Variables interface{} `json:"variables"`
+	}
+
+	query := fmt.Sprintf(`{
+		    gebouwCollectie(first: %d, offset: %d) {
+              nodes {
+                identificatie
+                status
+                oorspronkelijkBouwjaar
+                geometrie (srid: 9067) {
+                    asWKT
+                }
+                geregistreerdMet{
+                    beginGeldigheid
+                }
+			  }
+            }
+         }`, limit, offset)
+
+	req := graphqlreq{Query: query, Variables: nil}
+
+	b, err := json.Marshal(req)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return
+	}
+
+	resp, err := http.Post(url, `application/json`, bytes.NewReader(b))
+
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Print(string(body))
+
+	return mapresponseonfeatures(body)
 }
 
-func mapresponseonfeatures(response io.ReadCloser) (result *core.FeatureCollection, err error) {
+func mapresponseonfeatures(body []byte) (result *core.FeatureCollection, err error) {
 
 	type Gebouw struct {
 		Identificatie          string `json:"identificatie"`
 		Status                 string `json:"status"`
 		OorspronkelijkBouwjaar string `json:"oorspronkelijkBouwjaar"`
 		Geometrie              struct {
-			AsWKB string `json:"asWKB"`
+			AsWKT string `json:"asWKT"`
 		} `json:"geometrie"`
 		GeregistreerdMet struct {
 			BeginGeldigheid string `json:"beginGeldigheid"`
@@ -117,13 +178,49 @@ func mapresponseonfeatures(response io.ReadCloser) (result *core.FeatureCollecti
 		Gebouw `json:"gebouw"`
 	}
 
-	data := Data{}
-	body, err := ioutil.ReadAll(response)
-	if err != nil {
-		return nil, err
+	type Body struct {
+		Data Data `json:"data"`
 	}
 
+	data := Body{}
 	json.Unmarshal([]byte(body), &data)
 
-	return nil, nil
+	var gebouwen []Gebouw
+
+	if data.Data.GebouwCollectie.Nodes != nil {
+		gebouwen = data.Data.GebouwCollectie.Nodes
+	} else {
+		gebouwen = []Gebouw{data.Data.Gebouw}
+	}
+
+	fs := []*core.Feature{}
+
+	for _, gebouw := range gebouwen {
+
+		geom, err := wkt.Decode(strings.NewReader(gebouw.Geometrie.AsWKT))
+		if err != nil {
+			return nil, err
+		}
+
+		prop := map[string]interface{}{
+			"status":                 gebouw.Status,
+			"oorspronkelijkbouwjaar": gebouw.OorspronkelijkBouwjaar,
+		}
+
+		f := core.Feature{
+			ID: gebouw.Identificatie,
+			Feature: geojson.Feature{
+				Geometry:   geojson.Geometry{Geometry: geom},
+				Properties: prop,
+			},
+		}
+
+		fs = append(fs, &f)
+	}
+
+	fc := core.FeatureCollection{Features: fs}
+	fc.NumberReturned = int64(len(fs))
+	fc.Type = "FeatureCollection"
+
+	return &fc, nil
 }
