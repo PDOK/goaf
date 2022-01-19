@@ -1,0 +1,114 @@
+package graphql
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"oaf-server/codegen"
+	"oaf-server/core"
+)
+
+// GetFeaturesProvider is returned by the NewGetFeaturesProvider
+// containing the data, srsid and contenttype for the response
+type GetFeaturesProvider struct {
+	data        core.FeatureCollection
+	srsid       string
+	contenttype string
+}
+
+// NewGetFeaturesProvider handles the request and return the GetFeaturesProvider
+func (gp *GraphqlProvider) NewGetFeaturesProvider(r *http.Request) (codegen.Provider, error) {
+	collectionId, limit, offset, _, bbox, time := codegen.ParametersForGetFeatures(r)
+
+	limitParam := core.ParseLimit(limit, uint64(gp.Config.DefaultFeatureLimit), uint64(gp.Config.MaxFeatureLimit))
+	offsetParam := core.ParseUint(offset, 0)
+	bboxParam := core.ParseBBox(bbox, gp.Graphql.BBox)
+
+	if time != "" {
+		log.Println("Time selection currently not implemented")
+	}
+
+	path := r.URL.Path // collections/{{collectionId}}/items
+	p := &GetFeaturesProvider{srsid: fmt.Sprintf("EPSG:%d", gp.Graphql.Srid)}
+
+	ct, err := core.GetContentType(r, p.String())
+	if err != nil {
+		return nil, err
+	}
+
+	p.contenttype = ct
+
+	for _, cn := range gp.Graphql.Collections {
+		// maybe convert to map, but not thread safe!
+		if cn.Identifier != collectionId {
+			continue
+		}
+
+		fcGeoJSON, err := gp.Graphql.GetFeatures(r.Context(), gp.Graphql.Url, cn, collectionId, offsetParam, limitParam, nil, bboxParam)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, feature := range fcGeoJSON.Features {
+			hrefBase := fmt.Sprintf("%s%s/%v", gp.Config.Service.Url, path, feature.ID) // /collections
+			links, _ := core.CreateFeatureLinks("feature", hrefBase, "self", ct)
+			feature.Links = links
+		}
+
+		requestParams := r.URL.Query()
+
+		if int64(offsetParam) >= fcGeoJSON.NumberMatched && fcGeoJSON.NumberMatched > 0 {
+			offsetParam = uint64(fcGeoJSON.NumberMatched - 1)
+		}
+
+		if int64(offsetParam) < 0 {
+			offsetParam = 0
+		}
+
+		requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)))
+		requestParams.Set("limit", fmt.Sprintf("%d", int64(limitParam)))
+
+		// create links
+		hrefBase := fmt.Sprintf("%s%s", gp.Config.Service.Url, path) // /collections
+		links, _ := core.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "self", ct)
+		_ = core.ProcesLinksForParams(links, requestParams)
+
+		// next => offsetParam + limitParam < numbersMatched
+		if (int64(limitParam)) == fcGeoJSON.NumberReturned {
+			ilinks, _ := core.CreateFeatureLinks("features "+cn.Identifier, hrefBase, "next", ct)
+			requestParams.Set("offset", fmt.Sprintf("%d", int64(offsetParam)+int64(limitParam)))
+			_ = core.ProcesLinksForParams(ilinks, requestParams)
+
+			links = append(links, ilinks...)
+		}
+
+		fcGeoJSON.Links = links
+		fcGeoJSON.Crs = gp.Config.Crs[fmt.Sprintf("%d", cn.Srid)]
+
+		p.data = *fcGeoJSON
+		break
+	}
+
+	return p, nil
+}
+
+// Provide provides the data
+func (gfp *GetFeaturesProvider) Provide() (interface{}, error) {
+	return gfp.data, nil
+}
+
+// ContentType returns the ContentType
+func (gfp *GetFeaturesProvider) ContentType() string {
+	return gfp.contenttype
+}
+
+// String returns the provider name
+func (gfp *GetFeaturesProvider) String() string {
+	return "features"
+}
+
+// SrsId returns the srsid
+func (gfp *GetFeaturesProvider) SrsId() string {
+	return gfp.srsid
+}

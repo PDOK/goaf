@@ -68,6 +68,7 @@ type Service struct {
 type Datasource struct {
 	Geopackage  *Geopackage  `yaml:"gpkg"`
 	PostGIS     *PostGIS     `yaml:"postgis"`
+	Graphql     *Graphql     `yaml:"graphql"`
 	Collections []Collection `yaml:"collections"`
 	BBox        [4]float64   `yaml:"bbox"`
 	Srid        int          `yaml:"srid"`
@@ -82,6 +83,10 @@ type Geopackage struct {
 // PostGIS contains the PostGIS connection string
 type PostGIS struct {
 	Connection string `yaml:"connection"`
+}
+
+type Graphql struct {
+	URL string `yaml:"url"`
 }
 
 // Collection contains all the needed information for a collections

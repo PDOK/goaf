@@ -7,6 +7,7 @@ import (
 	"oaf-server/codegen"
 	"oaf-server/core"
 	"oaf-server/geopackage"
+	"oaf-server/graphql"
 	"oaf-server/postgis"
 	"oaf-server/server"
 	"os"
@@ -117,6 +118,8 @@ func getProvider(api *openapi3.T, config core.Config) codegen.Providers {
 		return geopackage.NewGeopackageWithCommonProvider(api, config)
 	} else if config.Datasource.PostGIS != nil {
 		return postgis.NewPostgisWithCommonProvider(api, config)
+	} else if config.Datasource.Graphql != nil {
+		return graphql.NewGraphqlWithCommonProvider(api, config)
 	}
 
 	return nil
