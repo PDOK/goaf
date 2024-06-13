@@ -1,5 +1,7 @@
 # GOAF
 
+> ARCHIVED, See [GoKoala](https://github.com/PDOK/gokoala) which is the successor of GOAF.
+
 [![GitHub license](https://img.shields.io/github/license/PDOK/goaf)](https://github.com/PDOK/goaf/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/PDOK/goaf.svg)](https://github.com/PDOK/goaf/releases)
 [![Go Report Card](https://goreportcard.com/badge/PDOK/goaf)](https://goreportcard.com/report/PDOK/goaf)
